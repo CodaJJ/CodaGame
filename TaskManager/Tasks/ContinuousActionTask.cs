@@ -1,5 +1,6 @@
 
 using System;
+using UnityGameFramework.TaskBase;
 
 namespace UnityGameFramework.Tasks
 {
@@ -11,7 +12,7 @@ namespace UnityGameFramework.Tasks
         private readonly Action _m_delegate;
         
         
-        public ContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate) 
+        public ContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
             : base(_duration, _runType)
         {
             _m_delegate = _delegate;

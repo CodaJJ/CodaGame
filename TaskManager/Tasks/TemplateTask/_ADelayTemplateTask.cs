@@ -1,4 +1,6 @@
 ﻿
+using UnityGameFramework.TaskBase;
+
 namespace UnityGameFramework.Tasks
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace UnityGameFramework.Tasks
         private float _m_timeCounter;
         
         
-        protected _ADelayTemplateTask(float _delayTime, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate) 
+        protected _ADelayTemplateTask(float _delayTime, ETaskRunType _runType = ETaskRunType.Update) 
             : base(_runType)
         {
             _m_delayTime = _delayTime;
@@ -25,16 +27,19 @@ namespace UnityGameFramework.Tasks
         /// Remaining time (second).
         /// </summary>
         public float remainingTime { get { return _m_delayTime - _m_timeCounter; } }
+        /// <inheritdoc/>
+        public override string name { get { return $"DelayTask with a delay of {_m_delayTime} seconds"; } }
         
 
         public sealed override void Deal(float _deltaTime)
         {
-            if (_m_timeCounter >= _m_delayTime)
+            if (_m_timeCounter > _m_delayTime)
             {
                 TemplateTaskDeal();
                 Stop();
                 return;
             }
+            
             _m_timeCounter += _deltaTime;
         }
 

@@ -1,5 +1,6 @@
 
 using System;
+using UnityGameFramework.TaskBase;
 
 namespace UnityGameFramework.Tasks
 {
@@ -15,6 +16,10 @@ namespace UnityGameFramework.Tasks
         {
             _m_delegate = _delegate;
         }
+        
+        
+        /// <inheritdoc/>
+        public override string name { get { return "ActionTask"; } }
         
 
         public override void Deal(float _deltaTime)

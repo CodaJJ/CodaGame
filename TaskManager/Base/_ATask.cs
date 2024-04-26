@@ -1,7 +1,5 @@
 ﻿
-using UnityEngine;
-
-namespace UnityGameFramework.Tasks
+namespace UnityGameFramework.TaskBase
 {
     /// <summary>
     /// Inherit this class, override abstract function so that you can do what you want.
@@ -28,6 +26,10 @@ namespace UnityGameFramework.Tasks
         /// Is task running.
         /// </summary>
         public bool isRunning { get { return _m_isRunning; } }
+        /// <summary>
+        /// The name of this task, usually displayed for debug.
+        /// </summary>
+        public abstract string name { get; }
         
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace UnityGameFramework.Tasks
         {
             if (_m_isRunning)
             {
-                Debug.LogWarning("[Task Warning] : task already running.");
+                Console.LogWarning(SystemNames.TaskSystem, $"The task({name}) is already running.");
                 return;
             }
 
@@ -64,7 +66,7 @@ namespace UnityGameFramework.Tasks
                     TaskManager.instance.AddUnscaledTimeLateUpdateTask(this);
                     break;
                 default:
-                    Debug.LogError($"[Task Error] : Unsupported task run type ({_m_runType}).");
+                    Console.LogError(SystemNames.TaskSystem, $"Unsupported task({name}) run type ({_m_runType}).");
                     break;
             }
 
@@ -77,7 +79,7 @@ namespace UnityGameFramework.Tasks
         {
             if (!_m_isRunning)
             {
-                Debug.LogWarning("[Task Warning] : task not run yet, you trying to stop it.");
+                Console.LogWarning(SystemNames.TaskSystem, $"The task({name}) hasn't started running yet, you are trying to stop it.");
                 return;
             }
 
@@ -104,17 +106,26 @@ namespace UnityGameFramework.Tasks
                     TaskManager.instance.RemoveUnscaledTimeLateUpdateTask(this);
                     break;
                 default:
-                    Debug.LogError($"[Task Error] : Unsupported task run type ({_m_runType}).");
+                    Console.LogError(SystemNames.TaskSystem, $"Unsupported task({name}) run type ({_m_runType}).");
                     break;
             }
 
             _m_isRunning = false;
         }
 
+
         /// <summary>
-        /// Deal you task tick.
+        /// Convert this task to string.
+        /// </summary>
+        public override string ToString()
+        {
+            return name;
+        }
+        /// <summary>
+        /// Deal your task tick.
         /// </summary>
         public abstract void Deal(float _deltaTime);
+        
         
         /// <summary>
         /// Do something on task run.

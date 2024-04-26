@@ -1,13 +1,17 @@
 
 using System;
+using JetBrains.Annotations;
+using UnityEngine;
 using UnityGameFramework.Tasks;
+using UnityGameFramework.TaskBase;
+using Object = UnityEngine.Object;
 
 namespace UnityGameFramework
 {
     /// <summary>
     /// All sorts of tasks you can find here.
     /// </summary>
-    public static class TaskManager
+    public class Task
     {
         /// <summary>
         /// Run a action task.
@@ -41,7 +45,7 @@ namespace UnityGameFramework
         /// <param name="_duration">The duration of this task.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate)
+        public static TaskHandle RunContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update)
         {
             ContinuousActionTask task = new ContinuousActionTask(_delegate, _duration, _runType);
             task.Run();
@@ -55,7 +59,7 @@ namespace UnityGameFramework
         /// <param name="_duration">The duration of this task.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunFixedIntervalContinuousActionTask(Action _delegate, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate)
+        public static TaskHandle RunFixedIntervalContinuousActionTask(Action _delegate, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update)
         {
             FixedIntervalContinuousActionTask task = new FixedIntervalContinuousActionTask(_delegate, _fixedInterval, _duration, _runType);
             task.Run();
@@ -68,7 +72,7 @@ namespace UnityGameFramework
         /// <param name="_frameCountDelay">The delay frame count before running.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunFrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate)
+        public static TaskHandle RunFrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update)
         {
             FrameDelayActionTask task = new FrameDelayActionTask(_delegate, _frameCountDelay, _runType);
             task.Run();
@@ -80,7 +84,7 @@ namespace UnityGameFramework
         /// <param name="_delegate">The delegate you want to run.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunNextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate)
+        public static TaskHandle RunNextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
         {
             NextFrameActionTask task = new NextFrameActionTask(_delegate, _runType);
             task.Run();

@@ -1,4 +1,5 @@
-using UnityGameFramework.Tasks;
+
+using UnityGameFramework.TaskBase;
 
 namespace UnityGameFramework
 {
@@ -21,7 +22,7 @@ namespace UnityGameFramework
         /// </summary>
         public void StopTask()
         {
-            if (_m_task is { isRunning: false })
+            if (_m_task is { isRunning: true })
                 _m_task.Stop();
         }
     }

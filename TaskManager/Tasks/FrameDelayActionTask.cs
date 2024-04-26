@@ -1,5 +1,6 @@
 
 using System;
+using UnityGameFramework.TaskBase;
 
 namespace UnityGameFramework.Tasks
 {
@@ -11,7 +12,7 @@ namespace UnityGameFramework.Tasks
         private readonly Action _m_delegate;
         
         
-        public FrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate) 
+        public FrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update) 
             : base(_frameCountDelay, _runType)
         {
             _m_delegate = _delegate;

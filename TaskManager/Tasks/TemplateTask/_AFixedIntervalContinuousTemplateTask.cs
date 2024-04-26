@@ -1,4 +1,6 @@
 
+using UnityGameFramework.TaskBase;
+
 namespace UnityGameFramework.Tasks
 {
     /// <summary>
@@ -9,10 +11,11 @@ namespace UnityGameFramework.Tasks
         private readonly float _m_duration;
         private readonly float _m_fixedInterval;
         private float _m_timeCounter;
-        private int _m_runCount;
+        private float _m_intervalTimeCounter;
+        private ulong _m_runCount;
         
         
-        protected _AFixedIntervalContinuousTemplateTask(float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate) 
+        protected _AFixedIntervalContinuousTemplateTask(float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
             : base(_runType)
         {
             _m_fixedInterval = _fixedInterval;
@@ -38,24 +41,36 @@ namespace UnityGameFramework.Tasks
         /// <summary>
         /// Count of run.
         /// </summary>
-        public int runCount { get { return _m_runCount; } }
+        public ulong runCount { get { return _m_runCount; } }
+        /// <inheritdoc/>
+        public override string name { get { return $"FixedIntervalContinuousTask with a duration of {_m_duration} seconds and a fixed interval of {_m_fixedInterval} seconds"; } }
         
         
 
         public sealed override void Deal(float _deltaTime)
         {
-            while (_m_runCount * _m_fixedInterval <= _m_timeCounter)
+            if (_m_timeCounter > _m_duration)
+            {
+                Stop();
+                return;
+            }
+            
+            while (_m_intervalTimeCounter > _m_fixedInterval)
             {
                 TemplateTaskDeal();
                 _m_runCount++;
+
+                _m_intervalTimeCounter -= _m_fixedInterval;
             }
             
             _m_timeCounter += _deltaTime;
+            _m_intervalTimeCounter += _deltaTime;
         }
 
         protected sealed override void OnRun()
         {
             _m_timeCounter = 0;
+            _m_intervalTimeCounter = 0;
             _m_runCount = 0;
 
             OnTemplateTaskRun();

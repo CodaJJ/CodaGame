@@ -1,37 +1,37 @@
-﻿
-using JetBrains.Annotations;
+
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
-namespace UnityGameFramework.Tasks
+namespace UnityGameFramework.TaskBase
 {
     /// <summary>
-    /// Internal class, which you can ignore.
+    /// A MonoBehaviour for running tasks.
     /// </summary>
-    /// <remarks>
-    /// <see cref="_ATask"/> will use singleton of this.
-    /// </remarks>
-    internal sealed class TaskManager : MonoBehaviour
+    internal class TaskManager : MonoBehaviour
     {
         /// <summary>
-        /// Singleton, use by <see cref="_ATask"/>.
+        /// The singleton of TaskManager.
         /// </summary>
         [NotNull] internal static TaskManager instance
         {
             get
             {
+                if (_g_instance != null)
+                    return _g_instance;
+                
+                GameObject go = new GameObject("TaskManager");
+                DontDestroyOnLoad(go);
+                _g_instance = go.AddComponent<TaskManager>();
                 if (_g_instance == null)
-                {
-                    GameObject go = new GameObject("TaskManager");
-                    DontDestroyOnLoad(go);
-                    _g_instance = go.AddComponent<TaskManager>();
-                }
-
+                    Console.LogCrush(SystemNames.TaskSystem, "Initialize TaskSystem failed, Failed to add TaskMonoBehaviour component.");
+                else
+                    Console.LogSystem(SystemNames.TaskSystem, "Initialize TaskManager success.");
+                
                 // ReSharper disable once AssignNullToNotNullAttribute
                 return _g_instance;
             }
         }
-        // Just a singleton.
         private static TaskManager _g_instance;
         
         
@@ -47,9 +47,9 @@ namespace UnityGameFramework.Tasks
 
         // Actually use for foreach traversal lists, to avoid list modification during traversal.
         [ItemNotNull][NotNull] private readonly List<_ATask> _m_taskListForTraversal;
-        
-        
-        private TaskManager()
+
+
+        internal TaskManager()
         {
             _m_updateTasks = new List<_ATask>();
             _m_lateUpdateTasks = new List<_ATask>();
@@ -63,7 +63,7 @@ namespace UnityGameFramework.Tasks
             _m_taskListForTraversal = new List<_ATask>();
         }
         
-
+        
         /// <summary>
         /// Add a update task.
         /// </summary>
@@ -74,6 +74,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_updateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a update task({_task.name}).");
                 _m_updateTasks.Add(_task);
             }
         }
@@ -87,6 +88,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_updateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a update task({_task.name}).");
                 _m_updateTasks.Remove(_task);
             }
         }
@@ -100,6 +102,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_lateUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a LateUpdate task({_task.name}).");
                 _m_lateUpdateTasks.Add(_task);
             }
         }
@@ -113,6 +116,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_lateUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a LateUpdate task({_task.name}).");
                 _m_lateUpdateTasks.Remove(_task);
             }
         }
@@ -126,6 +130,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_unscaledTimeUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time update task({_task.name}).");
                 _m_unscaledTimeUpdateTasks.Add(_task);
             }
         }
@@ -139,6 +144,7 @@ namespace UnityGameFramework.Tasks
                 
             lock (_m_unscaledTimeUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time update task({_task.name}).");
                 _m_unscaledTimeUpdateTasks.Remove(_task);
             }
         }
@@ -152,6 +158,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_unscaledTimeLateUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time LateUpdate task({_task.name}).");
                 _m_unscaledTimeLateUpdateTasks.Add(_task);
             }
         }
@@ -165,6 +172,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_unscaledTimeLateUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time LateUpdate task({_task.name}).");
                 _m_unscaledTimeLateUpdateTasks.Remove(_task);
             }
         }
@@ -178,6 +186,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_fixedUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a FixedUpdate task({_task.name}).");
                 _m_fixedUpdateTasks.Add(_task);
             }
         }
@@ -191,6 +200,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_fixedUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a FixedUpdate task({_task.name}).");
                 _m_fixedUpdateTasks.Remove(_task);
             }
         }
@@ -204,6 +214,7 @@ namespace UnityGameFramework.Tasks
 
             lock (_m_unscaledFixedUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time FixedUpdate task({_task.name}).");
                 _m_unscaledFixedUpdateTasks.Add(_task);
             }
         }
@@ -217,6 +228,7 @@ namespace UnityGameFramework.Tasks
             
             lock (_m_unscaledFixedUpdateTasks)
             {
+                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time FixedUpdate task({_task.name}).");
                 _m_unscaledFixedUpdateTasks.Remove(_task);
             }
         }
@@ -227,6 +239,9 @@ namespace UnityGameFramework.Tasks
         /// </summary>
         private void Update()
         {
+            if (Time.frameCount < 10)
+                return;
+            
             _m_taskListForTraversal.Clear();
             lock (_m_updateTasks) _m_taskListForTraversal.AddRange(_m_updateTasks);
             foreach (_ATask task in _m_taskListForTraversal)

@@ -1,4 +1,6 @@
 
+using UnityGameFramework.TaskBase;
+
 namespace UnityGameFramework.Tasks
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace UnityGameFramework.Tasks
         private float _m_timeCounter;
         
         
-        protected _AContinuousTemplateTask(float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.UnscaledTimeUpdate) 
+        protected _AContinuousTemplateTask(float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
             : base(_runType)
         {
             _m_duration = _duration;
@@ -25,11 +27,13 @@ namespace UnityGameFramework.Tasks
         /// Remaining time (second).
         /// </summary>
         public float remainingTime { get { return _m_duration - _m_timeCounter; } }
-        
+        /// <inheritdoc/>
+        public override string name { get { return $"ContinuousTask with a duration of {_m_duration} seconds"; } }
+
 
         public sealed override void Deal(float _deltaTime)
         {
-            if (_m_timeCounter >= _m_duration)
+            if (_m_timeCounter > _m_duration)
             {
                 Stop();
                 return;
