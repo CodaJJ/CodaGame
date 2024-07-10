@@ -28,6 +28,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack, Conditional("UNITY_EDITOR")]
         public static void LogVerbose(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Verbose, _system, _message, _context);
@@ -38,6 +39,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack, Conditional("UNITY_EDITOR")]
         public static void LogDebug(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Debug, _system, _message, _context);
@@ -48,6 +50,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack]
         public static void LogSystem(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.System, _system, _message, _context);
@@ -58,6 +61,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack]
         public static void LogWarning(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Warning, _system, _message, _context);
@@ -68,6 +72,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack]
         public static void LogError(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Error, _system, _message, _context);
@@ -78,6 +83,7 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack]
         public static void LogCrush(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Crush, _system, _message, _context);
@@ -91,10 +97,11 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <returns>A string includes log type, message, system, and if in Editor it'll also show the caller's name.</returns>
+        [HideInCallstack]
         private static string MakeLogString(ELogType _logType, string _system, string _message)
         {
 #if UNITY_EDITOR
-            string logString = $"<color=orange>[{_system} {_logType.ToString()}]</color> {_message}";
+            string logString = $"<color=orange>[{_system} {_logType}]</color> {_message}";
             MethodBase callerMethod = new StackTrace().GetFrame(3)?.GetMethod();
             if (callerMethod != null)
             {
@@ -109,15 +116,27 @@ namespace UnityGameFramework
             }
             return logString;
 #endif
-            return $"[{_system} {_logType.ToString()}] {_message}";
+            return $"[{_system} {_logType}] {_message}";
         }
 
 
         /// <summary>
         /// The singleton of the console.
         /// </summary>
-        [NotNull] internal static Console instance { get { return _g_instance ??= new Console(); } }
+        [NotNull]
+        internal static Console instance
+        {
+            get
+            {
+                if (_g_instance != null)
+                    return _g_instance;
+
+                lock (_g_lock) _g_instance ??= new Console();
+                return _g_instance;
+            }
+        }
         private static Console _g_instance;
+        [NotNull] private static readonly object _g_lock = new object();
 
 
         /// <summary>
@@ -144,9 +163,10 @@ namespace UnityGameFramework
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack]
         private void Log(ELogType _logType, string _system, string _message, Object _context = null)
         {
-            if ((int)_logType < (int)logLevel) 
+            if ((int)_logType < (int)_m_logLevel) 
                 return;
             
             string logString = MakeLogString(_logType, _system, _message);
