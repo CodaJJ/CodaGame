@@ -1,5 +1,5 @@
 ﻿
-namespace UnityGameFramework.TaskBase
+namespace UnityGameFramework.Base
 {
     /// <summary>
     /// Inherit this class, override abstract function so that you can do what you want.

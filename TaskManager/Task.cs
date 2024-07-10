@@ -1,17 +1,14 @@
 
 using System;
-using JetBrains.Annotations;
-using UnityEngine;
-using UnityGameFramework.Tasks;
-using UnityGameFramework.TaskBase;
-using Object = UnityEngine.Object;
+using UnityGameFramework.Base.Tasks;
+using UnityGameFramework.Base;
 
 namespace UnityGameFramework
 {
     /// <summary>
     /// All sorts of tasks you can find here.
     /// </summary>
-    public class Task
+    public static class Task
     {
         /// <summary>
         /// Run a action task.

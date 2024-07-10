@@ -1,5 +1,5 @@
 
-using UnityGameFramework.TaskBase;
+using UnityGameFramework.Base;
 
 namespace UnityGameFramework
 {

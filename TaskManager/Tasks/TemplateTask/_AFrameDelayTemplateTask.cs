@@ -1,7 +1,5 @@
 
-using UnityGameFramework.TaskBase;
-
-namespace UnityGameFramework.Tasks
+namespace UnityGameFramework.Base.Tasks
 {
     /// <summary>
     /// A task that you can run a function later.

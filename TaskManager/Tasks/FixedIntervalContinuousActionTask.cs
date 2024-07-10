@@ -1,8 +1,8 @@
 
 using System;
-using UnityGameFramework.TaskBase;
+using UnityGameFramework.Base;
 
-namespace UnityGameFramework.Tasks
+namespace UnityGameFramework.Base.Tasks
 {
     /// <summary>
     /// A task that you can continuously run a delegate at fixed interval.

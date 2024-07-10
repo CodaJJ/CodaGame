@@ -1,7 +1,7 @@
 
-using UnityGameFramework.TaskBase;
+using UnityEngine;
 
-namespace UnityGameFramework.Tasks
+namespace UnityGameFramework.Base.Tasks
 {
     /// <summary>
     /// A task that you can continuously run a function at fixed interval.
@@ -49,12 +49,6 @@ namespace UnityGameFramework.Tasks
 
         public sealed override void Deal(float _deltaTime)
         {
-            if (_m_timeCounter > _m_duration)
-            {
-                Stop();
-                return;
-            }
-            
             while (_m_intervalTimeCounter > _m_fixedInterval)
             {
                 TemplateTaskDeal();
@@ -63,8 +57,14 @@ namespace UnityGameFramework.Tasks
                 _m_intervalTimeCounter -= _m_fixedInterval;
             }
             
+            if (_m_timeCounter > _m_duration)
+            {
+                Stop();
+                return;
+            }
+            
+            _m_intervalTimeCounter = Mathf.Min(remainingTime, _m_intervalTimeCounter + _deltaTime);
             _m_timeCounter += _deltaTime;
-            _m_intervalTimeCounter += _deltaTime;
         }
 
         protected sealed override void OnRun()

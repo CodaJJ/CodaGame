@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace UnityGameFramework.TaskBase
+namespace UnityGameFramework.Base
 {
     /// <summary>
     /// A MonoBehaviour for running tasks.
@@ -19,34 +19,45 @@ namespace UnityGameFramework.TaskBase
             {
                 if (_g_instance != null)
                     return _g_instance;
-                
-                GameObject go = new GameObject("TaskManager");
-                DontDestroyOnLoad(go);
-                _g_instance = go.AddComponent<TaskManager>();
-                if (_g_instance == null)
-                    Console.LogCrush(SystemNames.TaskSystem, "Initialize TaskSystem failed, Failed to add TaskMonoBehaviour component.");
-                else
-                    Console.LogSystem(SystemNames.TaskSystem, "Initialize TaskManager success.");
-                
+
+                lock (_g_lock)
+                {
+                    if (_g_instance == null)
+                    {
+                        GameObject go = new GameObject("TaskManager");
+                        DontDestroyOnLoad(go);
+                        TaskManager manager = go.AddComponent<TaskManager>();
+
+                        if (manager == null)
+                            Console.LogCrush(SystemNames.TaskSystem, "Initialize TaskSystem failed, Failed to add TaskMonoBehaviour component.");
+                        else
+                            Console.LogSystem(SystemNames.TaskSystem, "Initialize TaskManager success.");
+
+                        // ReSharper disable once PossibleMultipleWriteAccessInDoubleCheckLocking
+                        _g_instance = manager;
+                    }
+                }
+
                 // ReSharper disable once AssignNullToNotNullAttribute
                 return _g_instance;
             }
         }
         private static TaskManager _g_instance;
+        [NotNull] private static readonly object _g_lock = new object();
         
         
         // Task will run in Update and LateUpdate, use Time.deltaTime.
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_updateTasks;
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_lateUpdateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_updateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_lateUpdateTasks;
         // Task will run in Update and LateUpdate, use Time.unscaledDeltaTime.
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_unscaledTimeUpdateTasks;
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_unscaledTimeLateUpdateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_unscaledTimeUpdateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_unscaledTimeLateUpdateTasks;
         // Task will run in FixedUpdate, use Time.fixedDeltaTime or Time.fixedUnscaledDeltaTime.
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_fixedUpdateTasks;
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_unscaledFixedUpdateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_fixedUpdateTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_unscaledFixedUpdateTasks;
 
         // Actually use for foreach traversal lists, to avoid list modification during traversal.
-        [ItemNotNull][NotNull] private readonly List<_ATask> _m_taskListForTraversal;
+        [ItemNotNull, NotNull] private readonly List<_ATask> _m_taskListForTraversal;
 
 
         internal TaskManager()
@@ -239,9 +250,6 @@ namespace UnityGameFramework.TaskBase
         /// </summary>
         private void Update()
         {
-            if (Time.frameCount < 10)
-                return;
-            
             _m_taskListForTraversal.Clear();
             lock (_m_updateTasks) _m_taskListForTraversal.AddRange(_m_updateTasks);
             foreach (_ATask task in _m_taskListForTraversal)
