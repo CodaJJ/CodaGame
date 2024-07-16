@@ -19,8 +19,6 @@ namespace UnityGameFramework.Base.AsyncOperations
         [NotNull] private readonly Queue<Async.Function> _m_functionQueue;
         // is the operation running
         private bool _m_isRunning;
-        // lock for thread safety
-        [NotNull] private readonly object _m_lock;
 
 
         /// <summary>
@@ -33,8 +31,6 @@ namespace UnityGameFramework.Base.AsyncOperations
             
             _m_functionQueue = new Queue<Async.Function>();
             _m_isRunning = false;
-
-            _m_lock = new object();
         }
         /// <summary>
         /// Create a new anonymous waterfall operation.
@@ -59,11 +55,9 @@ namespace UnityGameFramework.Base.AsyncOperations
                 return;
             }
 
-            lock (_m_lock)
-            {
-                _m_functionQueue.Enqueue(_function);
-                Console.LogVerbose(SystemNames.Async, $"{_m_name} enqueue a new function, now the function count is {_m_functionQueue.Count}.");
-            }
+            _m_functionQueue.Enqueue(_function);
+            Console.LogVerbose(SystemNames.Async, $"{_m_name} enqueue a new function, now the function count is {_m_functionQueue.Count}.");
+            
 
             TryToRunTheNextFunction();
         }
@@ -95,22 +89,17 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// </summary>
         private void TryToRunTheNextFunction()
         {
-            Async.Function function = null;
-            lock (_m_lock)
-            {
-                if (_m_isRunning || _m_functionQueue.Count == 0)
-                    return;
+            if (_m_isRunning || _m_functionQueue.Count == 0) 
+                return;
                 
-                _m_isRunning = true;
-                Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a function, now the function count is {_m_functionQueue.Count}.");
-                function = _m_functionQueue.Dequeue();
-            }
-
+            _m_isRunning = true;
+            
+            Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a function, now the function count is {_m_functionQueue.Count}.");
+            Async.Function function = _m_functionQueue.Dequeue();
             function?.Invoke(() =>
             {
                 Console.LogVerbose(SystemNames.Async, $"{_m_name} finishes a function, now the function count is {_m_functionQueue.Count}.");
-                lock (_m_lock)
-                    _m_isRunning = false;
+                _m_isRunning = false;
                 
                 TryToRunTheNextFunction();       
             });

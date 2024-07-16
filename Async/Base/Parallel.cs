@@ -1,6 +1,5 @@
 
 using System;
-using JetBrains.Annotations;
 
 namespace UnityGameFramework.Base.AsyncOperations
 {
@@ -18,8 +17,6 @@ namespace UnityGameFramework.Base.AsyncOperations
         private uint _m_functionCount;
         // complete callback
         private Action _m_completeCallback;
-        // lock for thread safety
-        [NotNull] private readonly object _m_lock;
         
         
         /// <summary>
@@ -31,8 +28,6 @@ namespace UnityGameFramework.Base.AsyncOperations
             _m_name = _name;
             _m_functionCount = 0;
             _m_completeCallback = null;
-            
-            _m_lock = new object();
         }
         /// <summary>
         /// Create a new anonymous parallel operation.
@@ -54,11 +49,8 @@ namespace UnityGameFramework.Base.AsyncOperations
                 return;
             }
 
-            lock (_m_lock)
-            {
-                _m_functionCount++;
-                Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a new function, now the function count is {_m_functionCount}.");
-            }
+            _m_functionCount++;
+            Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a new function, now the function count is {_m_functionCount}.");
             
             _function.Invoke(FunctionComplete);
         }
@@ -80,17 +72,10 @@ namespace UnityGameFramework.Base.AsyncOperations
 
             Console.LogVerbose(SystemNames.Async, $"{_m_name} adds a new complete callback, now the function count is {_m_functionCount}.");
             
-            bool invokeImmediately = false;
-            lock (_m_lock)
-            {
-                if (_m_functionCount == 0)
-                    invokeImmediately = true;
-                else
-                    _m_completeCallback += _completeCallback;
-            }
-            
-            if (invokeImmediately)
+            if (_m_functionCount == 0)
                 _completeCallback.Invoke();
+            else
+                _m_completeCallback += _completeCallback;
         }
 
 
@@ -101,17 +86,13 @@ namespace UnityGameFramework.Base.AsyncOperations
         {
             Action callback = null;
 
-            lock (_m_lock)
-            {
-                if (--_m_functionCount == 0)
-                {
-                    callback = _m_completeCallback;
-                    _m_completeCallback = null;
-                }
-                
-                Console.LogVerbose(SystemNames.Async, $"{_m_name} finishes a function, now the function count is {_m_functionCount}.");
+            if (--_m_functionCount == 0) 
+            { 
+                callback = _m_completeCallback; 
+                _m_completeCallback = null;
             }
-
+                
+            Console.LogVerbose(SystemNames.Async, $"{_m_name} finishes a function, now the function count is {_m_functionCount}.");
             callback?.Invoke();
         }
     }

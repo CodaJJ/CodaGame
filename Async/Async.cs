@@ -46,7 +46,10 @@ namespace UnityGameFramework
         public static void Parallel(List<Function> _functions, Action _complete = null)
         {
             if (_functions is not { Count: > 0 })
+            {
+                _complete?.Invoke();
                 return;
+            }
             
             Parallel parallel = new Parallel();
             foreach (Function function in _functions)
@@ -85,7 +88,10 @@ namespace UnityGameFramework
         public static void Waterfall(List<Function> _functions, Action _complete = null)
         {
             if (_functions is not { Count: > 0 })
+            {
+                _complete?.Invoke();
                 return;
+            }
             
             Waterfall waterfall = new Waterfall();
             foreach (Function function in _functions)
