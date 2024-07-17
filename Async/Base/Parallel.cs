@@ -8,9 +8,6 @@ namespace UnityGameFramework.Base.AsyncOperations
     /// </summary>
     public class Parallel
     {
-        // unique id for anonymous parallel operation
-        private static uint _g_uid = 0;
-        
         // name of the parallel operation
         private readonly string _m_name;
         // count of functions that are running
@@ -32,7 +29,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// <summary>
         /// Create a new anonymous parallel operation.
         /// </summary>
-        public Parallel() : this($"AnonymousParallelOperation_{_g_uid++}")
+        public Parallel() : this($"AnonymousParallelOperation_{Serialize.NextAsyncParallel()}")
         {
         }
         
@@ -41,7 +38,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// Run a function in the parallel operation.
         /// </summary>
         /// <param name="_function">The function you want to run.</param>
-        public void RunFunction(Async.Function _function)
+        public void RunFunction(AsyncFunction _function)
         {
             if (_function == null)
             {

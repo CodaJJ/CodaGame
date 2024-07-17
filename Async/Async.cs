@@ -11,19 +11,14 @@ namespace UnityGameFramework
     public static class Async
     {
         /// <summary>
-        /// A delegate that is used by async functions. 
-        /// </summary>
-        public delegate void Function(Action _complete);
-        
-        
-        /// <summary>
         /// Operate a list of units in parallel.
         /// </summary>
         /// <param name="_units">The list of units.</param>
         /// <param name="_unitFunction">The operation for units.</param>
         /// <param name="_complete">The complete callback.</param>
-        /// <typeparam name="T">The type of units</typeparam>
-        public static void Parallel<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null)
+        /// <param name="_name">The name of this parallel operation.</param>
+        /// <typeparam name="T">The type of units.</typeparam>
+        public static void Parallel<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null, string _name = null)
         {
             if (_units is not { Count: > 0 } || _unitFunction == null)
             {
@@ -31,7 +26,7 @@ namespace UnityGameFramework
                 return;
             }
             
-            Parallel parallel = new Parallel();
+            Parallel parallel = string.IsNullOrEmpty(_name) ? new Parallel() : new Parallel(_name);
             foreach (T unit in _units)
             {
                 parallel.RunFunction(_callback => _unitFunction.Invoke(unit, _callback));
@@ -43,7 +38,8 @@ namespace UnityGameFramework
         /// </summary>
         /// <param name="_functions">The functions you want to run.</param>
         /// <param name="_complete">The complete callback.</param>
-        public static void Parallel(List<Function> _functions, Action _complete = null)
+        /// <param name="_name">The name of this parallel operation.</param>
+        public static void Parallel(List<AsyncFunction> _functions, Action _complete = null, string _name = null)
         {
             if (_functions is not { Count: > 0 })
             {
@@ -51,8 +47,8 @@ namespace UnityGameFramework
                 return;
             }
             
-            Parallel parallel = new Parallel();
-            foreach (Function function in _functions)
+            Parallel parallel = string.IsNullOrEmpty(_name) ? new Parallel() : new Parallel(_name);
+            foreach (AsyncFunction function in _functions)
             {
                 parallel.RunFunction(function);
             }
@@ -64,8 +60,9 @@ namespace UnityGameFramework
         /// <param name="_units">The list of units.</param>
         /// <param name="_unitFunction">The operation for units.</param>
         /// <param name="_complete">The complete callback.</param>
+        /// <param name="_name">The name of this parallel operation.</param>
         /// <typeparam name="T">The type of units</typeparam>
-        public static void Waterfall<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null)
+        public static void Waterfall<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null, string _name = null)
         {
             if (_units is not { Count: > 0 } || _unitFunction == null)
             {
@@ -73,7 +70,7 @@ namespace UnityGameFramework
                 return;
             }
             
-            Waterfall waterfall = new Waterfall();
+            Waterfall waterfall = string.IsNullOrEmpty(_name) ? new Waterfall() : new Waterfall(_name);
             foreach (T unit in _units)
             {
                 waterfall.AddFunction(_callback => _unitFunction.Invoke(unit, _callback));
@@ -85,7 +82,8 @@ namespace UnityGameFramework
         /// </summary>
         /// <param name="_functions">The functions you want to run.</param>
         /// <param name="_complete">The complete callback.</param>
-        public static void Waterfall(List<Function> _functions, Action _complete = null)
+        /// <param name="_name">The name of this parallel operation.</param>
+        public static void Waterfall(List<AsyncFunction> _functions, Action _complete = null, string _name = null)
         {
             if (_functions is not { Count: > 0 })
             {
@@ -93,8 +91,8 @@ namespace UnityGameFramework
                 return;
             }
             
-            Waterfall waterfall = new Waterfall();
-            foreach (Function function in _functions)
+            Waterfall waterfall = string.IsNullOrEmpty(_name) ? new Waterfall() : new Waterfall(_name);
+            foreach (AsyncFunction function in _functions)
             {
                 waterfall.AddFunction(function);
             }

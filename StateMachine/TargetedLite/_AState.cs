@@ -2,19 +2,21 @@
 using System;
 using JetBrains.Annotations;
 
-namespace UnityGameFramework.StateMachine.Lite
+namespace UnityGameFramework.StateMachine.TargetedLite
 {
     /// <summary>
     /// A base class for state machine's state.
     /// </summary>
-    public abstract class _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
         // The serialize number of enter.
         private uint _m_enterSerialize;
         // The state machine that this state belongs to.
-        private StateMachine<T_STATE_TYPE> _m_stateMachine;
-
-
+        private StateMachine<T_STATE_TYPE, T_TARGET> _m_stateMachine;
+        // The target of this state.
+        private T_TARGET _m_target;
+        
+        
         protected _AStateBase()
         {
             _m_enterSerialize = Serialize.Next();
@@ -39,9 +41,15 @@ namespace UnityGameFramework.StateMachine.Lite
         
         
         /// <summary>
+        /// The target of this state.
+        /// </summary>
+        protected T_TARGET target { get { return _m_target; } }
+
+
+        /// <summary>
         /// Change state.
         /// </summary>
-        protected void ChangeState(_AState<T_STATE_TYPE> _state)
+        protected void ChangeState(_AState<T_STATE_TYPE, T_TARGET> _state)
         {
             if (_m_stateMachine == null)
             {
@@ -54,7 +62,7 @@ namespace UnityGameFramework.StateMachine.Lite
         /// <summary>
         /// Change state with a parameter.
         /// </summary>
-        protected void ChangeState<T_PARAM_1>(_AState<T_STATE_TYPE, T_PARAM_1> _state, T_PARAM_1 _param1)
+        protected void ChangeState<T_PARAM_1>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1> _state, T_PARAM_1 _param1)
         {
             if (_m_stateMachine == null)
             {
@@ -67,7 +75,7 @@ namespace UnityGameFramework.StateMachine.Lite
         /// <summary>
         /// Change state with two parameters.
         /// </summary>
-        protected void ChangeState<T_PARAM_1, T_PARAM_2>(_AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2> _state, T_PARAM_1 _param1, T_PARAM_2 _param2)
+        protected void ChangeState<T_PARAM_1, T_PARAM_2>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2> _state, T_PARAM_1 _param1, T_PARAM_2 _param2)
         {
             if (_m_stateMachine == null)
             {
@@ -80,7 +88,7 @@ namespace UnityGameFramework.StateMachine.Lite
         /// <summary>
         /// Change state with three parameters.
         /// </summary>
-        protected void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3>(_AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3)
+        protected void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3)
         {
             if (_m_stateMachine == null)
             {
@@ -93,7 +101,7 @@ namespace UnityGameFramework.StateMachine.Lite
         /// <summary>
         /// Change state with four parameters.
         /// </summary>
-        protected void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4>(_AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3, T_PARAM_4 _param4)
+        protected void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3, T_PARAM_4 _param4)
         {
             if (_m_stateMachine == null)
             {
@@ -103,13 +111,14 @@ namespace UnityGameFramework.StateMachine.Lite
             
             _m_stateMachine.ChangeState(_state, _param1, _param2, _param3, _param4);
         }
-
-
+        
+        
         /// <summary>
         /// Update the runtime data.
         /// </summary>
-        private protected void UpdateRuntimeData(StateMachine<T_STATE_TYPE> _stateMachine)
+        private protected void UpdateRuntimeData(T_TARGET _target, StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine)
         {
+            _m_target = _target;
             _m_stateMachine = _stateMachine;
         }
         internal void Exit()
@@ -120,6 +129,8 @@ namespace UnityGameFramework.StateMachine.Lite
             
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_m_stateMachine.name} exits {name}");
+            
+            _m_target = default;
             _m_stateMachine = null;
         }
         internal void Update()
@@ -140,14 +151,15 @@ namespace UnityGameFramework.StateMachine.Lite
     /// <summary>
     /// A state for state machine.
     /// </summary>
-    public abstract class _AState<T_STATE_TYPE> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AState<T_STATE_TYPE, T_TARGET> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
-        internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine)
+        internal void Enter(T_TARGET _target, [NotNull] StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine)
         {
+            UpdateRuntimeData(_target, _stateMachine);
+            
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name}");
-            
-            UpdateRuntimeData(_stateMachine);
+
             OnEnter();
         }
 
@@ -163,15 +175,15 @@ namespace UnityGameFramework.StateMachine.Lite
     /// <remarks>
     /// The target state's enter has a parameter.
     /// </remarks>
-    public abstract class _AState<T_STATE_TYPE, T_PARAM> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
-        internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine, T_PARAM _param)
+        internal void Enter(T_TARGET _target, [NotNull] StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine, T_PARAM _param)
         {
-            UpdateRuntimeData(_stateMachine);
+            UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameter {_param}");
-            
+
             OnEnter(_param);
         }
 
@@ -187,15 +199,15 @@ namespace UnityGameFramework.StateMachine.Lite
     /// <remarks>
     /// The target state's enter has two parameters.
     /// </remarks>
-    public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
-        internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2)
+        internal void Enter(T_TARGET _target, [NotNull] StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2)
         {
-            UpdateRuntimeData(_stateMachine);
+            UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}");
-            
+
             OnEnter(_param1, _param2);
         }
 
@@ -211,15 +223,15 @@ namespace UnityGameFramework.StateMachine.Lite
     /// <remarks>
     /// The target state's enter has three parameters.
     /// </remarks>
-    public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
-        internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3)
+        internal void Enter(T_TARGET _target, [NotNull] StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3)
         {
-            UpdateRuntimeData(_stateMachine);
+            UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}, {_param3}");
-            
+
             OnEnter(_param1, _param2, _param3);
         }
 
@@ -235,11 +247,11 @@ namespace UnityGameFramework.StateMachine.Lite
     /// <remarks>
     /// The target state's enter has four parameters.
     /// </remarks>
-    public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
+    public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
-        internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3, T_PARAM_4 _param4)
+        internal void Enter(T_TARGET _target, [NotNull] StateMachine<T_STATE_TYPE, T_TARGET> _stateMachine, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3, T_PARAM_4 _param4)
         {
-            UpdateRuntimeData(_stateMachine);
+            UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
             Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}, {_param3}, {_param4}");

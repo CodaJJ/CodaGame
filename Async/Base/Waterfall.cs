@@ -10,13 +10,10 @@ namespace UnityGameFramework.Base.AsyncOperations
     /// </summary>
     public class Waterfall
     {
-        // unique id for anonymous waterfall operation
-        private static uint _g_uid = 0;
-
         // name of the waterfall operation
         private readonly string _m_name;
         // queue of functions
-        [NotNull] private readonly Queue<Async.Function> _m_functionQueue;
+        [NotNull] private readonly Queue<AsyncFunction> _m_functionQueue;
         // is the operation running
         private bool _m_isRunning;
 
@@ -29,13 +26,13 @@ namespace UnityGameFramework.Base.AsyncOperations
         {
             _m_name = _name;
             
-            _m_functionQueue = new Queue<Async.Function>();
+            _m_functionQueue = new Queue<AsyncFunction>();
             _m_isRunning = false;
         }
         /// <summary>
         /// Create a new anonymous waterfall operation.
         /// </summary>
-        public Waterfall() : this($"AnonymousWaterfallOperation_{_g_uid++}")
+        public Waterfall() : this($"AnonymousWaterfallOperation_{Serialize.NextAsyncWaterfall()}")
         {
         }
         
@@ -47,7 +44,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// It will run immediately if there is no function running.
         /// </remarks>
         /// <param name="_function">The function you want to run.</param>
-        public void AddFunction(Async.Function _function)
+        public void AddFunction(AsyncFunction _function)
         {
             if (_function == null)
             {
@@ -95,7 +92,7 @@ namespace UnityGameFramework.Base.AsyncOperations
             _m_isRunning = true;
             
             Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a function, now the function count is {_m_functionQueue.Count}.");
-            Async.Function function = _m_functionQueue.Dequeue();
+            AsyncFunction function = _m_functionQueue.Dequeue();
             function?.Invoke(() =>
             {
                 Console.LogVerbose(SystemNames.Async, $"{_m_name} finishes a function, now the function count is {_m_functionQueue.Count}.");
