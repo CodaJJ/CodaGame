@@ -22,7 +22,7 @@ namespace UnityGameFramework.StateMachine.Lite
             _m_name = _name;
             _m_curState = null;
         }
-        public StateMachine() : this($"AnonymousStateMachine_{Serialize.NextStateMachine()}")
+        public StateMachine() : this($"StateMachine_{Serialize.NextStateMachine()}")
         {
         }
 

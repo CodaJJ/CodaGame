@@ -28,7 +28,7 @@ namespace UnityGameFramework
         {
         }
         protected _AAsyncObjectHandleGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousObjectHandleGetter_{Serialize.NextObjectHandleGetter()}", _initialCapacityOfCacheList)
+            : this($"ObjectHandleGetter_{Serialize.NextObjectHandleGetter()}", _initialCapacityOfCacheList)
         {
         }
 
@@ -148,7 +148,7 @@ namespace UnityGameFramework
             _m_handleCount = 0;
         }
         protected _AAsyncObjectHandleGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousMultiObjectGetter_{Serialize.NextObjectHandleGetter()}", _initialCapacityOfCacheList)
+            : this($"MultiObjectGetter_{Serialize.NextObjectHandleGetter()}", _initialCapacityOfCacheList)
         {
         }
         

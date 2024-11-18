@@ -25,7 +25,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
             _m_name = _name;
             _m_curState = null;
         }
-        public StateMachine(T_TARGET _target) : this(_target, $"AnonymousStateMachine_{Serialize.NextStateMachine()}")
+        public StateMachine(T_TARGET _target) : this(_target, $"StateMachine_{Serialize.NextStateMachine()}")
         {
         }
         

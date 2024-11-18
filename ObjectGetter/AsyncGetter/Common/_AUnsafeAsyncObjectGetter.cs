@@ -24,7 +24,7 @@ namespace UnityGameFramework
         {
         }
         protected _AUnsafeAsyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousUnsafeAsyncObjectGetter_{Serialize.NextUnsafeAsyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"UnsafeAsyncObjectGetter_{Serialize.NextUnsafeAsyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
 
@@ -125,7 +125,7 @@ namespace UnityGameFramework
         {
         }
         protected _AUnsafeAsyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousUnsafeAsyncObjectGetter_{Serialize.NextUnsafeAsyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"UnsafeAsyncObjectGetter_{Serialize.NextUnsafeAsyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
         

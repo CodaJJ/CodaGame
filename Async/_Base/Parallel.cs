@@ -29,7 +29,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// <summary>
         /// Create a new anonymous parallel operation.
         /// </summary>
-        public Parallel() : this($"AnonymousParallelOperation_{Serialize.NextAsyncParallel()}")
+        public Parallel() : this($"ParallelOperation_{Serialize.NextAsyncParallel()}")
         {
         }
         
@@ -42,12 +42,12 @@ namespace UnityGameFramework.Base.AsyncOperations
         {
             if (_function == null)
             {
-                Console.LogWarning(SystemNames.Async, $"{_m_name} is trying to run a null function.");
+                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to run a null function.");
                 return;
             }
 
             _m_functionCount++;
-            Console.LogVerbose(SystemNames.Async, $"{_m_name} starts a new function, now the function count is {_m_functionCount}.");
+            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Starts a new function, now the function count is {_m_functionCount}.");
             
             _function.Invoke(FunctionComplete);
         }
@@ -63,11 +63,11 @@ namespace UnityGameFramework.Base.AsyncOperations
         {
             if (_completeCallback == null)
             {
-                Console.LogWarning(SystemNames.Async, $"{_m_name} is trying to add a null complete callback.");
+                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to add a null complete callback.");
                 return;
             }
 
-            Console.LogVerbose(SystemNames.Async, $"{_m_name} adds a new complete callback, now the function count is {_m_functionCount}.");
+            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Adds a complete callback.");
             
             if (_m_functionCount == 0)
                 _completeCallback.Invoke();
@@ -89,7 +89,7 @@ namespace UnityGameFramework.Base.AsyncOperations
                 _m_completeCallback = null;
             }
                 
-            Console.LogVerbose(SystemNames.Async, $"{_m_name} finishes a function, now the function count is {_m_functionCount}.");
+            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Finishes a function, now the function count is {_m_functionCount}.");
             callback?.Invoke();
         }
     }

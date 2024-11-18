@@ -30,7 +30,7 @@ namespace UnityGameFramework
             _m_handleToKey = new Dictionary<T_OBJECT, T_KEY>();
         }
         protected _ASafeSyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousSafeSyncObjectGetter_{Serialize.NextSafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"SafeSyncObjectGetter_{Serialize.NextSafeSyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
 
@@ -141,7 +141,7 @@ namespace UnityGameFramework
             _m_objects = new HashSet<T_OBJECT>();
         }
         protected _ASafeSyncObjectGetter(int _initialCapacityOfCacheList)
-            : this($"AnonymousSafeSyncObjectGetter_{Serialize.NextSafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"SafeSyncObjectGetter_{Serialize.NextSafeSyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
 

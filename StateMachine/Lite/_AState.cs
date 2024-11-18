@@ -45,7 +45,7 @@ namespace UnityGameFramework.StateMachine.Lite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"You are trying to change state in a disabled state named {name}");
+                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -58,7 +58,7 @@ namespace UnityGameFramework.StateMachine.Lite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"You are trying to change state in a disabled state named {name}");
+                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -71,7 +71,7 @@ namespace UnityGameFramework.StateMachine.Lite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"You are trying to change state in a disabled state named {name}");
+                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -84,7 +84,7 @@ namespace UnityGameFramework.StateMachine.Lite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"You are trying to change state in a disabled state named {name}");
+                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -97,7 +97,7 @@ namespace UnityGameFramework.StateMachine.Lite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"You are trying to change state in a disabled state named {name}");
+                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -119,7 +119,7 @@ namespace UnityGameFramework.StateMachine.Lite
             _m_enterSerialize = Serialize.Next();
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_m_stateMachine.name} exits {name}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_m_stateMachine.name} -- state-{name} -- : exits.");
             _m_stateMachine = null;
         }
         internal void Update()
@@ -145,7 +145,7 @@ namespace UnityGameFramework.StateMachine.Lite
         internal void Enter([NotNull] StateMachine<T_STATE_TYPE> _stateMachine)
         {
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters.");
             
             UpdateRuntimeData(_stateMachine);
             OnEnter();
@@ -170,7 +170,7 @@ namespace UnityGameFramework.StateMachine.Lite
             UpdateRuntimeData(_stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameter {_param}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameter {_param}.");
             
             OnEnter(_param);
         }
@@ -194,7 +194,7 @@ namespace UnityGameFramework.StateMachine.Lite
             UpdateRuntimeData(_stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}.");
             
             OnEnter(_param1, _param2);
         }
@@ -218,7 +218,7 @@ namespace UnityGameFramework.StateMachine.Lite
             UpdateRuntimeData(_stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}, {_param3}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}.");
             
             OnEnter(_param1, _param2, _param3);
         }
@@ -242,7 +242,7 @@ namespace UnityGameFramework.StateMachine.Lite
             UpdateRuntimeData(_stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"{_stateMachine.name} enters {name} with parameters {_param1}, {_param2}, {_param3}, {_param4}");
+            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}, {_param4}.");
 
             OnEnter(_param1, _param2, _param3, _param4);
         }

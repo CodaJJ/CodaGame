@@ -23,7 +23,7 @@ namespace UnityGameFramework
         {
         }
         protected _AUnsafeSyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousUnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"UnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
 
@@ -109,7 +109,7 @@ namespace UnityGameFramework
         {
         }
         protected _AUnsafeSyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"AnonymousUnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+            : this($"UnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
         {
         }
         
