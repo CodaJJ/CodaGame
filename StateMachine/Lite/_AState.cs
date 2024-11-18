@@ -33,7 +33,7 @@ namespace UnityGameFramework.StateMachine.Lite
         /// The name of this state.
         /// </summary>
         /// <remarks>
-        /// Usually used for debugging tho.
+        /// <para>Usually used for debugging tho.</para>
         /// </remarks>
         public abstract string name { get; }
         
@@ -161,7 +161,7 @@ namespace UnityGameFramework.StateMachine.Lite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has a parameter.
+    /// <para>The target state's enter has a parameter.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_PARAM> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
     {
@@ -185,7 +185,7 @@ namespace UnityGameFramework.StateMachine.Lite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has two parameters.
+    /// <para>The target state's enter has two parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
     {
@@ -209,7 +209,7 @@ namespace UnityGameFramework.StateMachine.Lite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has three parameters.
+    /// <para>The target state's enter has three parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
     {
@@ -233,7 +233,7 @@ namespace UnityGameFramework.StateMachine.Lite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has four parameters.
+    /// <para>The target state's enter has four parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> : _AStateBase<T_STATE_TYPE> where T_STATE_TYPE : Enum
     {

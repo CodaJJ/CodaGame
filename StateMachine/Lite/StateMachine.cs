@@ -7,7 +7,7 @@ namespace UnityGameFramework.StateMachine.Lite
     /// A state machine lite that can change state.
     /// </summary>
     /// <remarks>
-    /// This machine only handles the state change, invoking the enter, exit and update of the state.
+    /// <para>This machine only handles the state change, invoking the enter, exit and update of the state.</para>
     /// </remarks>
     public class StateMachine<T_STATE_TYPE> where T_STATE_TYPE : Enum
     {

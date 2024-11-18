@@ -7,7 +7,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
     /// A state machine lite with a target that can change state.
     /// </summary>
     /// <remarks>
-    /// This machine handles the state change, invoking the enter, exit and update of the state for the target.
+    /// <para>This machine handles the state change, invoking the enter, exit and update of the state for the target.</para>
     /// </remarks>
     public class StateMachine<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {

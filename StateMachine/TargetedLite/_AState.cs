@@ -173,7 +173,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has a parameter.
+    /// <para>The target state's enter has a parameter.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
@@ -197,7 +197,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has two parameters.
+    /// <para>The target state's enter has two parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
@@ -221,7 +221,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has three parameters.
+    /// <para>The target state's enter has three parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
@@ -245,7 +245,7 @@ namespace UnityGameFramework.StateMachine.TargetedLite
     /// A state for state machine.
     /// </summary>
     /// <remarks>
-    /// The target state's enter has four parameters.
+    /// <para>The target state's enter has four parameters.</para>
     /// </remarks>
     public abstract class _AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> : _AStateBase<T_STATE_TYPE, T_TARGET> where T_STATE_TYPE : Enum
     {
