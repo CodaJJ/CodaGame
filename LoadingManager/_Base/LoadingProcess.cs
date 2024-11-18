@@ -61,7 +61,7 @@ namespace UnityGameFramework.Base
         /// Add a load function to the loading process.
         /// </summary>
         /// <remarks>
-        /// The load function will run immediately after loading show shows.
+        /// <para>The load function will run immediately after loading show shows.</para>
         /// </remarks>
         /// <param name="_loadFunction">The load function you want to run.</param>
         /// <param name="_loadingShowEndCallback">The callback when loading show ends.</param>
