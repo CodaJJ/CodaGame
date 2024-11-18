@@ -18,7 +18,7 @@ namespace UnityGameFramework
         /// <param name="_complete">The complete callback.</param>
         /// <param name="_name">The name of this parallel operation.</param>
         /// <typeparam name="T">The type of units.</typeparam>
-        public static void Parallel<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null, string _name = null)
+        public static void Parallel<T>(List<T> _units, AsyncFunction<T> _unitFunction, Action _complete = null, string _name = null)
         {
             if (_units is not { Count: > 0 } || _unitFunction == null)
             {
@@ -62,7 +62,7 @@ namespace UnityGameFramework
         /// <param name="_complete">The complete callback.</param>
         /// <param name="_name">The name of this parallel operation.</param>
         /// <typeparam name="T">The type of units</typeparam>
-        public static void Waterfall<T>(List<T> _units, Action<T, Action> _unitFunction, Action _complete = null, string _name = null)
+        public static void Waterfall<T>(List<T> _units, AsyncFunction<T> _unitFunction, Action _complete = null, string _name = null)
         {
             if (_units is not { Count: > 0 } || _unitFunction == null)
             {

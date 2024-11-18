@@ -41,7 +41,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// Add a function to the waterfall operation.
         /// </summary>
         /// <remarks>
-        /// It will run immediately if there is no function running.
+        /// <para>It will run immediately if there is no function running.</para>
         /// </remarks>
         /// <param name="_function">The function you want to run.</param>
         public void AddFunction(AsyncFunction _function)
@@ -62,7 +62,7 @@ namespace UnityGameFramework.Base.AsyncOperations
         /// Add a function to the waterfall operation.
         /// </summary>
         /// <remarks>
-        /// It will run immediately if there is no function running.
+        /// <para>It will run immediately if there is no function running.</para>
         /// </remarks>
         /// <param name="_function">The function you want to run.</param>
         public void AddFunction(Action _function)
