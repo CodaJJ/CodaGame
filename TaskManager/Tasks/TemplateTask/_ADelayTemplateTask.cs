@@ -10,8 +10,8 @@ namespace UnityGameFramework.Base.Tasks
         private float _m_timeCounter;
         
         
-        protected _ADelayTemplateTask(float _delayTime, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(_runType)
+        protected _ADelayTemplateTask(string _name, float _delayTime, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, _runType)
         {
             _m_delayTime = _delayTime;
         }
@@ -25,8 +25,6 @@ namespace UnityGameFramework.Base.Tasks
         /// Remaining time (second).
         /// </summary>
         public float remainingTime { get { return _m_delayTime - _m_timeCounter; } }
-        /// <inheritdoc/>
-        public override string name { get { return $"DelayTask with a delay of {_m_delayTime} seconds"; } }
         
 
         public sealed override void Deal(float _deltaTime)

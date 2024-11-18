@@ -1,8 +1,8 @@
 
 using System;
-using UnityGameFramework.Base;
+using UnityGameFramework.Base.Tasks;
 
-namespace UnityGameFramework.Base.Tasks
+namespace UnityGameFramework.Tasks
 {
     /// <summary>
     /// A task that you can run a delegate at next frame.
@@ -12,10 +12,14 @@ namespace UnityGameFramework.Base.Tasks
         private readonly Action _m_delegate;
         
         
-        public NextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(1, _runType)
+        public NextFrameActionTask(string _name, Action _delegate, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, 1, _runType)
         {
             _m_delegate = _delegate;
+        }
+        public NextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
+            : this($"NextFrameActionTask_{Serialize.NextNextFrameActionTask()}", _delegate, _runType)
+        {
         }
         
 

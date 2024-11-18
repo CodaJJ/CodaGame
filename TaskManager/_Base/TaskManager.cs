@@ -85,7 +85,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_updateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a update task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a update task.");
                 _m_updateTasks.Add(_task);
             }
         }
@@ -99,7 +99,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_updateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a update task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a update task.");
                 _m_updateTasks.Remove(_task);
             }
         }
@@ -113,7 +113,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_lateUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a LateUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a LateUpdate task.");
                 _m_lateUpdateTasks.Add(_task);
             }
         }
@@ -127,7 +127,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_lateUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a LateUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a LateUpdate task.");
                 _m_lateUpdateTasks.Remove(_task);
             }
         }
@@ -141,7 +141,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_unscaledTimeUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time update task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a unscaled time update task.");
                 _m_unscaledTimeUpdateTasks.Add(_task);
             }
         }
@@ -155,7 +155,7 @@ namespace UnityGameFramework.Base
                 
             lock (_m_unscaledTimeUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time update task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a unscaled time update task.");
                 _m_unscaledTimeUpdateTasks.Remove(_task);
             }
         }
@@ -169,7 +169,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_unscaledTimeLateUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time LateUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a unscaled time LateUpdate task.");
                 _m_unscaledTimeLateUpdateTasks.Add(_task);
             }
         }
@@ -183,7 +183,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_unscaledTimeLateUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time LateUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a unscaled time LateUpdate task.");
                 _m_unscaledTimeLateUpdateTasks.Remove(_task);
             }
         }
@@ -197,7 +197,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_fixedUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a FixedUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a FixedUpdate task.");
                 _m_fixedUpdateTasks.Add(_task);
             }
         }
@@ -211,7 +211,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_fixedUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a FixedUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a FixedUpdate task.");
                 _m_fixedUpdateTasks.Remove(_task);
             }
         }
@@ -225,7 +225,7 @@ namespace UnityGameFramework.Base
 
             lock (_m_unscaledFixedUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Add a unscaled time FixedUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Add a unscaled time FixedUpdate task.");
                 _m_unscaledFixedUpdateTasks.Add(_task);
             }
         }
@@ -239,7 +239,7 @@ namespace UnityGameFramework.Base
             
             lock (_m_unscaledFixedUpdateTasks)
             {
-                Console.LogVerbose(SystemNames.TaskSystem, $"Remove a unscaled time FixedUpdate task({_task.name}).");
+                Console.LogVerbose(SystemNames.TaskSystem, $"-- {_task.name} -- : Remove a unscaled time FixedUpdate task.");
                 _m_unscaledFixedUpdateTasks.Remove(_task);
             }
         }

@@ -1,8 +1,8 @@
 
 using System;
-using UnityGameFramework.Base;
+using UnityGameFramework.Base.Tasks;
 
-namespace UnityGameFramework.Base.Tasks
+namespace UnityGameFramework.Tasks
 {
     /// <summary>
     /// A task that you can continuously run a delegate at fixed interval.
@@ -12,10 +12,14 @@ namespace UnityGameFramework.Base.Tasks
         private readonly Action _m_delegate;
         
         
-        public FixedIntervalContinuousActionTask(Action _delegate, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(_fixedInterval, _duration, _runType)
+        public FixedIntervalContinuousActionTask(string _name, Action _delegate, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, _fixedInterval, _duration, _runType)
         {
             _m_delegate = _delegate;
+        }
+        public FixedIntervalContinuousActionTask(Action _delegate, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update)
+            : this($"FixedIntervalContinuousActionTask_{Serialize.NextFixedIntervalContinuousTask()}", _delegate, _fixedInterval, _duration, _runType)
+        {
         }
         
         

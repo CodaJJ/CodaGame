@@ -10,8 +10,8 @@ namespace UnityGameFramework.Base.Tasks
         private float _m_frameCounter;
         
         
-        protected _AFrameDelayTemplateTask(int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(_runType)
+        protected _AFrameDelayTemplateTask(string _name, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, _runType)
         {
             _m_frameCountDelay = _frameCountDelay;
         }
@@ -25,8 +25,6 @@ namespace UnityGameFramework.Base.Tasks
         /// Remaining frame count.
         /// </summary>
         public float remainingFrameCount { get { return _m_frameCountDelay - _m_frameCounter; } }
-        /// <inheritdoc/>
-        public override string name { get { return $"FrameDelayTask with a frame delay of {_m_frameCountDelay} frame"; } }
         
 
         public sealed override void Deal(float _deltaTime)

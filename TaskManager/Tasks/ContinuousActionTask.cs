@@ -1,8 +1,8 @@
 
 using System;
-using UnityGameFramework.Base;
+using UnityGameFramework.Base.Tasks;
 
-namespace UnityGameFramework.Base.Tasks
+namespace UnityGameFramework.Tasks
 {
     /// <summary>
     /// A task that you can continuously run a delegate.
@@ -12,10 +12,14 @@ namespace UnityGameFramework.Base.Tasks
         private readonly Action _m_delegate;
         
         
-        public ContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(_duration, _runType)
+        public ContinuousActionTask(string _name, Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, _duration, _runType)
         {
             _m_delegate = _delegate;
+        }
+        public ContinuousActionTask(Action _delegate, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update)
+            : this($"ContinuousActionTask_{Serialize.NextContinuousTask()}", _delegate, _duration, _runType)
+        {
         }
         
         

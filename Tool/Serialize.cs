@@ -15,8 +15,12 @@ namespace UnityGameFramework
         private static uint _g_safeSyncObjectGetterSerialize = 0;
         private static uint _g_unsafeSyncObjectGetterSerialize = 0;
         private static uint _g_objectHandleGetterSerialize = 0;
-        private static uint _g_uniqueObjectOccupyGetterSerialize = 0;
-        private static uint _g_uniqueObjectSharedGetterSerialize = 0;
+        private static uint _g_actionTaskSerialize = 0;
+        private static uint _g_continuousTaskSerialize = 0;
+        private static uint _g_delayActionTaskSerialize = 0;
+        private static uint _g_fixedIntervalContinuousTaskSerialize = 0;
+        private static uint _g_frameDelayActionTaskSerialize = 0;
+        private static uint _g_nextFrameActionTaskSerialize = 0;
         
         
         /// <summary>
@@ -60,13 +64,29 @@ namespace UnityGameFramework
         {
             return _g_objectHandleGetterSerialize++;
         }
-        internal static uint NextUniqueObjectOccupyGetter()
+        internal static uint NextActionTask()
         {
-            return _g_uniqueObjectOccupyGetterSerialize++;
+            return _g_actionTaskSerialize++;
         }
-        internal static uint NextUniqueObjectSharedGetter()
+        internal static uint NextContinuousTask()
         {
-            return _g_uniqueObjectSharedGetterSerialize++;
+            return _g_continuousTaskSerialize++;
+        }
+        internal static uint NextDelayActionTask()
+        {
+            return _g_delayActionTaskSerialize++;
+        }
+        internal static uint NextFixedIntervalContinuousTask()
+        {
+            return _g_fixedIntervalContinuousTaskSerialize++;
+        }
+        internal static uint NextFrameDelayActionTask()
+        {
+            return _g_frameDelayActionTaskSerialize++;
+        }
+        internal static uint NextNextFrameActionTask()
+        {
+            return _g_nextFrameActionTaskSerialize++;
         }
     }
 }

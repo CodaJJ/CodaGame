@@ -1,7 +1,6 @@
 
 using System;
-using UnityGameFramework.Base.Tasks;
-using UnityGameFramework.Base;
+using UnityGameFramework.Tasks;
 
 namespace UnityGameFramework
 {
@@ -14,7 +13,7 @@ namespace UnityGameFramework
         /// Run a action task.
         /// </summary>
         /// <remarks>
-        /// You can use this task to run a delegate on the main thread, specially Unity's function which is only runnable on the main thread.
+        /// <para>You can use this task to run a delegate on the main thread, specially Unity's function which is only runnable on the main thread.</para>
         /// </remarks>
         /// <param name="_delegate">The delegate you want to run</param>
         /// <param name="_runType">When will the task run</param>

@@ -1,5 +1,5 @@
 ﻿
-namespace UnityGameFramework.Base
+namespace UnityGameFramework
 {
     /// <summary>
     /// Enum for choose type you want run task.

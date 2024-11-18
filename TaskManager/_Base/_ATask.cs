@@ -6,6 +6,8 @@ namespace UnityGameFramework.Base
     /// </summary>
     public abstract class _ATask
     {
+        // Task name
+        private readonly string _m_name;
         // Running type
         private readonly ETaskRunType _m_runType;
         // Is task running?
@@ -15,8 +17,9 @@ namespace UnityGameFramework.Base
         /// <summary>
         /// Construct this task, choose which type you want.
         /// </summary>
-        protected _ATask(ETaskRunType _runType)
+        protected _ATask(string _name, ETaskRunType _runType)
         {
+            _m_name = _name;
             _m_runType = _runType;
             _m_isRunning = false;
         }
@@ -29,7 +32,7 @@ namespace UnityGameFramework.Base
         /// <summary>
         /// The name of this task, usually displayed for debug.
         /// </summary>
-        public abstract string name { get; }
+        public string name { get { return _m_name; } }
         
 
         /// <summary>
@@ -39,7 +42,7 @@ namespace UnityGameFramework.Base
         {
             if (_m_isRunning)
             {
-                Console.LogWarning(SystemNames.TaskSystem, $"The task({name}) is already running.");
+                Console.LogWarning(SystemNames.TaskSystem, $"-- {_m_name} -- : The task is already running.");
                 return;
             }
 
@@ -66,7 +69,7 @@ namespace UnityGameFramework.Base
                     TaskManager.instance.AddUnscaledTimeLateUpdateTask(this);
                     break;
                 default:
-                    Console.LogError(SystemNames.TaskSystem, $"Unsupported task({name}) run type ({_m_runType}).");
+                    Console.LogError(SystemNames.TaskSystem, $"-- {_m_name} -- : Unsupported task run type {_m_runType}.");
                     break;
             }
 
@@ -79,7 +82,7 @@ namespace UnityGameFramework.Base
         {
             if (!_m_isRunning)
             {
-                Console.LogWarning(SystemNames.TaskSystem, $"The task({name}) hasn't started running yet, you are trying to stop it.");
+                Console.LogWarning(SystemNames.TaskSystem, $"-- {_m_name} -- : The task hasn't started running yet, you are trying to stop it.");
                 return;
             }
 
@@ -106,7 +109,7 @@ namespace UnityGameFramework.Base
                     TaskManager.instance.RemoveUnscaledTimeLateUpdateTask(this);
                     break;
                 default:
-                    Console.LogError(SystemNames.TaskSystem, $"Unsupported task({name}) run type ({_m_runType}).");
+                    Console.LogError(SystemNames.TaskSystem, $"-- {_m_name} -- : Unsupported task run type {_m_runType}.");
                     break;
             }
 
@@ -114,13 +117,6 @@ namespace UnityGameFramework.Base
         }
 
 
-        /// <summary>
-        /// Convert this task to string.
-        /// </summary>
-        public override string ToString()
-        {
-            return name;
-        }
         /// <summary>
         /// Deal your task tick.
         /// </summary>

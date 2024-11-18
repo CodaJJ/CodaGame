@@ -15,14 +15,14 @@ namespace UnityGameFramework.Base.Tasks
         private ulong _m_runCount;
         
         
-        protected _AFixedIntervalContinuousTemplateTask(float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
-            : base(_runType)
+        protected _AFixedIntervalContinuousTemplateTask(string _name, float _fixedInterval, float _duration = float.PositiveInfinity, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, _runType)
         {
             _m_fixedInterval = _fixedInterval;
             _m_duration = _duration;
             
             if (_m_fixedInterval <= 0)
-                throw new System.ArgumentException("Fixed interval must be greater than 0.");
+                Console.LogCrush(SystemNames.TaskSystem, "Fixed interval must be greater than 0.");
         }
         
 
@@ -42,8 +42,6 @@ namespace UnityGameFramework.Base.Tasks
         /// Count of run.
         /// </summary>
         public ulong runCount { get { return _m_runCount; } }
-        /// <inheritdoc/>
-        public override string name { get { return $"FixedIntervalContinuousTask with a duration of {_m_duration} seconds and a fixed interval of {_m_fixedInterval} seconds"; } }
         
         
 
