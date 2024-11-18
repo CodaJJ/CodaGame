@@ -1,9 +1,11 @@
 
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using JetBrains.Annotations;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace UnityGameFramework
 {
@@ -115,8 +117,9 @@ namespace UnityGameFramework
                 logString += $"\n <color=cyan>--- by {className}.{methodName}</color>";
             }
             return logString;
-#endif
+#else 
             return $"[{_system} {_logType}] {_message}";
+#endif
         }
 
 
@@ -172,7 +175,10 @@ namespace UnityGameFramework
             string logString = MakeLogString(_logType, _system, _message);
             switch (_logType)
             {
-                case ELogType.Crush or ELogType.Error:
+                case ELogType.Crush:
+                    Debug.LogError(logString, _context);
+                    throw new Exception("fatal error: \n" + logString);
+                case ELogType.Error:
                     Debug.LogError(logString, _context);
                     break;
                 case ELogType.Warning:
