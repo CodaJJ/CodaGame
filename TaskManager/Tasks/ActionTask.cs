@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using System;
 using UnityGameFramework.Base;
@@ -7,12 +11,16 @@ namespace UnityGameFramework.Tasks
     /// <summary>
     /// A delegate task.
     /// </summary>
-    public class ActionTask : _ATask
+    /// <remarks>
+    /// <para>It's useful turn your process into main thread.</para>
+    /// </remarks>
+    public class ActionTask : _AFrameDelayTask
     {
         private readonly Action _m_delegate;
         
         
-        public ActionTask(string _name, Action _delegate, ETaskRunType _runType = ETaskRunType.Update) : base(_name, _runType)
+        public ActionTask(string _name, Action _delegate, ETaskRunType _runType = ETaskRunType.Update) 
+            : base(_name, 0, _runType)
         {
             _m_delegate = _delegate;
         }
@@ -22,13 +30,10 @@ namespace UnityGameFramework.Tasks
         }
 
 
-        public override void Deal(float _deltaTime)
+        protected override void OnDeal()
         {
             _m_delegate?.Invoke();
-            Stop();
         }
-
-        
         protected override void OnRun()
         {
         }

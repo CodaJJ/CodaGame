@@ -1,34 +1,26 @@
-﻿
+﻿// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
+
 namespace UnityGameFramework
 {
     /// <summary>
-    /// Enum for choose type you want run task.
+    /// Task running type.
     /// </summary>
     public enum ETaskRunType
     {
         /// <summary>
-        /// Will run in Unity's Update, and use Time.deltaTime.
+        /// Will run in Unity's Update.
         /// </summary>
         Update,
         /// <summary>
-        /// Will run in Unity's FixedUpdate, and use Time.fixedDeltaTime.
+        /// Will run in Unity's FixedUpdate.
         /// </summary>
         FixedUpdate,
         /// <summary>
-        /// Will run in Unity's FixedUpdate, and use Time.fixedUnscaledDeltaTime.
-        /// </summary>
-        UnscaledFixedUpdate,
-        /// <summary>
-        /// Will run in Unity's LateUpdate, and use Time.deltaTime.
+        /// Will run in Unity's LateUpdate.
         /// </summary>
         LateUpdate,
-        /// <summary>
-        /// Will run in Unity's Update, and use Time.unscaledDeltaTime.
-        /// </summary>
-        UnscaledTimeUpdate,
-        /// <summary>
-        /// Will run in Unity's LateUpdate, and use Time.unscaledDeltaTime.
-        /// </summary>
-        UnscaledTimeLateUpdate,
     }
 }

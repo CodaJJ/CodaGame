@@ -1,10 +1,14 @@
-﻿
+﻿// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
+
 namespace UnityGameFramework.Base
 {
     /// <summary>
-    /// Inherit this class, override abstract function so that you can do what you want.
+    /// A base class for all tasks.
     /// </summary>
-    public abstract class _ATask
+    public abstract class _ABaseTask
     {
         // Task name
         private readonly string _m_name;
@@ -14,10 +18,7 @@ namespace UnityGameFramework.Base
         private bool _m_isRunning;
         
         
-        /// <summary>
-        /// Construct this task, choose which type you want.
-        /// </summary>
-        protected _ATask(string _name, ETaskRunType _runType)
+        internal _ABaseTask(string _name, ETaskRunType _runType)
         {
             _m_name = _name;
             _m_runType = _runType;
@@ -30,8 +31,11 @@ namespace UnityGameFramework.Base
         /// </summary>
         public bool isRunning { get { return _m_isRunning; } }
         /// <summary>
-        /// The name of this task, usually displayed for debug.
+        /// The name of this task.
         /// </summary>
+        /// <remarks>
+        /// Usually displayed for debug.
+        /// </remarks>
         public string name { get { return _m_name; } }
         
 
@@ -51,28 +55,20 @@ namespace UnityGameFramework.Base
             switch (_m_runType)
             {
                 case ETaskRunType.Update:
-                    TaskManager.instance.AddUpdateTask(this);
-                    break;
-                case ETaskRunType.LateUpdate:
-                    TaskManager.instance.AddLateUpdateTask(this);
+                    AddToUpdateTaskSystem();
                     break;
                 case ETaskRunType.FixedUpdate:
-                    TaskManager.instance.AddFixedUpdateTask(this);
+                    AddToFixedUpdateTaskSystem();
                     break;
-                case ETaskRunType.UnscaledFixedUpdate:
-                    TaskManager.instance.AddUnscaledFixedUpdateTask(this);
-                    break;
-                case ETaskRunType.UnscaledTimeUpdate:
-                    TaskManager.instance.AddUnscaledTimeUpdateTask(this);
-                    break;
-                case ETaskRunType.UnscaledTimeLateUpdate:
-                    TaskManager.instance.AddUnscaledTimeLateUpdateTask(this);
+                case ETaskRunType.LateUpdate:
+                    AddToLateUpdateTaskSystem();
                     break;
                 default:
                     Console.LogError(SystemNames.TaskSystem, $"-- {_m_name} -- : Unsupported task run type {_m_runType}.");
                     break;
             }
 
+            OnInternalRun();
             OnRun();
         }
         /// <summary>
@@ -86,43 +82,52 @@ namespace UnityGameFramework.Base
                 return;
             }
 
+            _m_isRunning = false;
+
             OnStop();
+            OnInternalStop();
 
             switch (_m_runType)
             {
                 case ETaskRunType.Update:
-                    TaskManager.instance.RemoveUpdateTask(this);
-                    break;
-                case ETaskRunType.LateUpdate:
-                    TaskManager.instance.RemoveLateUpdateTask(this);
+                    RemoveFromUpdateTaskSystem();
                     break;
                 case ETaskRunType.FixedUpdate:
-                    TaskManager.instance.RemoveFixedUpdateTask(this);
+                    RemoveFromFixedUpdateTaskSystem();
                     break;
-                case ETaskRunType.UnscaledFixedUpdate:
-                    TaskManager.instance.RemoveUnscaledFixedUpdateTask(this);
-                    break;
-                case ETaskRunType.UnscaledTimeUpdate:
-                    TaskManager.instance.RemoveUnscaledTimeUpdateTask(this);
-                    break;
-                case ETaskRunType.UnscaledTimeLateUpdate:
-                    TaskManager.instance.RemoveUnscaledTimeLateUpdateTask(this);
+                case ETaskRunType.LateUpdate:
+                    RemoveFromLateUpdateTaskSystem();
                     break;
                 default:
                     Console.LogError(SystemNames.TaskSystem, $"-- {_m_name} -- : Unsupported task run type {_m_runType}.");
                     break;
             }
+        }
+        /// <summary>
+        /// Stop this task by system.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Called by task system, some tasks like delay tasks will be stopped by system,
+        /// at the same time, the system will removed them and invoke this stop function.
+        /// So, there aren't any remove process in this function.
+        /// </para>
+        /// </remarks>
+        internal void StopBySystem()
+        {
+            if (!_m_isRunning)
+            {
+                Console.LogWarning(SystemNames.TaskSystem, $"-- {_m_name} -- : The task hasn't started running yet, you are trying to stop it.");
+                return;
+            }
 
             _m_isRunning = false;
+
+            OnStop();
+            OnInternalStop();
         }
 
 
-        /// <summary>
-        /// Deal your task tick.
-        /// </summary>
-        public abstract void Deal(float _deltaTime);
-        
-        
         /// <summary>
         /// Do something on task run.
         /// </summary>
@@ -131,5 +136,16 @@ namespace UnityGameFramework.Base
         /// Do something on task stop.
         /// </summary>
         protected abstract void OnStop();
+
+        
+        private protected abstract void AddToUpdateTaskSystem();
+        private protected abstract void AddToFixedUpdateTaskSystem();
+        private protected abstract void AddToLateUpdateTaskSystem();
+        private protected abstract void RemoveFromUpdateTaskSystem();
+        private protected abstract void RemoveFromFixedUpdateTaskSystem();
+        private protected abstract void RemoveFromLateUpdateTaskSystem();
+
+        private protected abstract void OnInternalRun();
+        private protected abstract void OnInternalStop();
     }
 }

@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using UnityGameFramework.Base;
 
@@ -8,10 +12,10 @@ namespace UnityGameFramework
     /// </summary>
     public readonly struct TaskHandle
     {
-        private readonly _ATask _m_task;
+        private readonly _ABaseTask _m_task;
 
 
-        internal TaskHandle(_ATask _task)
+        internal TaskHandle(_ABaseTask _task)
         {
             _m_task = _task;
         }

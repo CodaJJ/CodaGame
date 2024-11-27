@@ -18,7 +18,8 @@ namespace UnityGameFramework
         private static uint _g_actionTaskSerialize = 0;
         private static uint _g_continuousTaskSerialize = 0;
         private static uint _g_delayActionTaskSerialize = 0;
-        private static uint _g_fixedIntervalContinuousTaskSerialize = 0;
+        private static uint _g_timeIntervalContinuousTaskSerialize = 0;
+        private static uint _g_frameIntervalContinuousTaskSerialize = 0;
         private static uint _g_frameDelayActionTaskSerialize = 0;
         private static uint _g_nextFrameActionTaskSerialize = 0;
         
@@ -76,9 +77,13 @@ namespace UnityGameFramework
         {
             return _g_delayActionTaskSerialize++;
         }
-        internal static uint NextFixedIntervalContinuousTask()
+        internal static uint NextTimeIntervalContinuousTask()
         {
-            return _g_fixedIntervalContinuousTaskSerialize++;
+            return _g_timeIntervalContinuousTaskSerialize++;
+        }
+        internal static uint NextFrameIntervalContinuousTask()
+        {
+            return _g_frameIntervalContinuousTaskSerialize++;
         }
         internal static uint NextFrameDelayActionTask()
         {

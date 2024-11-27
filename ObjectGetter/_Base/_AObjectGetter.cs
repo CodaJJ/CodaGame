@@ -136,7 +136,7 @@ namespace UnityGameFramework.Base
                 return false;
             }
             
-            _object = objectList.GetAndRemoveLast();
+            _object = objectList.GetLastAndRemove();
             if (objectList.Count == 0)
                 _m_keyToCacheList.Remove(_key);
             
@@ -273,7 +273,7 @@ namespace UnityGameFramework.Base
                 return false;
             }
             
-            _object = _m_cacheList.GetAndRemoveLast();
+            _object = _m_cacheList.GetLastAndRemove();
             Console.LogVerbose(SystemNames.ObjectGetter, $"The object({_object}) is retrieved from the {_m_name}'s cache list, now the cache list has {_m_cacheList.Count} objects.");
             return true;
         }

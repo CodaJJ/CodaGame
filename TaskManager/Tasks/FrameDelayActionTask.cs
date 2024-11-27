@@ -1,13 +1,21 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using System;
-using UnityGameFramework.Base.Tasks;
+using UnityGameFramework.Base;
 
 namespace UnityGameFramework.Tasks
 {
     /// <summary>
     /// A task that you can run a delegate later.
     /// </summary>
-    public class FrameDelayActionTask : _AFrameDelayTemplateTask
+    /// <remarks>
+    /// <para>If the delay frame count is zero or negative, it is exactly the same as <see cref="ActionTask"/>.</para>
+    /// <para>If the delay frame count is one, it is exactly the same as <see cref="NextFrameActionTask"/>.</para>
+    /// </remarks>
+    public class FrameDelayActionTask : _AFrameDelayTask
     {
         private readonly Action _m_delegate;
         
@@ -23,14 +31,14 @@ namespace UnityGameFramework.Tasks
         }
         
 
-        protected override void TemplateTaskDeal()
+        protected override void OnDeal()
         {
             _m_delegate?.Invoke();
         }
-        protected override void OnTemplateTaskRun()
+        protected override void OnRun()
         {
         }
-        protected override void OnTemplateTaskStop()
+        protected override void OnStop()
         {
         }
     }
