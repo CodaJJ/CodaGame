@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
-using UnityGameFramework.Base;
+using CodaGame.Base;
 
-namespace UnityGameFramework.Tasks
+namespace CodaGame.Tasks
 {
     /// <summary>
     /// A task that you can continuously run a delegate.

@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace UnityGameFramework
+namespace CodaGame
 {
     public static class DotNetExtension
     {

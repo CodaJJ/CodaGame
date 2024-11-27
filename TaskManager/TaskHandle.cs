@@ -3,9 +3,9 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-using UnityGameFramework.Base;
+using CodaGame.Base;
 
-namespace UnityGameFramework
+namespace CodaGame
 {
     /// <summary>
     /// The handle for a specify task that can be stopped.

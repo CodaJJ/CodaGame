@@ -7,7 +7,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// A MonoBehaviour for running tasks.

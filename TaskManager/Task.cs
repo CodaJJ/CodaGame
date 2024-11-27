@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
-using UnityGameFramework.Tasks;
+using CodaGame.Tasks;
 
-namespace UnityGameFramework
+namespace CodaGame
 {
     /// <summary>
     /// All sorts of tasks you can find here.

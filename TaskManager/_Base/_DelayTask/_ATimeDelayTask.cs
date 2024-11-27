@@ -5,7 +5,7 @@
 
 using System;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// A base class for the time delay tasks.

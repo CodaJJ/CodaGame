@@ -3,7 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-namespace UnityGameFramework
+namespace CodaGame
 {
     /// <summary>
     /// Task running type.

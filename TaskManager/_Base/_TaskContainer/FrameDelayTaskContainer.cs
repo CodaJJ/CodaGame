@@ -6,7 +6,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// A frame delay task container.

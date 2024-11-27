@@ -3,7 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// Base class of a continuous task with time interval.

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     internal abstract class _ATimeDelayTaskContainer : _ATaskContainer<_ATimeDelayTask>
     {

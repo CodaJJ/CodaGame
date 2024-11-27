@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using System;
 using System.Diagnostics;
@@ -7,7 +11,7 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-namespace UnityGameFramework
+namespace CodaGame
 {
     /// <summary>
     /// A simple console for logging messages.

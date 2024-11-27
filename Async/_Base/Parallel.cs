@@ -1,7 +1,11 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using System;
 
-namespace UnityGameFramework.Base.AsyncOperations
+namespace CodaGame.Base.AsyncOperations
 {
     /// <summary>
     /// A parallel operation that can run multiple functions at the same time.

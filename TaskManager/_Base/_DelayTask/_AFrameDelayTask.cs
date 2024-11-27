@@ -5,7 +5,7 @@
 
 using System;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// Base class for frame delay task.

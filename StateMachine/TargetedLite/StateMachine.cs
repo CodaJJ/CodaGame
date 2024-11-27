@@ -1,7 +1,11 @@
+// Copyright (c) 2024 Coda
+// 
+// This file is part of CodaGame, licensed under the MIT License.
+// See the LICENSE file in the project root for license information.
 
 using System;
 
-namespace UnityGameFramework.StateMachine.TargetedLite
+namespace CodaGame.StateMachine.TargetedLite
 {
     /// <summary>
     /// A state machine lite with a target that can change state.

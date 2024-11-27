@@ -5,7 +5,7 @@
 
 using JetBrains.Annotations;
 
-namespace UnityGameFramework.Base
+namespace CodaGame.Base
 {
     /// <summary>
     /// A task container.
