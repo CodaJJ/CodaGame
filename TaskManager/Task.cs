@@ -17,11 +17,14 @@ namespace CodaGame
         /// Run a action task.
         /// </summary>
         /// <remarks>
-        /// <para>You can use this task to run a delegate on the main thread, specially Unity's function which is only runnable on the main thread.</para>
+        /// <para>
+        /// You can use this task to run a delegate on the main thread,
+        /// specially Unity's function which is only runnable on the main thread.
+        /// </para>
         /// </remarks>
         /// <param name="_delegate">The delegate you want to run</param>
         /// <param name="_runType">When will the task run</param>
-        public static void RunActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
+        public static void RunActionTask(Action _delegate, UpdateType _runType = UpdateType.Update)
         {
             new ActionTask(_delegate, _runType).Run();
         }
@@ -33,7 +36,7 @@ namespace CodaGame
         /// <param name="_runType">Where does the task run on.</param>
         /// <param name="_useUnscaledTime">Use unscaled time or not.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunDelayActionTask(Action _delegate, float _delayTime, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public static TaskHandle RunDelayActionTask(Action _delegate, float _delayTime, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
         {
             DelayActionTask task = new DelayActionTask(_delegate, _delayTime, _runType, _useUnscaledTime);
             task.Run();
@@ -47,7 +50,7 @@ namespace CodaGame
         /// <param name="_runType">Where does the task run on.</param>
         /// <param name="_useUnscaledTime">Use unscaled time or not.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunContinuousActionTask(Action<float> _delegate, float _duration = -1, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public static TaskHandle RunContinuousActionTask(Action<float> _delegate, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
         {
             ContinuousActionTask task = new ContinuousActionTask(_delegate, _duration, _runType, _useUnscaledTime);
             task.Run();
@@ -64,7 +67,7 @@ namespace CodaGame
         /// <param name="_runType">Where does the task run on.</param>
         /// <param name="_useUnscaledTime">Use unscaled time or not.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunTimeIntervalContinuousActionTask(Action<float> _delegate, float _timeInterval, bool _dealOnceImmediately = true, float _duration = -1, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public static TaskHandle RunTimeIntervalContinuousActionTask(Action<float> _delegate, float _timeInterval, bool _dealOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
         {
             TimeIntervalContinuousActionTask task = new TimeIntervalContinuousActionTask(_delegate, _timeInterval, _dealOnceImmediately, _duration, _runType, _useUnscaledTime);
             task.Run();
@@ -80,7 +83,7 @@ namespace CodaGame
         /// <param name="_runType">Where does the task run on.</param>
         /// <param name="_useUnscaledTime">Use unscaled time or not.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunFrameIntervalContinuousActionTask(Action<float> _delegate, int _frameInterval, bool _dealOnceImmediately = true, float _duration = -1, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public static TaskHandle RunFrameIntervalContinuousActionTask(Action<float> _delegate, int _frameInterval, bool _dealOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
         {
             FrameIntervalContinuousActionTask task = new FrameIntervalContinuousActionTask(_delegate, _frameInterval, _dealOnceImmediately, _duration, _runType, _useUnscaledTime);
             task.Run();
@@ -93,7 +96,7 @@ namespace CodaGame
         /// <param name="_frameCountDelay">The delay frame count before running.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunFrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update)
+        public static TaskHandle RunFrameDelayActionTask(Action _delegate, int _frameCountDelay, UpdateType _runType = UpdateType.Update)
         {
             FrameDelayActionTask task = new FrameDelayActionTask(_delegate, _frameCountDelay, _runType);
             task.Run();
@@ -105,7 +108,7 @@ namespace CodaGame
         /// <param name="_delegate">The delegate you want to run.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <returns>The handle of this task.</returns>
-        public static TaskHandle RunNextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
+        public static TaskHandle RunNextFrameActionTask(Action _delegate, UpdateType _runType = UpdateType.Update)
         {
             NextFrameActionTask task = new NextFrameActionTask(_delegate, _runType);
             task.Run();

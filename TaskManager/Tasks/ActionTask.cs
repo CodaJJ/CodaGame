@@ -19,12 +19,12 @@ namespace CodaGame.Tasks
         private readonly Action _m_delegate;
         
         
-        public ActionTask(string _name, Action _delegate, ETaskRunType _runType = ETaskRunType.Update) 
+        public ActionTask(string _name, Action _delegate, UpdateType _runType = UpdateType.Update) 
             : base(_name, 0, _runType)
         {
             _m_delegate = _delegate;
         }
-        public ActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
+        public ActionTask(Action _delegate, UpdateType _runType = UpdateType.Update)
             : this($"ActionTask_{Serialize.NextActionTask()}", _delegate, _runType)
         {
         }

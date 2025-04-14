@@ -28,7 +28,7 @@ namespace CodaGame.Base
         /// <remarks>
         /// <para>If the "_delayTime" is 0 or negative, the task will deal right after next frame.</para>
         /// </remarks>
-        protected _ATimeDelayTask(string _name, float _delayTime, ETaskRunType _runType, bool _useUnscaledTime)
+        protected _ATimeDelayTask(string _name, float _delayTime, UpdateType _runType, bool _useUnscaledTime)
             : base(_name, _runType)
         {
             _m_delayTime = _delayTime;

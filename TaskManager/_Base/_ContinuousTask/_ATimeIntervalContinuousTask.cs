@@ -27,7 +27,7 @@ namespace CodaGame.Base
         /// <para>Makes sure the time interval is greater than 0, otherwise it will throw an exception.</para>
         /// <para>The "_dealImmediately" parameter is used to determine whether the task should deal once immediately.</para>
         /// </remarks>
-        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _dealOnceImmediately, ETaskRunType _runType, bool _useUnscaledTime) 
+        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _dealOnceImmediately, UpdateType _runType, bool _useUnscaledTime) 
             : base(_name, _runType, _useUnscaledTime)
         {
             _m_timeInterval = _timeInterval;

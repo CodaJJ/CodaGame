@@ -10,7 +10,7 @@ namespace CodaGame.Base
     /// </summary>
     public abstract class _AEveryFrameContinuousTask : _AContinuousTask
     {
-        protected _AEveryFrameContinuousTask(string _name, ETaskRunType _runType, bool _useUnscaledTime) 
+        protected _AEveryFrameContinuousTask(string _name, UpdateType _runType, bool _useUnscaledTime) 
             : base(_name, _runType, _useUnscaledTime)
         {
         }

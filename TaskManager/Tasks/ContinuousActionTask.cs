@@ -21,14 +21,14 @@ namespace CodaGame.Tasks
         private readonly DelayActionTask _m_durationTask;
 
 
-        public ContinuousActionTask(string _name, Action<float> _delegate, float _duration = -1, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false) 
+        public ContinuousActionTask(string _name, Action<float> _delegate, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false) 
             : base(_name, _runType, _useUnscaledTime)
         {
             _m_delegate = _delegate;
             if (_duration > 0)
                 _m_durationTask = new DelayActionTask(Stop, _duration, _runType, _useUnscaledTime);
         }
-        public ContinuousActionTask(Action<float> _delegate, float _duration = -1, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public ContinuousActionTask(Action<float> _delegate, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
             : this($"ContinuousActionTask_{Serialize.NextContinuousTask()}", _delegate, _duration, _runType, _useUnscaledTime)
         {
         }

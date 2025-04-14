@@ -19,12 +19,12 @@ namespace CodaGame.Tasks
         private readonly Action _m_delegate;
         
         
-        public DelayActionTask(string _name, Action _delegate, float _delayTime, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false) 
+        public DelayActionTask(string _name, Action _delegate, float _delayTime, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false) 
             : base(_name, _delayTime, _runType, _useUnscaledTime)
         {
             _m_delegate = _delegate;
         }
-        public DelayActionTask(Action _delegate, float _delayTime, ETaskRunType _runType = ETaskRunType.Update, bool _useUnscaledTime = false)
+        public DelayActionTask(Action _delegate, float _delayTime, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
             : this($"DelayActionTask_{Serialize.NextDelayActionTask()}", _delegate, _delayTime, _runType, _useUnscaledTime)
         {
         }

@@ -20,12 +20,12 @@ namespace CodaGame.Tasks
         private readonly Action _m_delegate;
         
         
-        public FrameDelayActionTask(string _name, Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update) 
+        public FrameDelayActionTask(string _name, Action _delegate, int _frameCountDelay, UpdateType _runType = UpdateType.Update) 
             : base(_name, _frameCountDelay, _runType)
         {
             _m_delegate = _delegate;
         }
-        public FrameDelayActionTask(Action _delegate, int _frameCountDelay, ETaskRunType _runType = ETaskRunType.Update)
+        public FrameDelayActionTask(Action _delegate, int _frameCountDelay, UpdateType _runType = UpdateType.Update)
             : this($"FrameDelayActionTask_{Serialize.NextFrameDelayActionTask()}", _delegate, _frameCountDelay, _runType)
         {
         }

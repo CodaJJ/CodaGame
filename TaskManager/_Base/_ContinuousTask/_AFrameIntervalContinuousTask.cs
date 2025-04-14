@@ -31,7 +31,7 @@ namespace CodaGame.Base
         /// <para>If the "_frameInternal" is 0 or negative, the task will deal every frame.</para>
         /// <para>The "_dealImmediately" parameter is used to determine whether the task should deal once immediately.</para>
         /// </remarks>
-        protected _AFrameIntervalContinuousTask(string _name, int _frameInterval, bool _dealOnceImmediately, ETaskRunType _runType, bool _useUnscaledTime) 
+        protected _AFrameIntervalContinuousTask(string _name, int _frameInterval, bool _dealOnceImmediately, UpdateType _runType, bool _useUnscaledTime) 
             : base(_name, _runType, _useUnscaledTime)
         {
             _m_frameInterval = _frameInterval;

@@ -16,12 +16,12 @@ namespace CodaGame.Tasks
         private readonly Action _m_delegate;
         
         
-        public NextFrameActionTask(string _name, Action _delegate, ETaskRunType _runType = ETaskRunType.Update) 
+        public NextFrameActionTask(string _name, Action _delegate, UpdateType _runType = UpdateType.Update) 
             : base(_name, 1, _runType)
         {
             _m_delegate = _delegate;
         }
-        public NextFrameActionTask(Action _delegate, ETaskRunType _runType = ETaskRunType.Update)
+        public NextFrameActionTask(Action _delegate, UpdateType _runType = UpdateType.Update)
             : this($"NextFrameActionTask_{Serialize.NextNextFrameActionTask()}", _delegate, _runType)
         {
         }

@@ -13,12 +13,12 @@ namespace CodaGame.Base
         // Task name
         private readonly string _m_name;
         // Running type
-        private readonly ETaskRunType _m_runType;
+        private readonly UpdateType _m_runType;
         // Is task running?
         private bool _m_isRunning;
         
         
-        internal _ABaseTask(string _name, ETaskRunType _runType)
+        internal _ABaseTask(string _name, UpdateType _runType)
         {
             _m_name = _name;
             _m_runType = _runType;
@@ -54,13 +54,13 @@ namespace CodaGame.Base
 
             switch (_m_runType)
             {
-                case ETaskRunType.Update:
+                case UpdateType.Update:
                     AddToUpdateTaskSystem();
                     break;
-                case ETaskRunType.FixedUpdate:
+                case UpdateType.FixedUpdate:
                     AddToFixedUpdateTaskSystem();
                     break;
-                case ETaskRunType.LateUpdate:
+                case UpdateType.LateUpdate:
                     AddToLateUpdateTaskSystem();
                     break;
                 default:
@@ -89,13 +89,13 @@ namespace CodaGame.Base
 
             switch (_m_runType)
             {
-                case ETaskRunType.Update:
+                case UpdateType.Update:
                     RemoveFromUpdateTaskSystem();
                     break;
-                case ETaskRunType.FixedUpdate:
+                case UpdateType.FixedUpdate:
                     RemoveFromFixedUpdateTaskSystem();
                     break;
-                case ETaskRunType.LateUpdate:
+                case UpdateType.LateUpdate:
                     RemoveFromLateUpdateTaskSystem();
                     break;
                 default:

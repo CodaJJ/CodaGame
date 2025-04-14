@@ -13,7 +13,7 @@ namespace CodaGame.Base
         private readonly bool _m_useUnscaledTime;
         
         
-        internal _AContinuousTask(string _name, ETaskRunType _runType, bool _useUnscaledTime) 
+        internal _AContinuousTask(string _name, UpdateType _runType, bool _useUnscaledTime) 
             : base(_name, _runType)
         {
             _m_useUnscaledTime = _useUnscaledTime;

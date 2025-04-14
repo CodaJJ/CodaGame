@@ -26,7 +26,7 @@ namespace CodaGame.Base
         /// <remarks>
         /// <para>If the "_delayFrame" is 0 or negative, the task will deal right after next frame.</para>
         /// </remarks>
-        protected _AFrameDelayTask(string _name, int _delayFrame, ETaskRunType _runType) 
+        protected _AFrameDelayTask(string _name, int _delayFrame, UpdateType _runType) 
             : base(_name, _runType)
         {
             _m_delayFrame = _delayFrame;
