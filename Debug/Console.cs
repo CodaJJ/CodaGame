@@ -33,66 +33,113 @@ namespace CodaGame
         /// </summary>
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <param name="_contextObj">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
         [HideInCallstack, Conditional("UNITY_EDITOR")]
-        public static void LogVerbose(string _system, string _message, Object _context = null)
+        public static void LogVerbose(string _system, string _message, Object _contextObj = null)
         {
-            instance.Log(ELogType.Verbose, _system, _message, _context);
+            instance.Log(ELogType.Verbose, _system, string.Empty, _message, _contextObj);
+        }
+        /// <summary>
+        /// Log a verbose message.
+        /// </summary>
+        /// <param name="_system">The system that logs this message.</param>
+        /// <param name="_contextName">A custom name that relates to this message.</param>
+        /// <param name="_message">The message you want to log.</param>
+        /// <param name="_contextObj">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        [HideInCallstack, Conditional("UNITY_EDITOR")]
+        public static void LogVerbose(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.Verbose, _system, _contextName, _message, _contextObj);
         }
         /// <summary>
         /// Log a debug message.
         /// </summary>
-        /// <param name="_system">The system that logs this message.</param>
-        /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
         [HideInCallstack, Conditional("UNITY_EDITOR")]
-        public static void LogDebug(string _system, string _message, Object _context = null)
+        public static void LogDebug(string _system, string _message, Object _contextObj = null)
         {
-            instance.Log(ELogType.Debug, _system, _message, _context);
+            instance.Log(ELogType.Debug, _system, string.Empty, _message, _contextObj);
+        }
+        /// <summary>
+        /// Log a debug message.
+        /// </summary>
+        /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
+        [HideInCallstack, Conditional("UNITY_EDITOR")]
+        public static void LogDebug(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.Debug, _system, _contextName, _message, _contextObj);
         }
         /// <summary>
         /// Log a system message.
         /// </summary>
-        /// <param name="_system">The system that logs this message.</param>
-        /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
         [HideInCallstack]
-        public static void LogSystem(string _system, string _message, Object _context = null)
+        public static void LogSystem(string _system, string _message, Object _contextObj = null)
         {
-            instance.Log(ELogType.System, _system, _message, _context);
+            instance.Log(ELogType.System, _system, string.Empty, _message, _contextObj);
+        }
+        /// <summary>
+        /// Log a system message.
+        /// </summary>
+        /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
+        [HideInCallstack]
+        public static void LogSystem(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.System, _system, _contextName, _message, _contextObj);
         }
         /// <summary>
         /// Log a warning message.
         /// </summary>
-        /// <param name="_system">The system that logs this message.</param>
-        /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
         [HideInCallstack]
-        public static void LogWarning(string _system, string _message, Object _context = null)
+        public static void LogWarning(string _system, string _message, Object _contextObj = null)
         {
-            instance.Log(ELogType.Warning, _system, _message, _context);
+            instance.Log(ELogType.Warning, _system, string.Empty, _message, _contextObj);
+        }
+        /// <summary>
+        /// Log a warning message.
+        /// </summary>
+        /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
+        [HideInCallstack]
+        public static void LogWarning(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.Warning, _system, _contextName, _message, _contextObj);
         }
         /// <summary>
         /// Log a error message.
         /// </summary>
-        /// <param name="_system">The system that logs this message.</param>
-        /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
         [HideInCallstack]
-        public static void LogError(string _system, string _message, Object _context = null)
+        public static void LogError(string _system, string _message, Object _contextObj = null)
         {
-            instance.Log(ELogType.Error, _system, _message, _context);
+            instance.Log(ELogType.Error, _system, string.Empty, _message, _contextObj);
+        }
+        /// <summary>
+        /// Log a error message.
+        /// </summary>
+        /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
+        [HideInCallstack]
+        public static void LogError(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.Error, _system, _contextName, _message, _contextObj);
         }
         /// <summary>
         /// Log a crush message.
         /// </summary>
-        /// <param name="_system">The system that logs this message.</param>
-        /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
         [HideInCallstack]
         public static void LogCrush(string _system, string _message, Object _context = null)
         {
-            instance.Log(ELogType.Crush, _system, _message, _context);
+            instance.Log(ELogType.Crush, _system, string.Empty, _message, _context);
+        }
+        /// <summary>
+        /// Log a crush message.
+        /// </summary>
+        /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
+        [HideInCallstack]
+        public static void LogCrush(string _system, string _contextName, string _message, Object _contextObj = null)
+        {
+            instance.Log(ELogType.Crush, _system, _contextName, _message, _contextObj);
         }
         
 
@@ -101,13 +148,16 @@ namespace CodaGame
         /// </summary>
         /// <param name="_logType">The type of this log.</param>
         /// <param name="_system">The system that logs this message.</param>
+        /// <param name="_contextName">A custom name that relates to this message.</param>
         /// <param name="_message">The message you want to log.</param>
         /// <returns>A string includes log type, message, system, and if in Editor it'll also show the caller's name.</returns>
         [HideInCallstack]
-        private static string MakeLogString(ELogType _logType, string _system, string _message)
+        private static string MakeLogString(ELogType _logType, string _system, string _contextName, string _message)
         {
 #if UNITY_EDITOR
-            string logString = $"<color=orange>[{_system} {_logType}]</color> {_message}";
+            string logString = string.IsNullOrEmpty(_contextName) ? 
+                $"<color=orange>[{_system} {_logType}]</color> : {_message}" : 
+                $"<color=orange>[{_system} {_logType}]</color> -- {_contextName} -- : {_message}";
             MethodBase callerMethod = new StackTrace().GetFrame(3)?.GetMethod();
             if (callerMethod != null)
             {
@@ -121,8 +171,10 @@ namespace CodaGame
                 logString += $"\n <color=cyan>--- by {className}.{methodName}</color>";
             }
             return logString;
-#else 
-            return $"[{_system} {_logType}] {_message}";
+#else
+            return string.IsNullOrEmpty(_contextName) ? 
+                $"[{_system} {_logType}] : {_message}" : 
+                $"[{_system} {_logType}] -- {_contextName} -- : {_message}";
 #endif
         }
 
@@ -169,27 +221,28 @@ namespace CodaGame
         /// <param name="_logType">The type of this log.</param>
         /// <param name="_system">The system that logs this message.</param>
         /// <param name="_message">The message you want to log.</param>
-        /// <param name="_context">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
+        /// <param name="_contextName">A custom name that relates to this message.</param>
+        /// <param name="_contextObj">A object reference that relates to this message. Clicking on this message will highlight the object.</param>
         [HideInCallstack]
-        private void Log(ELogType _logType, string _system, string _message, Object _context = null)
+        private void Log(ELogType _logType, string _system, string _contextName, string _message, Object _contextObj = null)
         {
             if ((int)_logType < (int)_m_logLevel) 
                 return;
             
-            string logString = MakeLogString(_logType, _system, _message);
+            string logString = MakeLogString(_logType, _system, _contextName, _message);
             switch (_logType)
             {
                 case ELogType.Crush:
-                    Debug.LogError(logString, _context);
+                    Debug.LogError(logString, _contextObj);
                     throw new Exception("fatal error: \n" + logString);
                 case ELogType.Error:
-                    Debug.LogError(logString, _context);
+                    Debug.LogError(logString, _contextObj);
                     break;
                 case ELogType.Warning:
-                    Debug.LogWarning(logString, _context);
+                    Debug.LogWarning(logString, _contextObj);
                     break;
                 default:
-                    Debug.Log(logString, _context);
+                    Debug.Log(logString, _contextObj);
                     break;
             }
         }

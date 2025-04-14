@@ -57,7 +57,7 @@ namespace CodaGame.StateMachine.TargetedLite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
+                Console.LogWarning(SystemNames.StateMachine, name, "You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -70,7 +70,7 @@ namespace CodaGame.StateMachine.TargetedLite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
+                Console.LogWarning(SystemNames.StateMachine, name, "You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -83,7 +83,7 @@ namespace CodaGame.StateMachine.TargetedLite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
+                Console.LogWarning(SystemNames.StateMachine, name, "You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -96,7 +96,7 @@ namespace CodaGame.StateMachine.TargetedLite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
+                Console.LogWarning(SystemNames.StateMachine, name, "You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -109,7 +109,7 @@ namespace CodaGame.StateMachine.TargetedLite
         {
             if (_m_stateMachine == null)
             {
-                Console.LogWarning(SystemNames.StateMachine, $"-- {name} -- : You are trying to change state in a disabled state.");
+                Console.LogWarning(SystemNames.StateMachine, name, "You are trying to change state in a disabled state.");
                 return;
             }
             
@@ -132,7 +132,7 @@ namespace CodaGame.StateMachine.TargetedLite
             _m_enterSerialize = Serialize.Next();
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_m_stateMachine.name} -- state-{name} -- : exits.");
+            Console.LogVerbose(SystemNames.StateMachine, _m_stateMachine.name, $"state-{name} -- : exits.");
             
             _m_target = default;
             _m_stateMachine = null;
@@ -162,7 +162,7 @@ namespace CodaGame.StateMachine.TargetedLite
             UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters.");
+            Console.LogVerbose(SystemNames.StateMachine, _stateMachine.name, $"state-{name} -- : enters.");
 
             OnEnter();
         }
@@ -186,7 +186,7 @@ namespace CodaGame.StateMachine.TargetedLite
             UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameter {_param}.");
+            Console.LogVerbose(SystemNames.StateMachine, _stateMachine.name, $"state-{name} -- : enters with parameter {_param}.");
 
             OnEnter(_param);
         }
@@ -210,7 +210,7 @@ namespace CodaGame.StateMachine.TargetedLite
             UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}.");
+            Console.LogVerbose(SystemNames.StateMachine, _stateMachine.name, $"state-{name} -- : enters with parameters {_param1}, {_param2}.");
 
             OnEnter(_param1, _param2);
         }
@@ -234,7 +234,7 @@ namespace CodaGame.StateMachine.TargetedLite
             UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}.");
+            Console.LogVerbose(SystemNames.StateMachine, _stateMachine.name, $"state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}.");
 
             OnEnter(_param1, _param2, _param3);
         }
@@ -258,7 +258,7 @@ namespace CodaGame.StateMachine.TargetedLite
             UpdateRuntimeData(_target, _stateMachine);
             
             // Output log.
-            Console.LogVerbose(SystemNames.StateMachine, $"-- {_stateMachine.name} -- state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}, {_param4}.");
+            Console.LogVerbose(SystemNames.StateMachine, _stateMachine.name, $"state-{name} -- : enters with parameters {_param1}, {_param2}, {_param3}, {_param4}.");
 
             OnEnter(_param1, _param2, _param3, _param4);
         }

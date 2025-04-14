@@ -41,24 +41,24 @@ namespace CodaGame
         {
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the key is null");
                 return default;
             }
             
             if (TryGetFromCache(_key, out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the cache");
                 return obj;
             }
             
             obj = LoadObject(_key);
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, $"key-{_key} -- : Failed to get the object from the loader.");
                 return obj;
             }
                 
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the loader");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the loader");
             return obj;
         }
         /// <summary>
@@ -74,17 +74,17 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the key is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Release the object");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Release the object");
             PushBackToCache(_key, _obj);
         }
         
@@ -127,18 +127,18 @@ namespace CodaGame
         {
             if (TryGetFromCache(out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the cache");
                 return obj;
             }
 
             obj = LoadObject();
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object from the loader.");
                 return default;
             }
                 
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the loader");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the loader");
             return obj;
         }
         /// <summary>
@@ -151,11 +151,11 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Release the object");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, "Release the object");
             PushBackToCache(_obj);
         }
         

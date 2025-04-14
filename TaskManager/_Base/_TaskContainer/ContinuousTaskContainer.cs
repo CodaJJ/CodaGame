@@ -37,7 +37,7 @@ namespace CodaGame.Base
             int index = _m_readyForDealTasks.IndexOf(_task);
             if (index < 0)
             {
-                Console.LogWarning(SystemNames.TaskSystem, $"-- {_task.name} -- : The task is not in the task container.");
+                Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
                 return;
             }
             

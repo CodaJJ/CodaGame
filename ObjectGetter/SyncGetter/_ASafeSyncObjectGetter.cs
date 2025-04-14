@@ -48,26 +48,26 @@ namespace CodaGame
         {
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the key is null");
                 return default;
             }
             
             if (TryGetFromCache(_key, out T_OBJECT obj))
             {
                 _m_handleToKey.Add(obj, _key);
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the cache, now the using count is {_m_handleToKey.Count}");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the cache, now the using count is {_m_handleToKey.Count}");
                 return obj;
             }
             
             obj = LoadObject(_key);
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, $"key-{_key} -- : Failed to get the object from the loader.");
                 return default;
             }
             
             _m_handleToKey.Add(obj, _key);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the loader, now the using count is {_m_handleToKey.Count}");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the loader, now the using count is {_m_handleToKey.Count}");
             return obj;
         }
         /// <summary>
@@ -80,18 +80,18 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
             if (!_m_handleToKey.TryGetValue(_obj, out T_KEY key))
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is not managed by the getter.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is not managed by the getter.");
                 return;
             }
             
             _m_handleToKey.Remove(_obj);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{key} -- : Release the object, now the using count is {_m_handleToKey.Count}");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{key} -- : Release the object, now the using count is {_m_handleToKey.Count}");
             PushBackToCache(key, _obj);
         }
         /// <summary>
@@ -102,13 +102,13 @@ namespace CodaGame
             _key = default;
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the key because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the key because the object is null");
                 return false;
             }
             
             if (!_m_handleToKey.TryGetValue(_obj, out _key))
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the key because the object is not managed by the getter.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the key because the object is not managed by the getter.");
                 return false;
             }
 
@@ -160,19 +160,19 @@ namespace CodaGame
             if (TryGetFromCache(out T_OBJECT obj))
             {
                 _m_objects.Add(obj);
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the cache, now the using count is {_m_objects.Count}");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"Get the object from the cache, now the using count is {_m_objects.Count}");
                 return obj;
             }
 
             obj = LoadObject();
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object from the loader.");
                 return default;
             }
 
             _m_objects.Add(obj);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the loader, now the using count is {_m_objects.Count}");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"Get the object from the loader, now the using count is {_m_objects.Count}");
             return obj;
         }
         /// <summary>
@@ -185,18 +185,18 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
             if (!_m_objects.Contains(_obj))
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is not managed by the getter.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is not managed by the getter.");
                 return;
             }
             
             _m_objects.Remove(_obj);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Release the object, now the using count is {_m_objects.Count}");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"Release the object, now the using count is {_m_objects.Count}");
             PushBackToCache(_obj);
         }
         

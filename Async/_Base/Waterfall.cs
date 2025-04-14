@@ -52,12 +52,12 @@ namespace CodaGame.Base
         {
             if (_function == null)
             {
-                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to run a null function.");
+                Console.LogWarning(SystemNames.Async, _m_name, "Trying to run a null function.");
                 return;
             }
 
             _m_functionQueue.Enqueue(_function);
-            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Enqueue a new function, now the function count is {_m_functionQueue.Count}.");
+            Console.LogVerbose(SystemNames.Async, _m_name, $"Enqueue a new function, now the function count is {_m_functionQueue.Count}.");
             
 
             TryToRunTheNextFunction();
@@ -73,7 +73,7 @@ namespace CodaGame.Base
         {
             if (_function == null)
             {
-                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to run a null function.");
+                Console.LogWarning(SystemNames.Async, _m_name, "Trying to run a null function.");
                 return;
             }
             
@@ -95,11 +95,11 @@ namespace CodaGame.Base
                 
             _m_isRunning = true;
             
-            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Starts a function, now the function count is {_m_functionQueue.Count}.");
+            Console.LogVerbose(SystemNames.Async, _m_name, $"Starts a function, now the function count is {_m_functionQueue.Count}.");
             AsyncFunction function = _m_functionQueue.Dequeue();
             function?.Invoke(() =>
             {
-                Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Finishes a function, now the function count is {_m_functionQueue.Count}.");
+                Console.LogVerbose(SystemNames.Async, _m_name, $"Finishes a function, now the function count is {_m_functionQueue.Count}.");
                 _m_isRunning = false;
                 
                 TryToRunTheNextFunction();       

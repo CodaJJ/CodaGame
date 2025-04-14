@@ -46,19 +46,19 @@ namespace CodaGame
         {
             if (_complete == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object because the complete action is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the complete action is null");
                 return;
             }
 
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the key is null");
                 return;
             }
             
             if (TryGetFromCache(_key, out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the cache");
                 _complete.Invoke(obj);
                 return;
             }
@@ -67,12 +67,12 @@ namespace CodaGame
             {
                 if (_obj == null)
                 {
-                    Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Failed to get the object from the loader.");
+                    Console.LogWarning(SystemNames.ObjectGetter, name, $"key-{_key} -- : Failed to get the object from the loader.");
                     _complete.Invoke(default);
                     return;
                 }
                 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get the object from the loader");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the loader");
                 _complete.Invoke(_obj);
             });
         }
@@ -89,17 +89,17 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object in because the key is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object in because the key is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Release the object");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Release the object");
             PushBackToCache(_key, _obj);
         }
         
@@ -147,13 +147,13 @@ namespace CodaGame
         {
             if (_complete == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object because the complete action is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the complete action is null");
                 return;
             }
             
             if (TryGetFromCache(out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the cache");
                 _complete.Invoke(obj);
                 return;
             }
@@ -162,12 +162,12 @@ namespace CodaGame
             {
                 if (_obj == null)
                 {
-                    Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to get the object from the loader.");
+                    Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object from the loader.");
                     _complete.Invoke(default);
                     return;
                 }
                 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get the object from the loader");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the loader");
                 _complete.Invoke(_obj);
             });
         }
@@ -181,11 +181,11 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Release the object");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, "Release the object");
             PushBackToCache(_obj);
         }
         

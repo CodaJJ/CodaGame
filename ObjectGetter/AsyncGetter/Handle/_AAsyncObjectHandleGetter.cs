@@ -47,7 +47,7 @@ namespace CodaGame
         {
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The key is null, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The key is null, it's meaningless to call this function.");
                 return null;
             }
             
@@ -56,24 +56,24 @@ namespace CodaGame
             
             if (TryGetFromCache(_key, out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : Get a handle, the object got from the cache, now the handle count is {_m_handleCount}.");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get a handle, the object got from the cache, now the handle count is {_m_handleCount}.");
                 
                 handle.SetObject(obj);
                 handle.SetLoadDone();
                 return handle;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : The cache is empty, through loading process to get a handle, now the handle count is {_m_handleCount}.");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : The cache is empty, through loading process to get a handle, now the handle count is {_m_handleCount}.");
             LoadObject(_key, _newObj =>
             {
                 if (!handle.enable)
                 {
-                    Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : The handle is disabled before the object is loaded, push the loaded object to the cache, now the handle count is {_m_handleCount}.");
+                    Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : The handle is disabled before the object is loaded, push the loaded object to the cache, now the handle count is {_m_handleCount}.");
                     PushBackToCache(_key, _newObj);
                     return;
                 }
                 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_key} -- : The object is loaded, set the object to the handle.");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : The object is loaded, set the object to the handle.");
                 handle.SetObject(_newObj);
                 handle.SetLoadDone();
             });
@@ -90,31 +90,31 @@ namespace CodaGame
         {
             if (_handle == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is null, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is null, it's meaningless to call this function.");
                 return;
             }
             
             if (_handle.CheckOwner(this))
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is not owned by this getter, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is not owned by this getter, it's meaningless to call this function.");
                 return;
             }
 
             if (!_handle.enable)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is released, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is released, it's meaningless to call this function.");
                 return;
             }
 
             if (_handle.obj != null)
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_handle.key} -- : The handle has a loaded obj when releasing, push the object back to the cache, now the handle count is {_m_handleCount}.");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_handle.key} -- : The handle has a loaded obj when releasing, push the object back to the cache, now the handle count is {_m_handleCount}.");
                 PushBackToCache(_handle.key, _handle.obj);
                 _handle.SetObject(default);
             }
             _handle.SetDisable();
             _m_handleCount--;
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- key-{_handle.key} -- : The handle is released, now the handle count is {_m_handleCount}.");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_handle.key} -- : The handle is released, now the handle count is {_m_handleCount}.");
             if (!_handle.isLoaded)
                 _handle.SetLoadDone();
         }
@@ -173,7 +173,7 @@ namespace CodaGame
                 handle.SetObject(obj);
                 handle.SetLoadDone();
                 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : Get a handle with the object got from the cache, now the handle count is {_m_handleCount}.");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, $"Get a handle with the object got from the cache, now the handle count is {_m_handleCount}.");
                 return handle;
             }
             
@@ -181,17 +181,17 @@ namespace CodaGame
             {
                 if (!handle.enable)
                 {
-                    Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : The handle is disabled before the object is loaded, push the loaded object to the cache, now the handle count is {_m_handleCount}.");
+                    Console.LogVerbose(SystemNames.ObjectGetter, name, $"The handle is disabled before the object is loaded, push the loaded object to the cache, now the handle count is {_m_handleCount}.");
                     PushBackToCache(_newObj);
                     return;
                 }
                 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : The object is loaded, set the object to the handle.");
+                Console.LogVerbose(SystemNames.ObjectGetter, name, "The object is loaded, set the object to the handle.");
                 handle.SetObject(_newObj);
                 handle.SetLoadDone();
             });
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : The cache is empty, get a handle with the object loading, now the handle count is {_m_handleCount}.");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"The cache is empty, get a handle with the object loading, now the handle count is {_m_handleCount}.");
             return handle;
         }
         /// <summary>
@@ -204,19 +204,19 @@ namespace CodaGame
         {
             if (_handle == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is null, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is null, it's meaningless to call this function.");
                 return;
             }
             
             if (_handle.CheckOwner(this))
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is not owned by this getter, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is not owned by this getter, it's meaningless to call this function.");
                 return;
             }
 
             if (!_handle.enable)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"-- {name} -- : The handle is released, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectGetter, name, "The handle is released, it's meaningless to call this function.");
                 return;
             }
             
@@ -224,7 +224,7 @@ namespace CodaGame
                 PushBackToCache(_handle.obj);
             _handle.SetDisable();
             _m_handleCount--;
-            Console.LogVerbose(SystemNames.ObjectGetter, $"-- {name} -- : The handle is released, now the handle count is {_m_handleCount}.");
+            Console.LogVerbose(SystemNames.ObjectGetter, name, $"The handle is released, now the handle count is {_m_handleCount}.");
             if (!_handle.isLoaded)
                 _handle.SetLoadDone();
         }

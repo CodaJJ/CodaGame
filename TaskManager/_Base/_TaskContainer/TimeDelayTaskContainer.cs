@@ -48,7 +48,7 @@ namespace CodaGame.Base
             }
 
             if (!_m_delayTasks.RemoveSorted(_task))
-                Console.LogWarning(SystemNames.TaskSystem, $"-- {_task.name} -- : The task is not in the task container.");
+                Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
         }
         /// <inheritdoc />
         internal override bool DealTasks()

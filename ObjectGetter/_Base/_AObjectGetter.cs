@@ -54,13 +54,13 @@ namespace CodaGame.Base
         {
             if (_predicate == null)
             {
-                Console.LogSystem(SystemNames.ObjectGetter, $"The {_m_name}'s caches that have not been used will be deleted");
+                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that have not been used will be deleted.");
                 foreach (List<T_OBJECT> cacheList in _m_keyToCacheList.Values)
                 {
                     foreach (T_OBJECT obj in cacheList)
                     {
                         DestroyObject(obj);
-                        Console.LogVerbose(SystemNames.ObjectGetter, $"The object({obj}) is destroyed in the cache list of {_m_name}.");
+                        Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
                     }
                 }
                 
@@ -68,7 +68,7 @@ namespace CodaGame.Base
             }
             else
             {
-                Console.LogSystem(SystemNames.ObjectGetter, $"The {_m_name}'s caches that meet the condition will be deleted");
+                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that meet the condition will be deleted.");
                 
                 List<T_KEY> keysEmpty = new List<T_KEY>();
                 foreach (KeyValuePair<T_KEY, List<T_OBJECT>> keyValuePair in _m_keyToCacheList)
@@ -81,11 +81,11 @@ namespace CodaGame.Base
                         {
                             cacheList.RemoveAt(i);
                             DestroyObject(obj);
-                            Console.LogVerbose(SystemNames.ObjectGetter, $"The object({obj}) is destroyed in the cache list of {_m_name}.");
+                            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
                         }
                     }
 
-                    Console.LogVerbose(SystemNames.ObjectGetter, $"Now the key({keyValuePair.Key})'s cache list has {cacheList.Count} objects.");
+                    Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"Now the key({keyValuePair.Key})'s cache list has {cacheList.Count} objects.");
                     if (cacheList.Count == 0)
                         keysEmpty.Add(keyValuePair.Key);
                 }
@@ -124,19 +124,19 @@ namespace CodaGame.Base
 
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"The key is null, when trying to get object from {_m_name}'s cache.");
+                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The key is null, when trying to get object from cache.");
                 return false;
             }
 
             if (!_m_keyToCacheList.TryGetValue(_key, out List<T_OBJECT> objectList))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"The key({_key}) is not found in the {_m_name}'s cache list.");
+                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The key({_key}) is not found in the cache list.");
                 return false;
             }
 
             if (objectList.Count == 0)
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"The key({_key})'s cache list is empty in {_m_name}");
+                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The key({_key})'s cache list is empty.");
                 return false;
             }
             
@@ -144,7 +144,7 @@ namespace CodaGame.Base
             if (objectList.Count == 0)
                 _m_keyToCacheList.Remove(_key);
             
-            Console.LogVerbose(SystemNames.ObjectGetter, $"The object({_object}) is retrieved from the {_m_name}'s cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is retrieved from the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
             return true;
         }
         /// <summary>
@@ -154,14 +154,14 @@ namespace CodaGame.Base
         {
             if (_object == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"The object is null, when trying to push back to {_m_name}'s cache.");
+                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The object is null, when trying to push back to cache.");
                 return;
             }
 
             if (_key == null)
             {
                 DestroyObject(_object);
-                Console.LogWarning(SystemNames.ObjectGetter, $"The key is null, when trying to push back to {_m_name}'s cache, so the object({_object}) is destroyed.");
+                Console.LogWarning(SystemNames.ObjectGetter, _m_name, $"The key is null, when trying to push back to cache, so the object({_object}) is destroyed.");
                 return;
             }
 
@@ -173,7 +173,7 @@ namespace CodaGame.Base
             }
             
             objectList.Add(_object);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"The object({_object}) is pushed back to the {_m_name}'s cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is pushed back to the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
         }
     }
     /// <summary>
@@ -217,18 +217,18 @@ namespace CodaGame.Base
         {
             if (_predicate == null)
             {
-                Console.LogSystem(SystemNames.ObjectGetter, $"The {_m_name}'s caches that have not been used will be deleted");
+                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that have not been used will be deleted");
                 foreach (T_OBJECT obj in _m_cacheList)
                 {
                     DestroyObject(obj);
-                    Console.LogVerbose(SystemNames.ObjectGetter, $"The object({obj}) is destroyed in the cache list of {_m_name}.");
+                    Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
                 }
 
                 _m_cacheList.Clear();
             }
             else
             {
-                Console.LogSystem(SystemNames.ObjectGetter, $"The {_m_name}'s caches that meet the condition will be deleted");
+                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that meet the condition will be deleted");
                 for (int i = _m_cacheList.Count - 1; i >= 0; i--)
                 {
                     T_OBJECT obj = _m_cacheList[i];
@@ -236,11 +236,11 @@ namespace CodaGame.Base
                     {
                         _m_cacheList.RemoveAt(i);
                         DestroyObject(obj);
-                        Console.LogVerbose(SystemNames.ObjectGetter, $"The object({obj}) is destroyed in the cache list of {_m_name}.");
+                        Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
                     }
                 }
 
-                Console.LogVerbose(SystemNames.ObjectGetter, $"Now The ({_m_name})'s cache list has {_m_cacheList.Count} objects.");
+                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"Now The cache list has {_m_cacheList.Count} objects.");
             }
         }
 
@@ -273,12 +273,12 @@ namespace CodaGame.Base
 
             if (_m_cacheList.Count == 0)
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, $"The cache list is empty in {_m_name}");
+                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, "The cache list is empty.");
                 return false;
             }
             
             _object = _m_cacheList.GetLastAndRemove();
-            Console.LogVerbose(SystemNames.ObjectGetter, $"The object({_object}) is retrieved from the {_m_name}'s cache list, now the cache list has {_m_cacheList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is retrieved from the cache list, now the cache list has {_m_cacheList.Count} objects.");
             return true;
         }
         /// <summary>
@@ -288,13 +288,13 @@ namespace CodaGame.Base
         {
             if (_object == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, $"The object is null, when trying to push back to {_m_name}'s cache.");
+                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The object is null, when trying to push back to cache.");
                 return;
             }
             
             ResetObject(_object);
             _m_cacheList.Add(_object);
-            Console.LogVerbose(SystemNames.ObjectGetter, $"The object({_object}) is pushed back to the {_m_name}'s cache list, now the cache list has {_m_cacheList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is pushed back to the cache list, now the cache list has {_m_cacheList.Count} objects.");
         }
     }
 }

@@ -46,12 +46,12 @@ namespace CodaGame.Base
         {
             if (_function == null)
             {
-                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to run a null function.");
+                Console.LogWarning(SystemNames.Async, _m_name, "Trying to run a null function.");
                 return;
             }
 
             _m_functionCount++;
-            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Starts a new function, now the function count is {_m_functionCount}.");
+            Console.LogVerbose(SystemNames.Async, _m_name, $"Starts a new function, now the function count is {_m_functionCount}.");
             
             _function.Invoke(FunctionComplete);
         }
@@ -67,11 +67,11 @@ namespace CodaGame.Base
         {
             if (_completeCallback == null)
             {
-                Console.LogWarning(SystemNames.Async, $"-- {_m_name} -- : Trying to add a null complete callback.");
+                Console.LogWarning(SystemNames.Async, _m_name, "Trying to add a null complete callback.");
                 return;
             }
 
-            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Adds a complete callback.");
+            Console.LogVerbose(SystemNames.Async, _m_name, "Adds a complete callback.");
             
             if (_m_functionCount == 0)
                 _completeCallback.Invoke();
@@ -93,7 +93,7 @@ namespace CodaGame.Base
                 _m_completeCallback = null;
             }
                 
-            Console.LogVerbose(SystemNames.Async, $"-- {_m_name} -- : Finishes a function, now the function count is {_m_functionCount}.");
+            Console.LogVerbose(SystemNames.Async, _m_name, $"Finishes a function, now the function count is {_m_functionCount}.");
             callback?.Invoke();
         }
     }
