@@ -5,7 +5,7 @@
 
 using System;
 
-namespace CodaGame.Base.AsyncOperations
+namespace CodaGame.Base
 {
     /// <summary>
     /// A parallel operation that can run multiple functions at the same time.

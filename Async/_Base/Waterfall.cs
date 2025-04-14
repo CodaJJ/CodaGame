@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace CodaGame.Base.AsyncOperations
+namespace CodaGame.Base
 {
     /// <summary>
     /// A waterfall operation that you can run a list of functions in order.

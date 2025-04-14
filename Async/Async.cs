@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-using CodaGame.Base.AsyncOperations;
+using CodaGame.Base;
 
 namespace CodaGame
 {

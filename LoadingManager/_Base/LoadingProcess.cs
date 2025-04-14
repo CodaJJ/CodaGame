@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using CodaGame.Base.AsyncOperations;
 using CodaGame.StateMachine.TargetedLite;
 using JetBrains.Annotations;
 
@@ -86,7 +85,7 @@ namespace CodaGame.Base
         /// </remarks>
         public void ForceToHide()
         {
-            Console.LogVerbose(SystemNames.Loading, $"{_m_name} is forced to hide.");
+            Console.LogVerbose(SystemNames.Loading, _m_name, "Forced to hide.");
             
             _m_forceHide = true;
             _m_stateMachine.Update();
