@@ -56,7 +56,7 @@ namespace CodaGame.Base
 
         internal override void Deal(float _deltaTime)
         {
-            while (_m_intervalTimeCounter > _m_timeInterval)
+            while (_m_intervalTimeCounter >= _m_timeInterval)
             {
                 OnDeal();
 
@@ -69,7 +69,7 @@ namespace CodaGame.Base
 
         private protected override void OnInternalRun()
         {
-            _m_intervalTimeCounter = _m_dealOnceImmediately ? _m_timeInterval + Values.HighPrecisionTolerance : 0;
+            _m_intervalTimeCounter = _m_dealOnceImmediately ? _m_timeInterval : 0;
             if (_m_timeInterval <= 0)
                 Console.LogCrush(SystemNames.TaskSystem, name, "Time interval must be greater than 0.");
         }
