@@ -26,6 +26,7 @@ namespace CodaGame
         private static uint _g_frameIntervalContinuousTaskSerialize = 0;
         private static uint _g_frameDelayActionTaskSerialize = 0;
         private static uint _g_nextFrameActionTaskSerialize = 0;
+        private static uint _g_nextLimitedValueRecoverTaskSerialize = 0;
         
         
         /// <summary>
@@ -96,6 +97,10 @@ namespace CodaGame
         internal static uint NextNextFrameActionTask()
         {
             return _g_nextFrameActionTaskSerialize++;
+        }
+        internal static uint NextNextLimitedValueRecoverTask()
+        {
+            return _g_nextLimitedValueRecoverTaskSerialize++;
         }
     }
 }

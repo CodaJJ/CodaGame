@@ -3,6 +3,9 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
+using JetBrains.Annotations;
+
 namespace CodaGame.Base
 {
     /// <summary>
@@ -21,7 +24,7 @@ namespace CodaGame.Base
         private readonly T_RANGE _m_valueRange;
         private readonly float _m_softBorderSize;
         // The task that will recover the value to the range when it's out of the range.
-        private readonly TaskHandle _m_recoverTask;
+        private readonly RecoverTask<T_VALUE, T_RANGE> _m_recoverTask;
         // The value will recover to the range after this delay, if it's out of the range and no more changes.
         private readonly int _m_recoverDelay;
         
@@ -55,20 +58,19 @@ namespace CodaGame.Base
         /// <param name="_runType">Determine where the recover task will run.</param>
         /// <param name="_recoverDelay">How many frames the value will recover to the range after it's out of the range and no more changes.</param>
         protected _ALimitedValue(T_VALUE _value, T_RANGE _valueRange, float _softBorderSize, UpdateType _runType = UpdateType.Update, int _recoverDelay = 1)
+            : this(_value, _valueRange)
         {
-            _m_valueRange = _valueRange;
             _m_softBorderSize = _softBorderSize;
             if (_m_recoverDelay >= 0 && _m_softBorderSize > 0)
             {
-                _m_recoverTask = Task.RunContinuousActionTask(_RecoverValue, -1, _runType);
+                _m_recoverTask = new RecoverTask<T_VALUE, T_RANGE>(new WeakReference<_ALimitedValue<T_VALUE, T_RANGE>>(this), _runType, false);
+                _m_recoverTask.Run();
                 _m_recoverDelay = _recoverDelay;
             }
-            
-            value = _value;
         }
         ~_ALimitedValue()
         {
-            _m_recoverTask.StopTask();
+            _m_recoverTask?.Stop();
         }
 
 
@@ -193,8 +195,40 @@ namespace CodaGame.Base
             
             if (_m_valueRange == null)
                 return;
-
+            
             _m_value = SmoothDamp(_m_value, _m_valueRange.ClampValue(_m_value), ref _m_smoothDampVelocity, 0.1f);
+        }
+
+
+        private class RecoverTask<T_VALUE, T_RANGE> : _AEveryFrameContinuousTask
+            where T_VALUE : struct
+            where T_RANGE : _IValueRange<T_VALUE>
+        {
+            // The reference to the limited value.
+            // Use WeakReference to let the limited value be garbage collected when it's not used.
+            [NotNull] private readonly WeakReference<_ALimitedValue<T_VALUE, T_RANGE>> _m_reference;
+            
+            
+            public RecoverTask([NotNull] WeakReference<_ALimitedValue<T_VALUE, T_RANGE>> _reference, UpdateType _runType, bool _useUnscaledTime) 
+                : base($"LimitedValueRecoverTask_{Serialize.NextNextLimitedValueRecoverTask()}", _runType, _useUnscaledTime)
+            {
+                _m_reference = _reference;
+            }
+            
+
+            protected override void OnRun()
+            {
+            }
+            protected override void OnStop()
+            {
+            }
+            protected override void OnDeal(float _deltaTime)
+            {
+                if (!_m_reference.TryGetTarget(out _ALimitedValue<T_VALUE, T_RANGE> limitedValue))
+                    return;
+                
+                limitedValue._RecoverValue(_deltaTime);
+            }
         }
     }
 }
