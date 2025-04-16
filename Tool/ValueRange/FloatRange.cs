@@ -19,6 +19,13 @@ namespace CodaGame
         public float max;
         
         
+        public FloatRange(float _min, float _max)
+        {
+            min = _min;
+            max = _max;
+        }
+        
+        
         public bool IsInRange(float _value)
         {
             return _value >= min && _value <= max;

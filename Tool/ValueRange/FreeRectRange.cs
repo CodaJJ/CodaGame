@@ -17,6 +17,16 @@ namespace CodaGame
         public FreeRect freeRect;
         
         
+        public FreeRectRange(Vector2 _center, Vector2 _size, float _radian)
+        {
+            freeRect = new FreeRect(_center, _size, _radian);
+        }
+        public FreeRectRange(Rect _rect, float _radian)
+        {
+            freeRect = new FreeRect(_rect, _radian);
+        }
+        
+        
         public bool IsInRange(Vector2 _value)
         {
             return freeRect.Contains(_value);

@@ -17,6 +17,16 @@ namespace CodaGame
         public LineSeg2D lineSeg2D;
         
         
+        public LineSeg2DRange(Vector2 _start, Vector2 _end)
+        {
+            lineSeg2D = new LineSeg2D(_start, _end);
+        }
+        public LineSeg2DRange(LineSeg2D _lineSeg2D)
+        {
+            lineSeg2D = _lineSeg2D;
+        }
+        
+        
         public bool IsInRange(Vector2 _value)
         {
             return lineSeg2D.Contains(_value);

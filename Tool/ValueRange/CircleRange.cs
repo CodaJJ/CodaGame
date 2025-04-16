@@ -17,6 +17,16 @@ namespace CodaGame
         public Circle circle;
         
         
+        public CircleRange(Vector2 _center, float _radius)
+        {
+            circle = new Circle(_center, _radius);
+        }
+        public CircleRange(Circle _circle)
+        {
+            circle = _circle;
+        }
+        
+        
         public bool IsInRange(Vector2 _value)
         {
             return circle.Contains(_value);

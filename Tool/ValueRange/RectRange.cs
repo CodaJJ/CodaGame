@@ -17,6 +17,16 @@ namespace CodaGame
         public Rect rect;
         
         
+        public RectRange(Vector2 _position, Vector2 _size)
+        {
+            rect = new Rect(_position, _size);
+        }
+        public RectRange(Rect _rect)
+        {
+            rect = _rect;
+        }
+        
+        
         public bool IsInRange(Vector2 _value)
         {
             return rect.Contains(_value);

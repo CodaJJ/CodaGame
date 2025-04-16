@@ -17,6 +17,16 @@ namespace CodaGame
         public Bounds bounds;
         
         
+        public BoundsRange(Vector3 _center, Vector3 _size)
+        {
+            bounds = new Bounds(_center, _size);
+        }
+        public BoundsRange(Bounds _bounds)
+        {
+            bounds = _bounds;
+        }
+        
+        
         public bool IsInRange(Vector3 _value)
         {
             return bounds.Contains(_value);

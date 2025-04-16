@@ -17,6 +17,16 @@ namespace CodaGame
         public Sphere sphere;
         
         
+        public SphereRange(Vector3 _center, float _radius)
+        {
+            sphere = new Sphere(_center, _radius);
+        }
+        public SphereRange(Sphere _sphere)
+        {
+            sphere = _sphere;
+        }
+        
+        
         public bool IsInRange(Vector3 _value)
         {
             return sphere.Contains(_value);
