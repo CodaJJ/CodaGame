@@ -39,10 +39,6 @@ namespace CodaGame
             : this(_rect.center, _rect.size, _radian)
         {
         }
-        public FreeRect(FreeRect _rect)
-            : this(_rect.center, _rect.size, _rect.rotation)
-        {
-        }
         
         
         public Vector2 size { get { return halfSize * 2f; } set { halfSize = value * 0.5f; } }
@@ -64,12 +60,6 @@ namespace CodaGame
             center = _rect.center;
             halfSize = _rect.size * 0.5f;
             rotation = _radian;
-        }
-        public void Set(FreeRect _rect)
-        {
-            center = _rect.center;
-            halfSize = _rect.halfSize;
-            rotation = _rect.rotation;
         }
         /// <summary>
         /// Returns the closest point on the rectangle to the given point.

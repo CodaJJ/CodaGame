@@ -17,7 +17,7 @@ namespace CodaGame.Base
         /// <summary>
         /// The singleton of TaskManager.
         /// </summary>
-        [NotNull] internal static TaskManager instance
+        [NotNull] public static TaskManager instance
         {
             get
             {
@@ -69,7 +69,7 @@ namespace CodaGame.Base
         [NotNull] private readonly UnscaledTimeDelayTaskContainer _m_unscaledTimeLateUpdateTimeDelayTaskContainer;
 
 
-        internal TaskManager()
+        private TaskManager()
         {
             _m_updateContinuousTaskContainer = new DeltaTimeContinuousTaskContainer();
             _m_unscaledTimeUpdateContinuousTaskContainer = new UnscaledDeltaTimeContinuousTaskContainer();
@@ -91,7 +91,7 @@ namespace CodaGame.Base
         }
 
 
-        internal void AddUpdateContinuousTask(_AContinuousTask _task)
+        public void AddUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -110,7 +110,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateContinuousTaskContainer);
             }
         }
-        internal void AddUnscaledTimeUpdateContinuousTask(_AContinuousTask _task)
+        public void AddUnscaledTimeUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -129,7 +129,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeUpdateContinuousTaskContainer);
             }
         }
-        internal void AddFixedUpdateContinuousTask(_AContinuousTask _task)
+        public void AddFixedUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -148,7 +148,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateContinuousTaskContainer);
             }
         }
-        internal void AddUnscaledTimeFixedUpdateContinuousTask(_AContinuousTask _task)
+        public void AddUnscaledTimeFixedUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -167,7 +167,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeFixedUpdateContinuousTaskContainer);
             }
         }
-        internal void AddLateUpdateContinuousTask(_AContinuousTask _task)
+        public void AddLateUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -186,7 +186,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_lateUpdateContinuousTaskContainer);
             }
         }
-        internal void AddUnscaledTimeLateUpdateContinuousTask(_AContinuousTask _task)
+        public void AddUnscaledTimeLateUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -205,7 +205,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeLateUpdateContinuousTaskContainer);
             }
         }
-        internal void RemoveUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -224,7 +224,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateContinuousTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveUnscaledTimeUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -243,7 +243,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeUpdateContinuousTaskContainer);
             }
         }
-        internal void RemoveFixedUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveFixedUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -262,7 +262,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateContinuousTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeFixedUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveUnscaledTimeFixedUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -281,7 +281,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeFixedUpdateContinuousTaskContainer);
             }
         }
-        internal void RemoveLateUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveLateUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -300,7 +300,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_lateUpdateContinuousTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeLateUpdateContinuousTask(_AContinuousTask _task)
+        public void RemoveUnscaledTimeLateUpdateContinuousTask(_AContinuousTask _task)
         {
             if (_task == null)
             {
@@ -320,7 +320,7 @@ namespace CodaGame.Base
             }
         }
         
-        internal void AddUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void AddUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -339,7 +339,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateFrameDelayTaskContainer);
             }
         }
-        internal void AddFixedUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void AddFixedUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -358,7 +358,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateFrameDelayTaskContainer);
             }
         }
-        internal void AddLateUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void AddLateUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -377,7 +377,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_lateUpdateFrameDelayTaskContainer);
             }
         }
-        internal void RemoveUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void RemoveUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -396,7 +396,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateFrameDelayTaskContainer);
             }
         }
-        internal void RemoveFixedUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void RemoveFixedUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -415,7 +415,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateFrameDelayTaskContainer);
             }
         }
-        internal void RemoveLateUpdateFrameDelayTask(_AFrameDelayTask _task)
+        public void RemoveLateUpdateFrameDelayTask(_AFrameDelayTask _task)
         {
             if (_task == null)
             {
@@ -435,7 +435,7 @@ namespace CodaGame.Base
             }
         }
         
-        internal void AddUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -454,7 +454,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateTimeDelayTaskContainer);
             }
         }
-        internal void AddUnscaledTimeUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddUnscaledTimeUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -473,7 +473,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeUpdateTimeDelayTaskContainer);
             }
         }
-        internal void AddFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -492,7 +492,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateTimeDelayTaskContainer);
             }
         }
-        internal void AddUnscaledTimeFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddUnscaledTimeFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -511,7 +511,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeFixedUpdateTimeDelayTaskContainer);
             }
         }
-        internal void AddLateUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddLateUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -530,7 +530,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_lateUpdateTimeDelayTaskContainer);
             }
         }
-        internal void AddUnscaledTimeLateUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void AddUnscaledTimeLateUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -549,7 +549,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeLateUpdateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -568,7 +568,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_updateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveUnscaledTimeUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -587,7 +587,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeUpdateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -606,7 +606,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_fixedUpdateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveUnscaledTimeFixedUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -625,7 +625,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_unscaledTimeFixedUpdateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveLateUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveLateUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {
@@ -644,7 +644,7 @@ namespace CodaGame.Base
                 Monitor.Exit(_m_lateUpdateTimeDelayTaskContainer);
             }
         }
-        internal void RemoveUnscaledTimeLateUpdateTimeDelayTask(_ATimeDelayTask _task)
+        public void RemoveUnscaledTimeLateUpdateTimeDelayTask(_ATimeDelayTask _task)
         {
             if (_task == null)
             {

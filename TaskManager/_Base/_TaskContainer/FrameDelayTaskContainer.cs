@@ -22,14 +22,14 @@ namespace CodaGame.Base
         private int _m_nextDealIndex;
         
         
-        internal FrameDelayTaskContainer()
+        public FrameDelayTaskContainer()
         {
             _m_readyForDealTasks = new List<_AFrameDelayTask>();
             _m_delayTasks = new List<_AFrameDelayTask>();
         }
         
         
-        internal override void AddTask(_AFrameDelayTask _task)
+        public override void AddTask(_AFrameDelayTask _task)
         {
             if (_task.DelayFrame <= 0)
             {                
@@ -41,7 +41,7 @@ namespace CodaGame.Base
             _task.SetDealFrame(_m_frame + _task.DelayFrame);
             _m_delayTasks.InsertSorted(_task);
         }
-        internal override void RemoveTask(_AFrameDelayTask _task)
+        public override void RemoveTask(_AFrameDelayTask _task)
         {
             int index = _m_readyForDealTasks.IndexOf(_task);
             if (index >= 0)
@@ -56,7 +56,7 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
         }
         /// <inheritdoc />
-        internal override bool DealTasks()
+        public override bool DealTasks()
         {
             if (_m_readyForDealTasks.Count == 0)
                 return false;
@@ -74,7 +74,7 @@ namespace CodaGame.Base
             return true;
         }
         /// <inheritdoc />
-        internal override void NextFrame()
+        public override void NextFrame()
         {
             _m_frame++;
 

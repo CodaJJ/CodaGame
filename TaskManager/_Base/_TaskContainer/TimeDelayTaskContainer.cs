@@ -16,14 +16,14 @@ namespace CodaGame.Base
         private int _m_nextDealIndex;
         
         
-        internal _ATimeDelayTaskContainer()
+        protected _ATimeDelayTaskContainer()
         {
             _m_readyForDealTasks = new List<_ATimeDelayTask>();
             _m_delayTasks = new List<_ATimeDelayTask>();
         }
         
         
-        internal override void AddTask(_ATimeDelayTask _task)
+        public override void AddTask(_ATimeDelayTask _task)
         {
             float nowTime = GetNowTime();
             if (_task.DelayTime <= 0)
@@ -36,7 +36,7 @@ namespace CodaGame.Base
             _task.SetDealTime(nowTime + _task.DelayTime);
             _m_delayTasks.InsertSorted(_task);
         }
-        internal override void RemoveTask(_ATimeDelayTask _task)
+        public override void RemoveTask(_ATimeDelayTask _task)
         {
             int index = _m_readyForDealTasks.IndexOf(_task);
             if (index >= 0)
@@ -51,7 +51,7 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
         }
         /// <inheritdoc />
-        internal override bool DealTasks()
+        public override bool DealTasks()
         {
             if (_m_readyForDealTasks.Count == 0)
                 return false;
@@ -69,7 +69,7 @@ namespace CodaGame.Base
             return true;
         }
         /// <inheritdoc />
-        internal override void NextFrame()
+        public override void NextFrame()
         {
             float nowTime = GetNowTime();
 

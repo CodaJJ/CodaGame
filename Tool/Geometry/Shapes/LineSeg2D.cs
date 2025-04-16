@@ -29,10 +29,6 @@ namespace CodaGame
             start = _start;
             end = _end;
         }
-        public LineSeg2D(LineSeg2D _lineSeg)
-            : this(_lineSeg.start, _lineSeg.end)
-        {
-        }
         
         
         public float length { get { return Vector2.Distance(start, end); } }
@@ -45,11 +41,6 @@ namespace CodaGame
         {
             start = _start;
             end = _end;
-        }
-        public void Set(LineSeg2D _lineSeg)
-        {
-            start = _lineSeg.start;
-            end = _lineSeg.end;
         }
         /// <summary>
         /// Returns the closest point on the line to the given point.

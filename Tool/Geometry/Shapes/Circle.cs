@@ -29,10 +29,6 @@ namespace CodaGame
             center = _center;
             radius = _radius;
         }
-        public Circle(Circle _circle)
-            : this(_circle.center, _circle.radius)
-        {
-        }
         
         
         public float area { get { return Values.Pi * radius * radius; } }
@@ -43,11 +39,6 @@ namespace CodaGame
         {
             center = _center;
             radius = _radius;
-        }
-        public void Set(Circle _circle)
-        {
-            center = _circle.center;
-            radius = _circle.radius;
         }
         /// <summary>
         /// Returns the closest point on the circle to the given point.

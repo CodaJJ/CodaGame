@@ -43,10 +43,6 @@ namespace CodaGame
             : this(_bounds.center, _bounds.size, _rotation)
         {
         }
-        public Cuboid(Cuboid _cuboid)
-            : this(_cuboid.center, _cuboid.size, _cuboid.rotation)
-        {
-        }
         
         
         public Vector3 size { get { return halfSize * 2f; } set { halfSize = value * 0.5f; } }
@@ -71,12 +67,6 @@ namespace CodaGame
         public void Set(Bounds _bounds, Quaternion _rotation)
         {
             Set(_bounds.center, _bounds.size, _rotation);
-        }
-        public void Set(Cuboid _cuboid)
-        {
-            center = _cuboid.center;
-            halfSize = _cuboid.halfSize;
-            rotation = _cuboid.rotation;
         }
         /// <summary>
         /// Returns the closest point on the cuboid to the given point.

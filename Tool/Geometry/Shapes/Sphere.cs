@@ -29,10 +29,6 @@ namespace CodaGame
             center = _center;
             radius = _radius;
         }
-        public Sphere(Sphere _sphere)
-            : this(_sphere.center, _sphere.radius)
-        {
-        }
         
         
         public float volume { get { return 4f / 3f * Values.Pi * radius * radius * radius; } }
@@ -42,11 +38,6 @@ namespace CodaGame
         {
             center = _center;
             radius = _radius;
-        }
-        public void Set(Sphere _circle)
-        {
-            center = _circle.center;
-            radius = _circle.radius;
         }
         /// <summary>
         /// Returns the closest point on the sphere to the given point.

@@ -16,8 +16,8 @@ namespace CodaGame.Base
     internal abstract class _ATaskContainer<T_TASK> 
         where T_TASK : _ABaseTask
     {
-        internal abstract void AddTask([NotNull] T_TASK _task);
-        internal abstract void RemoveTask([NotNull] T_TASK _task);
+        public abstract void AddTask([NotNull] T_TASK _task);
+        public abstract void RemoveTask([NotNull] T_TASK _task);
         /// <summary>
         /// Deal tasks.
         /// </summary>
@@ -25,13 +25,13 @@ namespace CodaGame.Base
         /// <para>Deal the tasks which need to be dealt in this frame.</para>
         /// <para>Return true if there are tasks to deal, otherwise return false.</para>
         /// </remarks>
-        internal abstract bool DealTasks();
+        public abstract bool DealTasks();
         /// <summary>
         /// Move to the next frame.
         /// </summary>
         /// <remarks>
         /// <para>Should be called after DealTasks, to prepare for the next frame deal.</para>
         /// </remarks>
-        internal abstract void NextFrame();
+        public abstract void NextFrame();
     }
 }

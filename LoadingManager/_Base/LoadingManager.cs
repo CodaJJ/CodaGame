@@ -14,7 +14,7 @@ namespace CodaGame.Base
     /// </summary>
     internal class LoadingManager
     {
-        [NotNull] internal static LoadingManager instance { get { return _g_instance ??= new LoadingManager(); } }
+        [NotNull] public static LoadingManager instance { get { return _g_instance ??= new LoadingManager(); } }
         private static LoadingManager _g_instance;
 
 
@@ -34,7 +34,7 @@ namespace CodaGame.Base
         /// <param name="_loadingShow">The loading show interface.</param>
         /// <param name="_loadFunction">The asynchronous load function.</param>
         /// <param name="_loadingShowEndCallback">The callback to be invoked when the loading show ends.</param>
-        internal void Load(_ILoadingShow _loadingShow, AsyncFunction _loadFunction, Action _loadingShowEndCallback)
+        public void Load(_ILoadingShow _loadingShow, AsyncFunction _loadFunction, Action _loadingShowEndCallback)
         {
             // Determine the appropriate loading process based on the loading show
             LoadingProcess loadingProcess;

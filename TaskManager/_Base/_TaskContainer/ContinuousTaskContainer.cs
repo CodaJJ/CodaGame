@@ -19,20 +19,20 @@ namespace CodaGame.Base
     {
         [ItemNotNull, NotNull] private readonly List<_AContinuousTask> _m_readyForDealTasks;
         private int _m_nextDealIndex;
-        
-        
-        internal _AContinuousTaskContainer()
+
+
+        protected _AContinuousTaskContainer()
         {
             _m_readyForDealTasks = new List<_AContinuousTask>();
             _m_nextDealIndex = 0;
         }
         
         
-        internal override void AddTask(_AContinuousTask _task)
+        public override void AddTask(_AContinuousTask _task)
         {
             _m_readyForDealTasks.Add(_task);
         }
-        internal override void RemoveTask(_AContinuousTask _task)
+        public override void RemoveTask(_AContinuousTask _task)
         {
             int index = _m_readyForDealTasks.IndexOf(_task);
             if (index < 0)
@@ -46,7 +46,7 @@ namespace CodaGame.Base
                 _m_nextDealIndex--;
         }
         /// <inheritdoc />
-        internal override bool DealTasks()
+        public override bool DealTasks()
         {
             if (_m_readyForDealTasks.Count == 0)
                 return false;
@@ -63,7 +63,7 @@ namespace CodaGame.Base
             return true;
         }
         /// <inheritdoc />
-        internal override void NextFrame()
+        public override void NextFrame()
         {
             _m_nextDealIndex = 0;
         }
