@@ -18,6 +18,20 @@ namespace CodaGame
         private const float _k_d1 = 2.75f;
         
 
+        /// <summary>
+        /// Evaluate the ease function.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method evaluates the easing curve defined by the specified <see cref="EaseType"/>.
+        /// The input <paramref name="_value"/> is expected to be in the normalized range of <c>0</c> to <c>1</c>,
+        /// representing the progress of the animation or transition.
+        /// </para>
+        /// <para>
+        /// If <paramref name="_value"/> falls outside the range of <c>0</c> to <c>1</c>, it will be handled according
+        /// to the specified <see cref="OverflowType"/>.
+        /// </para>
+        /// </remarks>
         public static float Evaluate(this EaseType _easeType, float _value, OverflowType _overflowType = OverflowType.Clamp)
         {
             float x = _overflowType switch

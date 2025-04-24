@@ -12,5 +12,6 @@ namespace CodaGame
         public const string Async = "Async";
         public const string StateMachine = "StateMachine";
         public const string Loading = "Loading";
+        public const string ValueController = "ValueController";
     }
 }
