@@ -11,20 +11,20 @@ namespace CodaGame.Base
     /// Base class for frame delay task.
     /// </summary>
     /// <remarks>
-    /// <para>Frame delay task will deal after a certain frame.</para>
-    /// <para>If the delay frame is 0 or negative, the task will deal right after next frame.</para>
+    /// <para>Frame delay task will execute after a certain frame.</para>
+    /// <para>If the delay frame is 0 or negative, the task will execute right after next frame.</para>
     /// </remarks>
     public abstract class _AFrameDelayTask : _ABaseTask, IComparable<_AFrameDelayTask>
     {
         private readonly int _m_delayFrame;
-        private int _m_dealFrame;
+        private int _m_executeFrame;
         
         
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <remarks>
-        /// <para>If the "_delayFrame" is 0 or negative, the task will deal right after next frame.</para>
+        /// <para>If the "_delayFrame" is 0 or negative, the task will execute right after next frame.</para>
         /// </remarks>
         protected _AFrameDelayTask(string _name, int _delayFrame, UpdateType _runType) 
             : base(_name, _runType)
@@ -37,38 +37,38 @@ namespace CodaGame.Base
         /// Delay frame.
         /// </summary>
         /// <remarks>
-        /// <para>How many frames to wait before the task deal.</para>
-        /// <para>If the delay frame is 0 or negative, the task will deal right after next frame.</para>
+        /// <para>How many frames to wait before the task execute.</para>
+        /// <para>If the delay frame is 0 or negative, the task will execute right after next frame.</para>
         /// </remarks>
         public int DelayFrame { get { return _m_delayFrame; } }
         /// <summary>
-        /// Deal frame.
+        /// Execute frame.
         /// </summary>
         /// <remarks>
-        /// <para>How many TaskManager frames have passed when the task deal.</para>
+        /// <para>How many TaskManager frames have passed when the task execute.</para>
         /// <para>It's counted by TaskManager, not Unity's frame.</para>
         /// <para>Just a internal property for delay calculation.</para>
         /// </remarks>
-        internal int DealFrame { get { return _m_dealFrame; } }
+        internal int ExecuteFrame { get { return _m_executeFrame; } }
         
         
         /// <summary>
-        /// Deal function.
+        /// Execute function.
         /// </summary>
         /// <remarks>
         /// <para>This function will be called after the delay frame.</para>
-        /// <para>If the delay frame is 0 or negative, the task will deal right after next frame.</para>
+        /// <para>If the delay frame is 0 or negative, the task will execute right after next frame.</para>
         /// </remarks>
-        protected abstract void OnDeal();
+        protected abstract void OnExecute();
         
         
-        internal void Deal()
+        internal void Execute()
         {
-            OnDeal();
+            OnExecute();
         }
-        internal void SetDealFrame(int _dealFrame)
+        internal void SetExecuteFrame(int _executeFrame)
         {
-            _m_dealFrame = _dealFrame;
+            _m_executeFrame = _executeFrame;
         }
 
         
@@ -110,7 +110,7 @@ namespace CodaGame.Base
             if (_other == null)
                 return 1;
             
-            return _m_dealFrame.CompareTo(_other._m_dealFrame);
+            return _m_executeFrame.CompareTo(_other._m_executeFrame);
         }
     }
 }

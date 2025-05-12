@@ -26,7 +26,7 @@ namespace CodaGame.Base
         public bool UseUnscaledTime { get { return _m_useUnscaledTime; } }
 
 
-        internal abstract void Deal(float _deltaTime);
+        internal abstract void Tick(float _deltaTime);
 
         
         private protected sealed override void AddToUpdateTaskSystem()

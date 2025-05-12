@@ -27,7 +27,7 @@ namespace CodaGame.Tasks
         }
         
 
-        protected override void OnDeal()
+        protected override void OnExecute()
         {
             _m_delegate?.Invoke();
         }

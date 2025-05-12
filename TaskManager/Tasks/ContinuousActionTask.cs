@@ -34,7 +34,7 @@ namespace CodaGame.Tasks
         }
 
 
-        protected override void OnDeal(float _deltaTime)
+        protected override void OnTick(float _deltaTime)
         {
             _m_delegate?.Invoke(_deltaTime);
         }

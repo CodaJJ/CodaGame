@@ -16,15 +16,15 @@ namespace CodaGame.Base
     /// </remarks>
     internal class FrameDelayTaskContainer : _ATaskContainer<_AFrameDelayTask>
     {
-        [ItemNotNull, NotNull] private readonly List<_AFrameDelayTask> _m_readyForDealTasks;
+        [ItemNotNull, NotNull] private readonly List<_AFrameDelayTask> _m_readyForExecuteTasks;
         [ItemNotNull, NotNull] private readonly List<_AFrameDelayTask> _m_delayTasks;
         private int _m_frame;
-        private int _m_nextDealIndex;
+        private int _m_nextExecuteIndex;
         
         
         public FrameDelayTaskContainer()
         {
-            _m_readyForDealTasks = new List<_AFrameDelayTask>();
+            _m_readyForExecuteTasks = new List<_AFrameDelayTask>();
             _m_delayTasks = new List<_AFrameDelayTask>();
         }
         
@@ -33,22 +33,22 @@ namespace CodaGame.Base
         {
             if (_task.DelayFrame <= 0)
             {                
-                _task.SetDealFrame(_m_frame);
-                _m_readyForDealTasks.Add(_task);
+                _task.SetExecuteFrame(_m_frame);
+                _m_readyForExecuteTasks.Add(_task);
                 return;
             }
 
-            _task.SetDealFrame(_m_frame + _task.DelayFrame);
+            _task.SetExecuteFrame(_m_frame + _task.DelayFrame);
             _m_delayTasks.InsertSorted(_task);
         }
         public override void RemoveTask(_AFrameDelayTask _task)
         {
-            int index = _m_readyForDealTasks.IndexOf(_task);
+            int index = _m_readyForExecuteTasks.IndexOf(_task);
             if (index >= 0)
             {
-                _m_readyForDealTasks.RemoveAt(index);
-                if (index < _m_nextDealIndex)
-                    _m_nextDealIndex--;
+                _m_readyForExecuteTasks.RemoveAt(index);
+                if (index < _m_nextExecuteIndex)
+                    _m_nextExecuteIndex--;
                 return;
             }
 
@@ -56,21 +56,21 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
         }
         /// <inheritdoc />
-        public override bool DealTasks()
+        public override bool ExecuteTasks()
         {
-            if (_m_readyForDealTasks.Count == 0)
+            if (_m_readyForExecuteTasks.Count == 0)
                 return false;
             
-            while (_m_nextDealIndex < _m_readyForDealTasks.Count)
+            while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
-                _AFrameDelayTask task = _m_readyForDealTasks[_m_nextDealIndex++];
-                task.Deal();
+                _AFrameDelayTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
+                task.Execute();
                 if (task.isRunning)
                     task.StopBySystem();
             }
             
-            _m_readyForDealTasks.Clear();
-            _m_nextDealIndex = 0;
+            _m_readyForExecuteTasks.Clear();
+            _m_nextExecuteIndex = 0;
             return true;
         }
         /// <inheritdoc />
@@ -80,13 +80,13 @@ namespace CodaGame.Base
 
             foreach (_AFrameDelayTask task in _m_delayTasks)
             {
-                if (task.DealFrame > _m_frame)
+                if (task.ExecuteFrame > _m_frame)
                     break;
                 
-                _m_readyForDealTasks.Add(task);
+                _m_readyForExecuteTasks.Add(task);
             }
             
-            _m_delayTasks.RemoveRange(0, _m_readyForDealTasks.Count);
+            _m_delayTasks.RemoveRange(0, _m_readyForExecuteTasks.Count);
         }
     }
 }

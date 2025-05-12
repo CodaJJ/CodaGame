@@ -21,8 +21,8 @@ namespace CodaGame.Tasks
         private readonly DelayActionTask _m_durationTask;
         
         
-        public FrameIntervalContinuousActionTask(string _name, Action<float> _delegate, int _frameInterval, bool _dealOnceImmediately = true, float _duration = float.PositiveInfinity, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false) 
-            : base(_name, _frameInterval, _dealOnceImmediately, _runType, _useUnscaledTime)
+        public FrameIntervalContinuousActionTask(string _name, Action<float> _delegate, int _frameInterval, bool _executeOnceImmediately = true, float _duration = float.PositiveInfinity, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false) 
+            : base(_name, _frameInterval, _executeOnceImmediately, _runType, _useUnscaledTime)
         {
             _m_delegate = _delegate;
             if (_duration > 0)
@@ -34,7 +34,7 @@ namespace CodaGame.Tasks
         }
 
 
-        protected override void OnDeal(float _deltaTime)
+        protected override void OnTick(float _deltaTime)
         {
             _m_delegate?.Invoke(_deltaTime);
         }

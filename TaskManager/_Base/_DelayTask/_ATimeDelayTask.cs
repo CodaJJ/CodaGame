@@ -11,22 +11,22 @@ namespace CodaGame.Base
     /// A base class for the time delay tasks.
     /// </summary>
     /// <remarks>
-    /// <para>Time delay task will deal after a certain time.</para>
-    /// <para>If the delay time is 0 or negative, the task will deal right after next frame.</para>
+    /// <para>Time delay task will execute after a certain time.</para>
+    /// <para>If the delay time is 0 or negative, the task will execute right after next frame.</para>
     /// </remarks>
     public abstract class _ATimeDelayTask : _ABaseTask, IComparable<_ATimeDelayTask>
     {
         private readonly float _m_delayTime;
         private readonly bool _m_useUnscaledTime;
 
-        private float _m_dealTime;
+        private float _m_executeTime;
         
         
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <remarks>
-        /// <para>If the "_delayTime" is 0 or negative, the task will deal right after next frame.</para>
+        /// <para>If the "_delayTime" is 0 or negative, the task will execute right after next frame.</para>
         /// </remarks>
         protected _ATimeDelayTask(string _name, float _delayTime, UpdateType _runType, bool _useUnscaledTime)
             : base(_name, _runType)
@@ -45,30 +45,30 @@ namespace CodaGame.Base
         /// Delay time.
         /// </summary>
         /// <remarks>
-        /// <para>How many seconds to wait before the task deal.</para>
-        /// <para>If the delay time is 0 or negative, the task will deal right after next frame.</para>
+        /// <para>How many seconds to wait before the task execute.</para>
+        /// <para>If the delay time is 0 or negative, the task will execute right after next frame.</para>
         /// </remarks>
         public float DelayTime { get { return _m_delayTime; } }
         /// <summary>
-        /// Deal time.
+        /// Execute time.
         /// </summary>
         /// <remarks>
-        /// <para>How many seconds have passed when the task deal.</para>
+        /// <para>How many seconds have passed when the task execute.</para>
         /// <para>It's determined by running type of the task and whether using unscaled time.</para>
         /// </remarks>
-        internal float DealTime { get { return _m_dealTime; } }
+        internal float ExecuteTime { get { return _m_executeTime; } }
 
 
-        protected abstract void OnDeal();
+        protected abstract void OnExecute();
         
         
-        internal void Deal()
+        internal void Execute()
         {
-            OnDeal();
+            OnExecute();
         }
-        internal void SetDealTime(float _dealTime)
+        internal void SetExecuteTime(float _executeTime)
         {
-            _m_dealTime = _dealTime;
+            _m_executeTime = _executeTime;
         }
         
 
@@ -128,7 +128,7 @@ namespace CodaGame.Base
             if (_other == null)
                 return 1;
             
-            return _m_dealTime.CompareTo(_other._m_dealTime);
+            return _m_executeTime.CompareTo(_other._m_executeTime);
         }
     }
 }

@@ -17,47 +17,47 @@ namespace CodaGame.Base
     /// </remarks>
     internal abstract class _AContinuousTaskContainer : _ATaskContainer<_AContinuousTask>
     {
-        [ItemNotNull, NotNull] private readonly List<_AContinuousTask> _m_readyForDealTasks;
-        private int _m_nextDealIndex;
+        [ItemNotNull, NotNull] private readonly List<_AContinuousTask> _m_readyForExecuteTasks;
+        private int _m_nextExecuteIndex;
 
 
         protected _AContinuousTaskContainer()
         {
-            _m_readyForDealTasks = new List<_AContinuousTask>();
-            _m_nextDealIndex = 0;
+            _m_readyForExecuteTasks = new List<_AContinuousTask>();
+            _m_nextExecuteIndex = 0;
         }
         
         
         public override void AddTask(_AContinuousTask _task)
         {
-            _m_readyForDealTasks.Add(_task);
+            _m_readyForExecuteTasks.Add(_task);
         }
         public override void RemoveTask(_AContinuousTask _task)
         {
-            int index = _m_readyForDealTasks.IndexOf(_task);
+            int index = _m_readyForExecuteTasks.IndexOf(_task);
             if (index < 0)
             {
                 Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
                 return;
             }
             
-            _m_readyForDealTasks.RemoveAt(index);
-            if (index < _m_nextDealIndex)
-                _m_nextDealIndex--;
+            _m_readyForExecuteTasks.RemoveAt(index);
+            if (index < _m_nextExecuteIndex)
+                _m_nextExecuteIndex--;
         }
         /// <inheritdoc />
-        public override bool DealTasks()
+        public override bool ExecuteTasks()
         {
-            if (_m_readyForDealTasks.Count == 0)
+            if (_m_readyForExecuteTasks.Count == 0)
                 return false;
             
-            if (_m_nextDealIndex >= _m_readyForDealTasks.Count)
+            if (_m_nextExecuteIndex >= _m_readyForExecuteTasks.Count)
                 return false;
 
-            while (_m_nextDealIndex < _m_readyForDealTasks.Count)
+            while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
-                _AContinuousTask task = _m_readyForDealTasks[_m_nextDealIndex++];
-                task.Deal(GetDeltaTime());
+                _AContinuousTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
+                task.Tick(GetDeltaTime());
             }
             
             return true;
@@ -65,7 +65,7 @@ namespace CodaGame.Base
         /// <inheritdoc />
         public override void NextFrame()
         {
-            _m_nextDealIndex = 0;
+            _m_nextExecuteIndex = 0;
         }
         
         

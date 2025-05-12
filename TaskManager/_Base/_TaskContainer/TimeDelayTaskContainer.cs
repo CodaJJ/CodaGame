@@ -11,14 +11,14 @@ namespace CodaGame.Base
 {
     internal abstract class _ATimeDelayTaskContainer : _ATaskContainer<_ATimeDelayTask>
     {
-        [ItemNotNull, NotNull] private readonly List<_ATimeDelayTask> _m_readyForDealTasks;
+        [ItemNotNull, NotNull] private readonly List<_ATimeDelayTask> _m_readyForExecuteTasks;
         [ItemNotNull, NotNull] private readonly List<_ATimeDelayTask> _m_delayTasks;
-        private int _m_nextDealIndex;
+        private int _m_nextExecuteIndex;
         
         
         protected _ATimeDelayTaskContainer()
         {
-            _m_readyForDealTasks = new List<_ATimeDelayTask>();
+            _m_readyForExecuteTasks = new List<_ATimeDelayTask>();
             _m_delayTasks = new List<_ATimeDelayTask>();
         }
         
@@ -28,22 +28,22 @@ namespace CodaGame.Base
             float nowTime = GetNowTime();
             if (_task.DelayTime <= 0)
             {                
-                _task.SetDealTime(nowTime);
-                _m_readyForDealTasks.Add(_task);
+                _task.SetExecuteTime(nowTime);
+                _m_readyForExecuteTasks.Add(_task);
                 return;
             }
 
-            _task.SetDealTime(nowTime + _task.DelayTime);
+            _task.SetExecuteTime(nowTime + _task.DelayTime);
             _m_delayTasks.InsertSorted(_task);
         }
         public override void RemoveTask(_ATimeDelayTask _task)
         {
-            int index = _m_readyForDealTasks.IndexOf(_task);
+            int index = _m_readyForExecuteTasks.IndexOf(_task);
             if (index >= 0)
             {
-                _m_readyForDealTasks.RemoveAt(index);
-                if (index < _m_nextDealIndex)
-                    _m_nextDealIndex--;
+                _m_readyForExecuteTasks.RemoveAt(index);
+                if (index < _m_nextExecuteIndex)
+                    _m_nextExecuteIndex--;
                 return;
             }
 
@@ -51,21 +51,21 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.TaskSystem, _task.name, "The task is not in the task container.");
         }
         /// <inheritdoc />
-        public override bool DealTasks()
+        public override bool ExecuteTasks()
         {
-            if (_m_readyForDealTasks.Count == 0)
+            if (_m_readyForExecuteTasks.Count == 0)
                 return false;
             
-            while (_m_nextDealIndex < _m_readyForDealTasks.Count)
+            while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
-                _ATimeDelayTask task = _m_readyForDealTasks[_m_nextDealIndex++];
-                task.Deal();
+                _ATimeDelayTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
+                task.Execute();
                 if (task.isRunning)
                     task.StopBySystem();
             }
             
-            _m_readyForDealTasks.Clear();
-            _m_nextDealIndex = 0;
+            _m_readyForExecuteTasks.Clear();
+            _m_nextExecuteIndex = 0;
             return true;
         }
         /// <inheritdoc />
@@ -75,13 +75,13 @@ namespace CodaGame.Base
 
             foreach (_ATimeDelayTask task in _m_delayTasks)
             {
-                if (task.DealTime > nowTime)
+                if (task.ExecuteTime > nowTime)
                     break;
                 
-                _m_readyForDealTasks.Add(task);
+                _m_readyForExecuteTasks.Add(task);
             }
             
-            _m_delayTasks.RemoveRange(0, _m_readyForDealTasks.Count);
+            _m_delayTasks.RemoveRange(0, _m_readyForExecuteTasks.Count);
         }
 
 

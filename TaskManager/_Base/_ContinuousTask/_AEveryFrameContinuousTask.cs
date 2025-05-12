@@ -17,18 +17,18 @@ namespace CodaGame.Base
 
 
         /// <summary>
-        /// Deal every frame.
+        /// Execute every frame.
         /// </summary>
         /// <remarks>
         /// <para>This function will be called every frame.</para>
         /// <para>The "_deltaTime" value is determined by the running type of the task and whether using unscaled time.</para>
         /// </remarks>
-        protected abstract void OnDeal(float _deltaTime);
+        protected abstract void OnTick(float _deltaTime);
         
         
-        internal override void Deal(float _deltaTime)
+        internal override void Tick(float _deltaTime)
         {
-            OnDeal(_deltaTime);
+            OnTick(_deltaTime);
         }
         
         

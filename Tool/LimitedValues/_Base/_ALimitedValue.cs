@@ -222,7 +222,7 @@ namespace CodaGame.Base
             protected override void OnStop()
             {
             }
-            protected override void OnDeal(float _deltaTime)
+            protected override void OnTick(float _deltaTime)
             {
                 if (!_m_reference.TryGetTarget(out _ALimitedValue<T_VALUE, T_RANGE> limitedValue))
                     return;

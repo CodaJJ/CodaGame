@@ -25,7 +25,7 @@ namespace CodaGame.Base
         /// <para>Deal the tasks which need to be dealt in this frame.</para>
         /// <para>Return true if there are tasks to deal, otherwise return false.</para>
         /// </remarks>
-        public abstract bool DealTasks();
+        public abstract bool ExecuteTasks();
         /// <summary>
         /// Move to the next frame.
         /// </summary>

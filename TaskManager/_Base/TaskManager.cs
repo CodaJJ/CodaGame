@@ -677,11 +677,11 @@ namespace CodaGame.Base
             {
                 while (true)
                 {
-                    if (!_m_updateContinuousTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeUpdateContinuousTaskContainer.DealTasks() &&
-                        !_m_updateFrameDelayTaskContainer.DealTasks() &&
-                        !_m_updateTimeDelayTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeUpdateTimeDelayTaskContainer.DealTasks())
+                    if (!_m_updateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeUpdateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_updateFrameDelayTaskContainer.ExecuteTasks() &&
+                        !_m_updateTimeDelayTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeUpdateTimeDelayTaskContainer.ExecuteTasks())
                         break;
                 }
             }
@@ -711,11 +711,11 @@ namespace CodaGame.Base
             {
                 while (true)
                 {
-                    if (!_m_fixedUpdateContinuousTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeFixedUpdateContinuousTaskContainer.DealTasks() &&
-                        !_m_fixedUpdateFrameDelayTaskContainer.DealTasks() &&
-                        !_m_fixedUpdateTimeDelayTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeFixedUpdateTimeDelayTaskContainer.DealTasks())
+                    if (!_m_fixedUpdateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeFixedUpdateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_fixedUpdateFrameDelayTaskContainer.ExecuteTasks() &&
+                        !_m_fixedUpdateTimeDelayTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeFixedUpdateTimeDelayTaskContainer.ExecuteTasks())
                         break;
                 }
             }
@@ -745,11 +745,11 @@ namespace CodaGame.Base
             {
                 while (true)
                 {
-                    if (!_m_lateUpdateContinuousTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeLateUpdateContinuousTaskContainer.DealTasks() &&
-                        !_m_lateUpdateFrameDelayTaskContainer.DealTasks() &&
-                        !_m_lateUpdateTimeDelayTaskContainer.DealTasks() &&
-                        !_m_unscaledTimeLateUpdateTimeDelayTaskContainer.DealTasks())
+                    if (!_m_lateUpdateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeLateUpdateContinuousTaskContainer.ExecuteTasks() &&
+                        !_m_lateUpdateFrameDelayTaskContainer.ExecuteTasks() &&
+                        !_m_lateUpdateTimeDelayTaskContainer.ExecuteTasks() &&
+                        !_m_unscaledTimeLateUpdateTimeDelayTaskContainer.ExecuteTasks())
                         break;
                 }
             }
