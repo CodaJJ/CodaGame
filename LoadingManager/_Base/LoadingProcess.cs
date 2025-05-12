@@ -74,7 +74,7 @@ namespace CodaGame.Base
                 _m_loadFunctions.Add(_loadFunction);
             _m_loadingShowEndDelegate += _loadingShowEndCallback;
             
-            _m_stateMachine.Update();
+            _m_stateMachine.Update(0);
         }
         /// <summary>
         /// Force to hide the loading show.
@@ -88,7 +88,7 @@ namespace CodaGame.Base
             Console.LogVerbose(SystemNames.Loading, _m_name, "Forced to hide.");
             
             _m_forceHide = true;
-            _m_stateMachine.Update();
+            _m_stateMachine.Update(0);
         }
 
 
@@ -106,7 +106,7 @@ namespace CodaGame.Base
             protected override void OnExit()
             {
             }
-            protected override void OnUpdate()
+            protected override void OnUpdate(float _)
             {
                 if (target == null)
                 {
@@ -168,7 +168,7 @@ namespace CodaGame.Base
             protected override void OnExit()
             {
             }
-            protected override void OnUpdate()
+            protected override void OnUpdate(float _)
             {
             }
         }
@@ -216,7 +216,7 @@ namespace CodaGame.Base
             {
                 _m_parallelOperation = null;
             }
-            protected override void OnUpdate()
+            protected override void OnUpdate(float _)
             {
                 if (target == null || _m_parallelOperation == null)
                 {
@@ -272,7 +272,7 @@ namespace CodaGame.Base
             protected override void OnExit()
             {
             }
-            protected override void OnUpdate()
+            protected override void OnUpdate(float _)
             {
             }
         }

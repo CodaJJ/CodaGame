@@ -126,9 +126,9 @@ namespace CodaGame.StateMachine.Lite
             Console.LogVerbose(SystemNames.StateMachine, _m_stateMachine.name, $"state-{name} -- : exits.");
             _m_stateMachine = null;
         }
-        internal void Update()
+        internal void Update(float _deltaTime)
         {
-            OnUpdate();
+            OnUpdate(_deltaTime);
         }
 
         
@@ -139,7 +139,7 @@ namespace CodaGame.StateMachine.Lite
         /// <summary>
         /// When updating this state.
         /// </summary>
-        protected abstract void OnUpdate();
+        protected abstract void OnUpdate(float _deltaTime);
     }
     /// <summary>
     /// A state for state machine.

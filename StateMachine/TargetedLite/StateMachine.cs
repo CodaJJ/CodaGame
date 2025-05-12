@@ -57,9 +57,9 @@ namespace CodaGame.StateMachine.TargetedLite
         /// <summary>
         /// Update the current state.
         /// </summary>
-        public void Update()
+        public void Update(float _deltaTime)
         {
-            _m_curState?.Update();
+            _m_curState?.Update(_deltaTime);
         }
         /// <summary>
         /// Change state.

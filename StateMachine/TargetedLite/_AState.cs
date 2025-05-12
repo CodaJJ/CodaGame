@@ -137,9 +137,9 @@ namespace CodaGame.StateMachine.TargetedLite
             _m_target = default;
             _m_stateMachine = null;
         }
-        internal void Update()
+        internal void Update(float _deltaTime)
         {
-            OnUpdate();
+            OnUpdate(_deltaTime);
         }
 
         
@@ -150,7 +150,7 @@ namespace CodaGame.StateMachine.TargetedLite
         /// <summary>
         /// When updating this state.
         /// </summary>
-        protected abstract void OnUpdate();
+        protected abstract void OnUpdate(float _deltaTime);
     }
     /// <summary>
     /// A state for state machine.
