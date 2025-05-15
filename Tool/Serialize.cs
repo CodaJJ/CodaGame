@@ -25,10 +25,13 @@ namespace CodaGame
         private static uint _g_timeIntervalContinuousTaskSerialize = 0;
         private static uint _g_frameIntervalContinuousTaskSerialize = 0;
         private static uint _g_frameDelayActionTaskSerialize = 0;
-        private static uint _g_nextFrameActionTaskSerialize = 0;
-        private static uint _g_nextLimitedValueRecoverTaskSerialize = 0;
-        
-        
+        private static uint _g_frameActionTaskSerialize = 0;
+        private static uint _g_limitedValueRecoverTaskSerialize = 0;
+        private static uint _g_cameraValueBehaviourSerialize = 0;
+        private static uint _g_cameraValueOffsetSerialize = 0;
+        private static uint _g_cameraValueConstraintSerialize = 0;
+
+
         /// <summary>
         /// Get the next serialize number
         /// </summary>
@@ -96,11 +99,23 @@ namespace CodaGame
         }
         internal static uint NextNextFrameActionTask()
         {
-            return _g_nextFrameActionTaskSerialize++;
+            return _g_frameActionTaskSerialize++;
         }
         internal static uint NextNextLimitedValueRecoverTask()
         {
-            return _g_nextLimitedValueRecoverTaskSerialize++;
+            return _g_limitedValueRecoverTaskSerialize++;
+        }
+        internal static uint NextCameraValueBehaviour()
+        {
+            return _g_cameraValueBehaviourSerialize++;
+        }
+        internal static uint NextCameraValueOffset()
+        {
+            return _g_cameraValueOffsetSerialize++;
+        }
+        internal static uint NextCameraValueConstraint()
+        {
+            return _g_cameraValueConstraintSerialize++;
         }
     }
 }
