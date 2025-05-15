@@ -160,6 +160,20 @@ namespace CodaGame
         {
             return _value;
         }
+        /// <summary>
+        /// Called when this behaviour is actually removed from the controller.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Note that this is not triggered immediately when <c>RemoveBehaviour</c> is called;
+        /// instead, it is invoked after fade-out effect has completed,
+        /// indicating that the behaviour is no longer active within the controller.
+        /// </para>
+        /// </remarks>
+        protected virtual void OnRemoved()
+        {
+            
+        }
 
 
         /// <summary>
@@ -193,6 +207,9 @@ namespace CodaGame
         /// </summary>
         internal void SetBehaviourRemoved()
         {
+            OnRemovedInternal();
+            OnRemoved();
+            
             _m_controller = null;
             _m_state = State.Dead;
             _m_blendFactor = 0f;
@@ -286,5 +303,11 @@ namespace CodaGame
         {
             return Evaluate();
         }
+
+
+        /// <summary>
+        /// Additional internal method to be called when the behaviour is removed.
+        /// </summary>
+        private protected virtual void OnRemovedInternal() { }
     }
 }
