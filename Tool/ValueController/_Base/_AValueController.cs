@@ -41,8 +41,6 @@ namespace CodaGame.Base
         private T_VALUE _m_value;
         // The base value is a lowest priority behaviour that is always present.
         private T_VALUE _m_baseValue;
-        // The dirty flag is used to indicate if the value needs to be re-evaluated.
-        private bool _m_isDirty;
 
 
         protected _AValueController(string _name, T_VALUE _initValue)
@@ -57,7 +55,7 @@ namespace CodaGame.Base
             _m_layerListForTraversal = new List<ValueBehaviourLayer>();
             _m_offsetListForTraversal = new List<_AValueOffset<T_VALUE>>();
             _m_constraintListForTraversal = new List<_AValueConstraint<T_VALUE>>();
-            SetDirty();
+            _m_value = Evaluate();
         }
         
         
@@ -71,19 +69,7 @@ namespace CodaGame.Base
         /// <remarks>
         /// <para>The final value after all processing.</para>
         /// </remarks>
-        public T_VALUE value
-        {
-            get
-            {
-                if (_m_isDirty)
-                {
-                    _m_value = _Evaluate();
-                    _m_isDirty = false;
-                }
-                
-                return _m_value;
-            }
-        }
+        public T_VALUE value { get { return _m_value; } }
         /// <summary>
         /// The base value of the value controller.
         /// </summary>
@@ -125,10 +111,10 @@ namespace CodaGame.Base
             }
             
             _behaviour.SetBehaviourAdded(this);
-            ValueBehaviourLayer layer = _GetOrCreateBehaviourLayer(_behaviour.priority);
+            ValueBehaviourLayer layer = GetOrCreateBehaviourLayer(_behaviour.priority);
             layer.AddBehaviour(_behaviour);
             _behaviour.StartFadeIn();
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Removes a behaviour from the value controller.
@@ -159,11 +145,11 @@ namespace CodaGame.Base
                 return;
             
             _behaviour.SetBehaviourRemoved();
-            ValueBehaviourLayer layer = _GetOrCreateBehaviourLayer(_behaviour.priority);
+            ValueBehaviourLayer layer = GetOrCreateBehaviourLayer(_behaviour.priority);
             layer.RemoveBehaviour(_behaviour);
             if (layer.IsEmpty())
                 _m_behaviourLayers.RemoveSorted(layer);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Immediately removes a behaviour from the value controller.
@@ -193,11 +179,11 @@ namespace CodaGame.Base
             }
 
             _behaviour.SetBehaviourRemoved();
-            ValueBehaviourLayer layer = _GetOrCreateBehaviourLayer(_behaviour.priority);
+            ValueBehaviourLayer layer = GetOrCreateBehaviourLayer(_behaviour.priority);
             layer.RemoveBehaviour(_behaviour);
             if (layer.IsEmpty())
                 _m_behaviourLayers.RemoveSorted(layer);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Adds an offset to the value controller.
@@ -222,7 +208,7 @@ namespace CodaGame.Base
             
             _offset.SetOffsetAdded(this);
             _m_offsetList.Add(_offset);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Removes an offset from the value controller.
@@ -246,7 +232,7 @@ namespace CodaGame.Base
             
             _offset.SetOffsetRemoved();
             _m_offsetList.Remove(_offset);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Adds a constraint to the value controller.
@@ -277,7 +263,7 @@ namespace CodaGame.Base
             
             _constraint.SetConstraintAdded(this);
             _m_constraintList.Add(_constraint);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Removes a constraint from the value controller.
@@ -301,7 +287,7 @@ namespace CodaGame.Base
             
             _constraint.SetConstraintRemoved();
             _m_constraintList.Remove(_constraint);
-            SetDirty();
+            _m_value = Evaluate();
         }
         /// <summary>
         /// Updates the value controller.
@@ -328,18 +314,8 @@ namespace CodaGame.Base
             
             foreach (_AValueConstraint<T_VALUE> constraint in _m_constraintListForTraversal)
                 constraint.InternalUpdate(_deltaTime);
-            
-            SetDirty();
-        }
-        /// <summary>
-        /// Marks the value controller as dirty.
-        /// </summary>
-        /// <remarks>
-        /// <para>Use this to indicate that the value needs to be re-evaluated.</para>
-        /// </remarks>
-        public void SetDirty()
-        {
-            _m_isDirty = true;
+
+            _m_value = Evaluate();
         }
         
         
@@ -354,7 +330,7 @@ namespace CodaGame.Base
         
         
         [NotNull]
-        private ValueBehaviourLayer _GetOrCreateBehaviourLayer(int _priority)
+        private ValueBehaviourLayer GetOrCreateBehaviourLayer(int _priority)
         {
             ValueBehaviourLayer layer = _m_behaviourLayers.Find(_layer => _layer.priority == _priority);
             if (layer != null)
@@ -364,14 +340,14 @@ namespace CodaGame.Base
             _m_behaviourLayers.InsertSorted(layer);
             return layer;
         }
-        private T_VALUE _Evaluate()
+        private T_VALUE Evaluate()
         {
-            T_VALUE behaviourValue = _EvaluateBehaviours();
-            T_VALUE offsetValue = _EvaluateOffset();
-            T_VALUE finalValue = _EvaluateConstraint(Add(behaviourValue, offsetValue));
+            T_VALUE behaviourValue = EvaluateBehaviours();
+            T_VALUE offsetValue = EvaluateOffset();
+            T_VALUE finalValue = EvaluateConstraint(Add(behaviourValue, offsetValue));
             return finalValue;
         }
-        private T_VALUE _EvaluateBehaviours()
+        private T_VALUE EvaluateBehaviours()
         {
             T_VALUE behaviourValue = _m_baseValue;
             foreach (ValueBehaviourLayer layer in _m_behaviourLayers)
@@ -384,7 +360,7 @@ namespace CodaGame.Base
             
             return behaviourValue;
         }
-        private T_VALUE _EvaluateOffset()
+        private T_VALUE EvaluateOffset()
         {
             T_VALUE offsetValue = default;
             foreach (_AValueOffset<T_VALUE> offset in _m_offsetList)
@@ -392,7 +368,7 @@ namespace CodaGame.Base
 
             return offsetValue;
         }
-        private T_VALUE _EvaluateConstraint(T_VALUE _value)
+        private T_VALUE EvaluateConstraint(T_VALUE _value)
         {
             T_VALUE clampedValue = _value;
             foreach (_AValueConstraint<T_VALUE> constraint in _m_constraintList)
