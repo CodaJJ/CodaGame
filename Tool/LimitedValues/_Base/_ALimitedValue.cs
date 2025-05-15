@@ -24,7 +24,7 @@ namespace CodaGame.Base
         private readonly T_RANGE _m_valueRange;
         private readonly float _m_softBorderSize;
         // The task that will recover the value to the range when it's out of the range.
-        private readonly RecoverTask<T_VALUE, T_RANGE> _m_recoverTask;
+        private readonly RecoverTask _m_recoverTask;
         // The value will recover to the range after this delay, if it's out of the range and no more changes.
         private readonly int _m_recoverDelay;
         
@@ -63,7 +63,7 @@ namespace CodaGame.Base
             _m_softBorderSize = _softBorderSize;
             if (_m_recoverDelay >= 0 && _m_softBorderSize > 0)
             {
-                _m_recoverTask = new RecoverTask<T_VALUE, T_RANGE>(new WeakReference<_ALimitedValue<T_VALUE, T_RANGE>>(this), _runType, false);
+                _m_recoverTask = new RecoverTask(new WeakReference<_ALimitedValue<T_VALUE, T_RANGE>>(this), _runType, false);
                 _m_recoverTask.Run();
                 _m_recoverDelay = _recoverDelay;
             }
@@ -156,7 +156,7 @@ namespace CodaGame.Base
         /// <summary>
         /// Implement the SmoothDamp method for T_VALUE
         /// </summary>
-        protected abstract T_VALUE SmoothDamp(T_VALUE _current, T_VALUE _target, ref T_VALUE _currentVelocity, float _smoothTime);
+        protected abstract T_VALUE SmoothDamp(T_VALUE _current, T_VALUE _target, ref T_VALUE _currentVelocity, float _smoothTime, float _deltaTime);
 
 
         private T_VALUE _SoftTheClampedValue(T_VALUE _value, T_VALUE _clampedValue)
@@ -196,13 +196,11 @@ namespace CodaGame.Base
             if (_m_valueRange == null)
                 return;
             
-            _m_value = SmoothDamp(_m_value, _m_valueRange.ClampValue(_m_value), ref _m_smoothDampVelocity, 0.1f);
+            _m_value = SmoothDamp(_m_value, _m_valueRange.ClampValue(_m_value), ref _m_smoothDampVelocity, 0.1f, _deltaTime);
         }
 
 
-        private class RecoverTask<T_VALUE, T_RANGE> : _AEveryFrameContinuousTask
-            where T_VALUE : struct
-            where T_RANGE : _IValueRange<T_VALUE>
+        private class RecoverTask : _AEveryFrameContinuousTask
         {
             // The reference to the limited value.
             // Use WeakReference to let the limited value be garbage collected when it's not used.

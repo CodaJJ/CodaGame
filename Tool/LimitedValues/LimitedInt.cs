@@ -43,7 +43,7 @@ namespace CodaGame
             };
         }
         protected override float GetMagnitude(int _value) { return Mathf.Abs(_value); }
-        protected override int SmoothDamp(int _current, int _target, ref int _currentVelocity, float _smoothTime)
+        protected override int SmoothDamp(int _current, int _target, ref int _currentVelocity, float _smoothTime, float _deltaTime)
         {
             return _target;
         }

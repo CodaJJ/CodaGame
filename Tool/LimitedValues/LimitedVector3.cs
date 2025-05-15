@@ -50,9 +50,9 @@ namespace CodaGame
         protected override Vector3 MultiplyValue(Vector3 _value, float _multiplier) { return _value * _multiplier; }
         protected override Vector3 Normalize(Vector3 _value) { return _value.normalized; }
         protected override float GetMagnitude(Vector3 _value) { return _value.magnitude; }
-        protected override Vector3 SmoothDamp(Vector3 _current, Vector3 _target, ref Vector3 _currentVelocity, float _smoothTime)
+        protected override Vector3 SmoothDamp(Vector3 _current, Vector3 _target, ref Vector3 _currentVelocity, float _smoothTime, float _deltaTime)
         {
-            return Vector3.SmoothDamp(_current, _target, ref _currentVelocity, _smoothTime);
+            return Vector3.SmoothDamp(_current, _target, ref _currentVelocity, _smoothTime,float.PositiveInfinity, _deltaTime);
         }
     }
 }

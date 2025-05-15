@@ -50,9 +50,9 @@ namespace CodaGame
         protected override float MultiplyValue(float _value, float _multiplier) { return _value * _multiplier; }
         protected override float Normalize(float _value) { return Mathf.Sign(_value); }
         protected override float GetMagnitude(float _value) { return Mathf.Abs(_value); }
-        protected override float SmoothDamp(float _current, float _target, ref float _currentVelocity, float _smoothTime)
+        protected override float SmoothDamp(float _current, float _target, ref float _currentVelocity, float _smoothTime, float _deltaTime)
         {
-            return Mathf.SmoothDamp(_current, _target, ref _currentVelocity, _smoothTime);
+            return Mathf.SmoothDamp(_current, _target, ref _currentVelocity, _smoothTime, float.PositiveInfinity, _deltaTime);
         }
     }
 }
