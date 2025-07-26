@@ -14,5 +14,6 @@ namespace CodaGame
         public const string Loading = "Loading";
         public const string CameraController = "CameraController";
         public const string ValueController = "ValueController";
+        public const string GameLogic = "GameLogic";
     }
 }
