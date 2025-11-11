@@ -8,6 +8,7 @@ namespace CodaGame
     public static class SystemNames
     {
         public const string Utility = "Utility";
+        public const string Main = "Main";
         public const string Task = "Task";
         public const string ObjectPool = "ObjectPool";
         public const string Async = "Async";
@@ -19,5 +20,6 @@ namespace CodaGame
         public const string Assets = "Assets";
         public const string Config = "Config";
         public const string System = "System";
+        public const string Input = "Input";
     }
 }
