@@ -7,6 +7,7 @@ namespace CodaGame
 {
     public static class SystemNames
     {
+        public const string Main = "Main";
         public const string TaskSystem = "TaskSystem";
         public const string ObjectGetter = "ObjectGetter";
         public const string Async = "Async";
@@ -14,5 +15,6 @@ namespace CodaGame
         public const string Loading = "Loading";
         public const string CameraController = "CameraController";
         public const string ValueController = "ValueController";
+        public const string Input = "Input";
     }
 }
