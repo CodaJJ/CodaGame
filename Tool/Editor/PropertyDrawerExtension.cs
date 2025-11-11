@@ -20,12 +20,14 @@ namespace CodaGame.Editor
     {
         public override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
         {
-            TryFlattenProperty(_property, _label);
+            TryFlattenProperty(_property);
+            TryCuttingTheLabel(_label);
             return EditorGUI.GetPropertyHeight(_property, _label);
         }
         public override void OnGUI(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
         {
-            TryFlattenProperty(_property, _label);
+            TryFlattenProperty(_property);
+            TryCuttingTheLabel(_label);
             EditorGUI.PropertyField(_position, _property, _label, true);
         }
 
@@ -33,7 +35,7 @@ namespace CodaGame.Editor
         /// <summary>
         /// Try to flatten the property if it has only one child.
         /// </summary>
-        private void TryFlattenProperty([NotNull] SerializedProperty _property, GUIContent _label)
+        private void TryFlattenProperty([NotNull] SerializedProperty _property)
         {
             SerializedProperty copy = _property.Copy();
             
@@ -48,6 +50,18 @@ namespace CodaGame.Editor
 
             // Flatten the property.
             _property.NextVisible(true);
+        }
+        /// <summary>
+        /// Try to cut the label to the last part after underscore.
+        /// </summary>
+        private void TryCuttingTheLabel(GUIContent _label)
+        {
+            string[] textArray = _label.text.Split('_');
+            string str = textArray[^1];
+            if (string.IsNullOrEmpty(str))
+                return;
+            
+            _label.text = str.ToUpperFirstChar();
         }
     }
 }

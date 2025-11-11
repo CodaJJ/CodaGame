@@ -3,7 +3,11 @@
 // This file is part of Unity Game Framework, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace CodaGame
 {
@@ -17,11 +21,37 @@ namespace CodaGame
         /// <para>It's different from the default <see cref="object.Equals(object, object)"/> method, using <see cref="System.IComparable{T}"/> to compare the values.</para>
         /// </remarks>
         public static bool CompareEqual<T>(T _a, T _b)
-            where T : System.IComparable<T>
+            where T : IComparable<T>
         {
             if (_a is null || _b is null)
                 return _a is null && _b is null;
             return _a.CompareTo(_b) == 0;
+        }
+        /// <summary>
+        /// Convert an enum value to int.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ToInt32<T_ENUM>(this T_ENUM _value) where T_ENUM : struct, Enum
+        {
+            return UnsafeUtility.As<T_ENUM, int>(ref _value);
+        }        
+        /// <summary>
+        /// Convert the first character of the string to upper case.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ToUpperFirstChar(this string _str)
+        {
+            if (string.IsNullOrEmpty(_str))
+                return _str;
+        
+            if (char.IsUpper(_str[0]))
+                return _str;
+        
+            Span<char> chars = stackalloc char[_str.Length];
+            _str.AsSpan().CopyTo(chars);
+            chars[0] = char.ToUpper(chars[0]);
+        
+            return new string(chars);
         }
         
         #region List
@@ -68,7 +98,7 @@ namespace CodaGame
         /// <para>Uses binary search to insert the value into the sorted list, and preserves the insertion order among equal elements.</para>
         /// </remarks>
         public static void InsertSorted<T>(this List<T> _list, T _value) 
-            where T : System.IComparable<T>
+            where T : IComparable<T>
         {
             int index = _list.BinarySearch(_value);
             if (index >= 0)
@@ -109,7 +139,7 @@ namespace CodaGame
         /// <para>After binary search, it will check the elements before and after the found index to remove the value.</para>
         /// </remarks>
         public static bool RemoveSorted<T>(this List<T> _list, T _value)
-            where T : System.IComparable<T>
+            where T : IComparable<T>
         {
             int index = _list.BinarySearch(_value);
             if (index < 0)
@@ -198,6 +228,21 @@ namespace CodaGame
         {
             T_VALUE value = _dictionary[_key];
             _dictionary.Remove(_key);
+            return value;
+        }
+        /// <summary>
+        /// Get the value of the dictionary, if the key does not exist, add a new value with default constructor.
+        /// </summary>
+        [NotNull]
+        public static T_VALUE GetValueDefinitely<T_KEY, T_VALUE>(this Dictionary<T_KEY, T_VALUE> _dictionary, T_KEY _key)
+            where T_VALUE : new()
+        {
+            if (!_dictionary.TryGetValue(_key, out T_VALUE value) || value == null)
+            {
+                value = new T_VALUE();
+                _dictionary[_key] = value;
+            }
+
             return value;
         }
         

@@ -5,8 +5,8 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using JetBrains.Annotations;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
@@ -127,7 +127,7 @@ namespace CodaGame
         /// Log a crush message.
         /// </summary>
         /// <inheritdoc cref="LogVerbose(string,string,UnityEngine.Object)"/>
-        [HideInCallstack]
+        [HideInCallstack, DoesNotReturn]
         public static void LogCrush(string _system, string _message, Object _context = null)
         {
             instance.Log(ELogType.Crush, _system, string.Empty, _message, _context);
@@ -136,7 +136,7 @@ namespace CodaGame
         /// Log a crush message.
         /// </summary>
         /// <inheritdoc cref="LogVerbose(string,string,string,UnityEngine.Object)"/>
-        [HideInCallstack]
+        [HideInCallstack, DoesNotReturn]
         public static void LogCrush(string _system, string _contextName, string _message, Object _contextObj = null)
         {
             instance.Log(ELogType.Crush, _system, _contextName, _message, _contextObj);
@@ -182,7 +182,7 @@ namespace CodaGame
         /// <summary>
         /// The singleton of the console.
         /// </summary>
-        [NotNull]
+        [JetBrains.Annotations.NotNull]
         internal static Console instance
         {
             get
@@ -195,7 +195,7 @@ namespace CodaGame
             }
         }
         private static Console _g_instance;
-        [NotNull] private static readonly object _g_lock = new object();
+        [JetBrains.Annotations.NotNull] private static readonly object _g_lock = new object();
 
 
         /// <summary>
