@@ -16,6 +16,19 @@ namespace CodaGame.Editor
     /// It's convenient to use this drawer to add some custom processing to unity's default property drawer.
     /// </remarks>
     [CustomPropertyDrawer(typeof(object), true)]
+    [CustomPropertyDrawer(typeof(byte), true)]
+    [CustomPropertyDrawer(typeof(sbyte), true)]
+    [CustomPropertyDrawer(typeof(ushort), true)]
+    [CustomPropertyDrawer(typeof(short), true)]
+    [CustomPropertyDrawer(typeof(uint), true)]
+    [CustomPropertyDrawer(typeof(int), true)]
+    [CustomPropertyDrawer(typeof(ulong), true)]
+    [CustomPropertyDrawer(typeof(long), true)]
+    [CustomPropertyDrawer(typeof(float), true)]
+    [CustomPropertyDrawer(typeof(double), true)]
+    [CustomPropertyDrawer(typeof(bool), true)]
+    [CustomPropertyDrawer(typeof(char), true)]
+    [CustomPropertyDrawer(typeof(string), true)]
     public class PropertyDrawerExtension : PropertyDrawer
     {
         public override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
@@ -56,12 +69,11 @@ namespace CodaGame.Editor
         /// </summary>
         private void TryCuttingTheLabel(GUIContent _label)
         {
-            string[] textArray = _label.text.Split('_');
-            string str = textArray[^1];
-            if (string.IsNullOrEmpty(str))
+            string name = _label.text;
+            if (!name.StartsWith("M_"))
                 return;
             
-            _label.text = str.ToUpperFirstChar();
+            _label.text = name.Substring(2).ToUpperFirstChar();
         }
     }
 }

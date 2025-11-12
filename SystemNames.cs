@@ -7,7 +7,8 @@ namespace CodaGame
 {
     public static class SystemNames
     {
-        public const string TaskSystem = "TaskSystem";
+        public const string Utility = "Utility";
+        public const string Task = "Task";
         public const string ObjectPool = "ObjectPool";
         public const string Async = "Async";
         public const string StateMachine = "StateMachine";
@@ -16,5 +17,7 @@ namespace CodaGame
         public const string ValueController = "ValueController";
         public const string Operation = "Operation";
         public const string Assets = "Assets";
+        public const string Config = "Config";
+        public const string System = "System";
     }
 }

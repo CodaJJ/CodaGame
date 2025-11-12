@@ -46,7 +46,7 @@ namespace CodaGame.Base
         {
             if (_m_isRunning)
             {
-                Console.LogWarning(SystemNames.TaskSystem, _m_name, "The task is already running.");
+                Console.LogWarning(SystemNames.Task, _m_name, "The task is already running.");
                 return;
             }
 
@@ -64,7 +64,7 @@ namespace CodaGame.Base
                     AddToLateUpdateTaskSystem();
                     break;
                 default:
-                    Console.LogError(SystemNames.TaskSystem, _m_name, $"Unsupported task run type {_m_runType}.");
+                    Console.LogError(SystemNames.Task, _m_name, $"Unsupported task run type {_m_runType}.");
                     break;
             }
 
@@ -78,7 +78,7 @@ namespace CodaGame.Base
         {
             if (!_m_isRunning)
             {
-                Console.LogWarning(SystemNames.TaskSystem, _m_name, "The task hasn't started running yet, you are trying to stop it.");
+                Console.LogWarning(SystemNames.Task, _m_name, "The task hasn't started running yet, you are trying to stop it.");
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace CodaGame.Base
                     RemoveFromLateUpdateTaskSystem();
                     break;
                 default:
-                    Console.LogError(SystemNames.TaskSystem, _m_name, $"Unsupported task run type {_m_runType}.");
+                    Console.LogError(SystemNames.Task, _m_name, $"Unsupported task run type {_m_runType}.");
                     break;
             }
         }
@@ -117,7 +117,7 @@ namespace CodaGame.Base
         {
             if (!_m_isRunning)
             {
-                Console.LogWarning(SystemNames.TaskSystem, _m_name, "The task hasn't started running yet, you are trying to stop it.");
+                Console.LogWarning(SystemNames.Task, _m_name, "The task hasn't started running yet, you are trying to stop it.");
                 return;
             }
 

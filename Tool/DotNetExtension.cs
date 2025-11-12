@@ -11,7 +11,6 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace CodaGame
 {
-    
     public static class DotNetExtension
     {
         /// <summary>
@@ -214,6 +213,41 @@ namespace CodaGame
                 int addCount = _count - _list.Count;
                 for (int i = 0; i < addCount; i++)
                     _list.Add(default);
+            }
+        }
+        public static void RemoveDuplicates<T, T_KEY>(this List<T> _list, Func<T, T_KEY> _keySelector)
+        {
+            if (_keySelector == null)
+            {
+                RemoveDuplicates(_list);
+                return;
+            }
+            
+            if (_list.Count < 2)
+                return;
+
+            HashSet<T_KEY> seenKeys = new HashSet<T_KEY>();
+            for (int i = _list.Count - 1; i >= 0; i--)
+            {
+                T_KEY key = _keySelector(_list[i]);
+                if (!seenKeys.Add(key))
+                {
+                    _list.RemoveAt(i);
+                }
+            }
+        }
+        public static void RemoveDuplicates<T>(this List<T> _list)
+        {
+            if (_list.Count < 2)
+                return;
+
+            HashSet<T> seenItems = new HashSet<T>();
+            for (int i = _list.Count - 1; i >= 0; i--)
+            {
+                if (!seenItems.Add(_list[i]))
+                {
+                    _list.RemoveAt(i);
+                }
             }
         }
 

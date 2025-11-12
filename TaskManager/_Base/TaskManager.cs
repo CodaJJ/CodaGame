@@ -33,9 +33,9 @@ namespace CodaGame.Base
                         TaskManager manager = go.AddComponent<TaskManager>();
 
                         if (manager == null)
-                            Console.LogCrush(SystemNames.TaskSystem, "Initialize TaskSystem failed, Failed to add TaskMonoBehaviour component.");
+                            Console.LogCrush(SystemNames.Task, "Initialize TaskSystem failed, Failed to add TaskMonoBehaviour component.");
                         else
-                            Console.LogSystem(SystemNames.TaskSystem, "Initialize TaskManager success.");
+                            Console.LogSystem(SystemNames.Task, "Initialize TaskManager success.");
 
                         // ReSharper disable once PossibleMultipleWriteAccessInDoubleCheckLocking
                         _g_instance = manager;
@@ -95,7 +95,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -103,7 +103,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUpdateContinuousTask success.");
             }
             finally
             {
@@ -114,7 +114,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeUpdateContinuousTask failed, Task is null.");
                 return;    
             }
             
@@ -122,7 +122,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeUpdateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeUpdateContinuousTask success.");
             }
             finally
             {
@@ -133,7 +133,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddFixedUpdateContinuousTask failed, Task is null.");    
+                Console.LogWarning(SystemNames.Task, "AddFixedUpdateContinuousTask failed, Task is null.");    
                 return;
             }
             
@@ -141,7 +141,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddFixedUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddFixedUpdateContinuousTask success.");
             }
             finally
             {
@@ -152,7 +152,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeFixedUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeFixedUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -160,7 +160,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeFixedUpdateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeFixedUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeFixedUpdateContinuousTask success.");
             }
             finally
             {
@@ -171,7 +171,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddLateUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddLateUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -179,7 +179,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddLateUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddLateUpdateContinuousTask success.");
             }
             finally
             {
@@ -190,7 +190,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeLateUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeLateUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -198,7 +198,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeLateUpdateContinuousTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeLateUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeLateUpdateContinuousTask success.");
             }
             finally
             {
@@ -209,7 +209,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -217,7 +217,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUpdateContinuousTask success.");
             }
             finally
             {
@@ -228,7 +228,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -236,7 +236,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeUpdateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeUpdateContinuousTask success.");
             }
             finally
             {
@@ -247,7 +247,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveFixedUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveFixedUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -255,7 +255,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveFixedUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveFixedUpdateContinuousTask success.");
             }
             finally
             {
@@ -266,7 +266,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeFixedUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeFixedUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -274,7 +274,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeFixedUpdateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeFixedUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeFixedUpdateContinuousTask success.");
             }
             finally
             {
@@ -285,7 +285,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveLateUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveLateUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -293,7 +293,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveLateUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveLateUpdateContinuousTask success.");
             }
             finally
             {
@@ -304,7 +304,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeLateUpdateContinuousTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeLateUpdateContinuousTask failed, Task is null.");
                 return;
             }
             
@@ -312,7 +312,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeLateUpdateContinuousTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeLateUpdateContinuousTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeLateUpdateContinuousTask success.");
             }
             finally
             {
@@ -324,7 +324,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -332,7 +332,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateFrameDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -343,7 +343,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddFixedUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddFixedUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -351,7 +351,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateFrameDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddFixedUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddFixedUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -362,7 +362,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddLateUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddLateUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -370,7 +370,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateFrameDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddLateUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddLateUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -381,7 +381,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -389,7 +389,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateFrameDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -400,7 +400,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveFixedUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveFixedUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -408,7 +408,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateFrameDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveFixedUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveFixedUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -419,7 +419,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveLateUpdateFrameDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveLateUpdateFrameDelayTask failed, Task is null.");
                 return;
             }
             
@@ -427,7 +427,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateFrameDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveLateUpdateFrameDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveLateUpdateFrameDelayTask success.");
             }
             finally
             {
@@ -439,7 +439,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -447,7 +447,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -458,7 +458,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -466,7 +466,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeUpdateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -477,7 +477,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddFixedUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddFixedUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -485,7 +485,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddFixedUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddFixedUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -496,7 +496,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeFixedUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeFixedUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -504,7 +504,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeFixedUpdateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeFixedUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeFixedUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -515,7 +515,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddLateUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddLateUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -523,7 +523,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddLateUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddLateUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -534,7 +534,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "AddUnscaledTimeLateUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "AddUnscaledTimeLateUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -542,7 +542,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeLateUpdateTimeDelayTaskContainer.AddTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "AddUnscaledTimeLateUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "AddUnscaledTimeLateUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -553,7 +553,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -561,7 +561,7 @@ namespace CodaGame.Base
             try
             {
                 _m_updateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -572,7 +572,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -580,7 +580,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeUpdateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -591,7 +591,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveFixedUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveFixedUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -599,7 +599,7 @@ namespace CodaGame.Base
             try
             {
                 _m_fixedUpdateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveFixedUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveFixedUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -610,7 +610,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeFixedUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeFixedUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -618,7 +618,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeFixedUpdateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeFixedUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeFixedUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -629,7 +629,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveLateUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveLateUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -637,7 +637,7 @@ namespace CodaGame.Base
             try
             {
                 _m_lateUpdateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveLateUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveLateUpdateTimeDelayTask success.");
             }
             finally
             {
@@ -648,7 +648,7 @@ namespace CodaGame.Base
         {
             if (_task == null)
             {
-                Console.LogWarning(SystemNames.TaskSystem, "RemoveUnscaledTimeLateUpdateTimeDelayTask failed, Task is null.");
+                Console.LogWarning(SystemNames.Task, "RemoveUnscaledTimeLateUpdateTimeDelayTask failed, Task is null.");
                 return;
             }
             
@@ -656,7 +656,7 @@ namespace CodaGame.Base
             try
             {
                 _m_unscaledTimeLateUpdateTimeDelayTaskContainer.RemoveTask(_task);
-                Console.LogVerbose(SystemNames.TaskSystem, _task.name, "RemoveUnscaledTimeLateUpdateTimeDelayTask success.");
+                Console.LogVerbose(SystemNames.Task, _task.name, "RemoveUnscaledTimeLateUpdateTimeDelayTask success.");
             }
             finally
             {

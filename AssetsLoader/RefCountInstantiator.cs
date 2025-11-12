@@ -4,22 +4,23 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
+using UnityEngine;
 
 namespace CodaGame
 {
     /// <summary>
     /// A reference count based asset loader.
     /// </summary>
-    public class ReferenceCountLoader<T_ASSET> : _AReferenceCountAsyncOperation
+    public class RefCountInstantiator : _AReferenceCountAsyncOperation
     {
-        // The index of the asset to load.
-        private readonly _AAssetIndex _m_assetIndex;
+        // The path of the asset to load.
+        private readonly string _m_assetPath;
         // Callbacks for load and release completion.
-        private readonly Action<T_ASSET> _m_loadComplete;
+        private readonly Action<GameObject> _m_loadComplete;
         private readonly Action _m_releaseComplete;
         
         // The loaded asset.
-        private T_ASSET _m_asset;
+        private GameObject _m_asset;
         
         
         /// <summary>
@@ -28,9 +29,19 @@ namespace CodaGame
         /// <param name="_assetIndex">The index of the asset to load.</param>
         /// <param name="_loadComplete">Callback for load completion.</param>
         /// <param name="_releaseComplete">Callback for release completion.</param>
-        public ReferenceCountLoader(_AAssetIndex _assetIndex, Action<T_ASSET> _loadComplete = null, Action _releaseComplete = null)
+        public RefCountInstantiator(_AAssetIndex _assetIndex, Action<GameObject> _loadComplete = null, Action _releaseComplete = null)
+            : this(_assetIndex?.ToAddressableKey(), _loadComplete, _releaseComplete)
         {
-            _m_assetIndex = _assetIndex;
+        }
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="_assetPath">The path of the asset to load.</param>
+        /// <param name="_loadComplete">Callback for load completion.</param>
+        /// <param name="_releaseComplete">Callback for release completion.</param>
+        public RefCountInstantiator(string _assetPath, Action<GameObject> _loadComplete = null, Action _releaseComplete = null)
+        {
+            _m_assetPath = _assetPath;
             _m_loadComplete = _loadComplete;
             _m_releaseComplete = _releaseComplete;
         }
@@ -41,14 +52,7 @@ namespace CodaGame
         /// </summary>
         protected override void OnOperationStart(Action _complete)
         {
-            if (_m_assetIndex == null)
-            {
-                Console.LogWarning(SystemNames.Operation, "Loader is null.");
-                _complete.Invoke();
-                return;
-            }
-            
-            AssetLoader.LoadAsync<T_ASSET>(_m_assetIndex, _asset =>
+            AssetLoader.InstantiateAsync(_m_assetPath, _asset =>
             {
                 _m_asset = _asset;
                 _m_loadComplete?.Invoke(_asset);
@@ -60,13 +64,6 @@ namespace CodaGame
         /// </summary>
         protected override void OnOperationEnd(Action _complete)
         {
-            if (_m_assetIndex == null)
-            {
-                Console.LogWarning(SystemNames.Operation, "Loader is null.");
-                _complete.Invoke();
-                return;
-            }
-
             AssetLoader.Release(_m_asset);
             _m_releaseComplete?.Invoke();
             _complete.Invoke();
