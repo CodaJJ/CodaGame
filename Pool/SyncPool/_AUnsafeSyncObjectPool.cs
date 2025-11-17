@@ -8,25 +8,25 @@ using CodaGame.Base;
 namespace CodaGame
 {
     /// <summary>
-    /// A unsafe synchronous object getter.
+    /// A unsafe synchronous object pool.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// "Unsafe" means that the getter will not make sure that the object is managed by this getter when you release it.
+    /// "Unsafe" means that the pool will not make sure that the object is managed by this pool when you release it.
     /// So you need to specify the key when you release the object.
     /// </para>
-    /// <para>Unsafe getters are faster than safe getters, but you need to be careful when using them.</para>
+    /// <para>Unsafe pools are faster than safe pools, but you need to be careful when using them.</para>
     /// </remarks>
     /// <typeparam name="T_KEY">The key's type for objects</typeparam>
     /// <typeparam name="T_OBJECT">The object's type</typeparam>
-    public abstract class _AUnsafeSyncObjectGetter<T_KEY, T_OBJECT> : _AObjectGetter<T_KEY, T_OBJECT>
+    public abstract class _AUnsafeSyncObjectPool<T_KEY, T_OBJECT> : _AObjectPool<T_KEY, T_OBJECT>
     {
-        protected _AUnsafeSyncObjectGetter(string _name, int _initialCapacityOfCacheList = 4)
+        protected _AUnsafeSyncObjectPool(string _name, int _initialCapacityOfCacheList = 4)
             : base(_name, _initialCapacityOfCacheList)
         {
         }
-        protected _AUnsafeSyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"UnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+        protected _AUnsafeSyncObjectPool(int _initialCapacityOfCacheList = 4)
+            : this($"UnsafeSyncObjectPool_{Serialize.NextUnsafeSyncObjectPool()}", _initialCapacityOfCacheList)
         {
         }
 
@@ -41,24 +41,24 @@ namespace CodaGame
         {
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectPool, name, "Failed to get the object because the key is null");
                 return default;
             }
             
             if (TryGetFromCache(_key, out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectPool, name, $"key-{_key} -- : Get the object from the cache");
                 return obj;
             }
             
             obj = LoadObject(_key);
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, $"key-{_key} -- : Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectPool, name, $"key-{_key} -- : Failed to get the object from the loader.");
                 return obj;
             }
                 
-            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Get the object from the loader");
+            Console.LogVerbose(SystemNames.ObjectPool, name, $"key-{_key} -- : Get the object from the loader");
             return obj;
         }
         /// <summary>
@@ -74,17 +74,17 @@ namespace CodaGame
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectPool, name, "Failed to release the object because the object is null");
                 return;
             }
             
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the key is null");
+                Console.LogWarning(SystemNames.ObjectPool, name, "Failed to release the object because the key is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, name, $"key-{_key} -- : Release the object");
+            Console.LogVerbose(SystemNames.ObjectPool, name, $"key-{_key} -- : Release the object");
             PushBackToCache(_key, _obj);
         }
         
@@ -98,21 +98,21 @@ namespace CodaGame
         protected abstract T_OBJECT LoadObject(T_KEY _key);
     }
     /// <summary>
-    /// A safe synchronous object getter.
+    /// A safe synchronous object pool.
     /// </summary>
     /// <remarks>
-    /// <para>"Unsafe" means that the getter will not make sure that the object is managed by this getter when you release it.</para>
-    /// <para>Unsafe getters are faster than safe getters, but you need to be careful when using them.</para>
+    /// <para>"Unsafe" means that the pool will not make sure that the object is managed by this pool when you release it.</para>
+    /// <para>Unsafe pools are faster than safe pools, but you need to be careful when using them.</para>
     /// </remarks>
     /// <typeparam name="T_OBJECT">The object's type</typeparam>
-    public abstract class _AUnsafeSyncObjectGetter<T_OBJECT> : _AObjectGetter<T_OBJECT>
+    public abstract class _AUnsafeSyncObjectPool<T_OBJECT> : _AObjectPool<T_OBJECT>
     {
-        protected _AUnsafeSyncObjectGetter(string _name, int _initialCapacityOfCacheList = 4)
+        protected _AUnsafeSyncObjectPool(string _name, int _initialCapacityOfCacheList = 4)
             : base(_name, _initialCapacityOfCacheList)
         {
         }
-        protected _AUnsafeSyncObjectGetter(int _initialCapacityOfCacheList = 4)
-            : this($"UnsafeSyncObjectGetter_{Serialize.NextUnsafeSyncObjectGetter()}", _initialCapacityOfCacheList)
+        protected _AUnsafeSyncObjectPool(int _initialCapacityOfCacheList = 4)
+            : this($"UnsafeSyncObjectPool_{Serialize.NextUnsafeSyncObjectPool()}", _initialCapacityOfCacheList)
         {
         }
         
@@ -127,35 +127,35 @@ namespace CodaGame
         {
             if (TryGetFromCache(out T_OBJECT obj))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the cache");
+                Console.LogVerbose(SystemNames.ObjectPool, name, "Get the object from the cache");
                 return obj;
             }
 
             obj = LoadObject();
             if (obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to get the object from the loader.");
+                Console.LogWarning(SystemNames.ObjectPool, name, "Failed to get the object from the loader.");
                 return default;
             }
                 
-            Console.LogVerbose(SystemNames.ObjectGetter, name, "Get the object from the loader");
+            Console.LogVerbose(SystemNames.ObjectPool, name, "Get the object from the loader");
             return obj;
         }
         /// <summary>
         /// Release the object.
         /// </summary>
         /// <remarks>
-        /// <para>This function will check whether the object is managed by the getter.</para>
+        /// <para>This function will check whether the object is managed by the pool.</para>
         /// </remarks>
         public void Release(T_OBJECT _obj)
         {
             if (_obj == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, name, "Failed to release the object because the object is null");
+                Console.LogWarning(SystemNames.ObjectPool, name, "Failed to release the object because the object is null");
                 return;
             }
             
-            Console.LogVerbose(SystemNames.ObjectGetter, name, "Release the object");
+            Console.LogVerbose(SystemNames.ObjectPool, name, "Release the object");
             PushBackToCache(_obj);
         }
         

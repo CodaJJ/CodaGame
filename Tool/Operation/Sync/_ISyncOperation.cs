@@ -1,17 +1,16 @@
-// Copyright (c) 2024 Coda
-// 
+// Copyright (c) 2025 Coda
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
 namespace CodaGame
 {
     /// <summary>
-    /// A interface that for handle getter.
+    /// An interface for synchronous operations with start and end methods.
     /// </summary>
-    /// <remarks>
-    /// Just as a mark for handle getter.
-    /// </remarks>
-    internal interface _IObjectHandleGetter
+    public interface _ISyncOperation
     {
+        public void Start();
+        public void End();
     }
 }

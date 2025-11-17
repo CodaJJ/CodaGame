@@ -10,24 +10,24 @@ using JetBrains.Annotations;
 namespace CodaGame.Base
 {
     /// <summary>
-    /// A base class that provides some basic functions for the getter system.
+    /// A base class that provides some basic functions for the pool system.
     /// </summary>
     /// <remarks>
-    /// <para>The getter system is a cache system that can get objects easily and efficiently.</para>
+    /// <para>The pool system is a cache system that can get objects easily and efficiently.</para>
     /// </remarks>
     /// <typeparam name="T_KEY">The type of key used to index the objects.</typeparam>
-    /// <typeparam name="T_OBJECT">The type of object that is handled by getter system.</typeparam>
-    public abstract class _AObjectGetter<T_KEY, T_OBJECT>
+    /// <typeparam name="T_OBJECT">The type of object that is handled by pool system.</typeparam>
+    public abstract class _AObjectPool<T_KEY, T_OBJECT>
     {
-        // The name of the getter.
+        // The name of the pool.
         private readonly string _m_name;
-        // The capacity of the cache list, specially used for occupied getter and shared getter.
+        // The capacity of the cache list, specially used for occupied pool and shared pool.
         private readonly int _m_cacheListCapacity;
         // The dictionary that maps the key to the cache list.
         [NotNull] private readonly Dictionary<T_KEY, List<T_OBJECT>> _m_keyToCacheList;
         
 
-        internal _AObjectGetter(string _name, int _capacity = 4)
+        internal _AObjectPool(string _name, int _capacity = 4)
         {
             _m_name = _name;
             _m_cacheListCapacity = _capacity;
@@ -37,7 +37,7 @@ namespace CodaGame.Base
 
 
         /// <summary>
-        /// The name of the getter, usually used for debugging.
+        /// The name of the pool, usually used for debugging.
         /// </summary>
         public string name { get { return _m_name; } }
         
@@ -54,13 +54,13 @@ namespace CodaGame.Base
         {
             if (_predicate == null)
             {
-                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that have not been used will be deleted.");
+                Console.LogSystem(SystemNames.ObjectPool, _m_name, "The caches that have not been used will be deleted.");
                 foreach (List<T_OBJECT> cacheList in _m_keyToCacheList.Values)
                 {
                     foreach (T_OBJECT obj in cacheList)
                     {
                         DestroyObject(obj);
-                        Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
+                        Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({obj}) is destroyed in the cache list.");
                     }
                 }
                 
@@ -68,7 +68,7 @@ namespace CodaGame.Base
             }
             else
             {
-                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that meet the condition will be deleted.");
+                Console.LogSystem(SystemNames.ObjectPool, _m_name, "The caches that meet the condition will be deleted.");
                 
                 List<T_KEY> keysEmpty = new List<T_KEY>();
                 foreach (KeyValuePair<T_KEY, List<T_OBJECT>> keyValuePair in _m_keyToCacheList)
@@ -81,11 +81,11 @@ namespace CodaGame.Base
                         {
                             cacheList.RemoveAt(i);
                             DestroyObject(obj);
-                            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
+                            Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({obj}) is destroyed in the cache list.");
                         }
                     }
 
-                    Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"Now the key({keyValuePair.Key})'s cache list has {cacheList.Count} objects.");
+                    Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"Now the key({keyValuePair.Key})'s cache list has {cacheList.Count} objects.");
                     if (cacheList.Count == 0)
                         keysEmpty.Add(keyValuePair.Key);
                 }
@@ -124,19 +124,19 @@ namespace CodaGame.Base
 
             if (_key == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The key is null, when trying to get object from cache.");
+                Console.LogWarning(SystemNames.ObjectPool, _m_name, "The key is null, when trying to get object from cache.");
                 return false;
             }
 
             if (!_m_keyToCacheList.TryGetValue(_key, out List<T_OBJECT> objectList))
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The key({_key}) is not found in the cache list.");
+                Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The key({_key}) is not found in the cache list.");
                 return false;
             }
 
             if (objectList.Count == 0)
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The key({_key})'s cache list is empty.");
+                Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The key({_key})'s cache list is empty.");
                 return false;
             }
             
@@ -144,7 +144,7 @@ namespace CodaGame.Base
             if (objectList.Count == 0)
                 _m_keyToCacheList.Remove(_key);
             
-            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is retrieved from the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({_object}) is retrieved from the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
             return true;
         }
         /// <summary>
@@ -154,14 +154,14 @@ namespace CodaGame.Base
         {
             if (_object == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The object is null, when trying to push back to cache.");
+                Console.LogWarning(SystemNames.ObjectPool, _m_name, "The object is null, when trying to push back to cache.");
                 return;
             }
 
             if (_key == null)
             {
                 DestroyObject(_object);
-                Console.LogWarning(SystemNames.ObjectGetter, _m_name, $"The key is null, when trying to push back to cache, so the object({_object}) is destroyed.");
+                Console.LogWarning(SystemNames.ObjectPool, _m_name, $"The key is null, when trying to push back to cache, so the object({_object}) is destroyed.");
                 return;
             }
 
@@ -173,25 +173,25 @@ namespace CodaGame.Base
             }
             
             objectList.Add(_object);
-            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is pushed back to the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({_object}) is pushed back to the cache list, now the key({_key})'s cache list has {objectList.Count} objects.");
         }
     }
     /// <summary>
-    /// A base class that provides some basic functions for the getter system.
+    /// A base class that provides some basic functions for the pool system.
     /// </summary>
     /// <remarks>
-    /// <para>The getter system is a cache system that can get objects easily and efficiently.</para>
+    /// <para>The pool system is a cache system that can get objects easily and efficiently.</para>
     /// </remarks>
-    /// <typeparam name="T_OBJECT">The type of object that is handled by getter system.</typeparam>
-    public abstract class _AObjectGetter<T_OBJECT>
+    /// <typeparam name="T_OBJECT">The type of object that is handled by pool system.</typeparam>
+    public abstract class _AObjectPool<T_OBJECT>
     {
-        // The name of the getter.
+        // The name of the pool.
         private readonly string _m_name;
         // The list that stores the objects that are returned to the cache.
         [NotNull] private readonly List<T_OBJECT> _m_cacheList;
         
 
-        internal _AObjectGetter(string _name, int _capacity = 4)
+        internal _AObjectPool(string _name, int _capacity = 4)
         {
             _m_name = _name;
             
@@ -200,7 +200,7 @@ namespace CodaGame.Base
 
 
         /// <summary>
-        /// The name of the getter, usually used for debugging.
+        /// The name of the pool, usually used for debugging.
         /// </summary>
         public string name { get { return _m_name; } }
 
@@ -217,18 +217,18 @@ namespace CodaGame.Base
         {
             if (_predicate == null)
             {
-                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that have not been used will be deleted");
+                Console.LogSystem(SystemNames.ObjectPool, _m_name, "The caches that have not been used will be deleted");
                 foreach (T_OBJECT obj in _m_cacheList)
                 {
                     DestroyObject(obj);
-                    Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
+                    Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({obj}) is destroyed in the cache list.");
                 }
 
                 _m_cacheList.Clear();
             }
             else
             {
-                Console.LogSystem(SystemNames.ObjectGetter, _m_name, "The caches that meet the condition will be deleted");
+                Console.LogSystem(SystemNames.ObjectPool, _m_name, "The caches that meet the condition will be deleted");
                 for (int i = _m_cacheList.Count - 1; i >= 0; i--)
                 {
                     T_OBJECT obj = _m_cacheList[i];
@@ -236,11 +236,11 @@ namespace CodaGame.Base
                     {
                         _m_cacheList.RemoveAt(i);
                         DestroyObject(obj);
-                        Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({obj}) is destroyed in the cache list.");
+                        Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({obj}) is destroyed in the cache list.");
                     }
                 }
 
-                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"Now The cache list has {_m_cacheList.Count} objects.");
+                Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"Now The cache list has {_m_cacheList.Count} objects.");
             }
         }
 
@@ -273,12 +273,12 @@ namespace CodaGame.Base
 
             if (_m_cacheList.Count == 0)
             {
-                Console.LogVerbose(SystemNames.ObjectGetter, _m_name, "The cache list is empty.");
+                Console.LogVerbose(SystemNames.ObjectPool, _m_name, "The cache list is empty.");
                 return false;
             }
             
             _object = _m_cacheList.GetLastAndRemove();
-            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is retrieved from the cache list, now the cache list has {_m_cacheList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({_object}) is retrieved from the cache list, now the cache list has {_m_cacheList.Count} objects.");
             return true;
         }
         /// <summary>
@@ -288,13 +288,13 @@ namespace CodaGame.Base
         {
             if (_object == null)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, _m_name, "The object is null, when trying to push back to cache.");
+                Console.LogWarning(SystemNames.ObjectPool, _m_name, "The object is null, when trying to push back to cache.");
                 return;
             }
             
             ResetObject(_object);
             _m_cacheList.Add(_object);
-            Console.LogVerbose(SystemNames.ObjectGetter, _m_name, $"The object({_object}) is pushed back to the cache list, now the cache list has {_m_cacheList.Count} objects.");
+            Console.LogVerbose(SystemNames.ObjectPool, _m_name, $"The object({_object}) is pushed back to the cache list, now the cache list has {_m_cacheList.Count} objects.");
         }
     }
 }

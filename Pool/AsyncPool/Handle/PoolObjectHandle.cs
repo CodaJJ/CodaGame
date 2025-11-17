@@ -9,16 +9,16 @@ using JetBrains.Annotations;
 namespace CodaGame
 {
     /// <summary>
-    /// Represents a handle for an object managed by a getter system.
+    /// Represents a handle for an object managed by a pool system.
     /// </summary>
     /// <remarks>
-    /// This class provides mechanisms to interact with the object and perform actions when the object is set by getter system.
+    /// This class provides mechanisms to interact with the object and perform actions when the object is set by pool system.
     /// </remarks>
     /// <typeparam name="T_OBJECT">The type of the object.</typeparam>
-    public class GetterObjectHandle<T_OBJECT>
+    public class PoolObjectHandle<T_OBJECT>
     {
-        // The getter that owns the handle.
-        [NotNull] private readonly _IObjectHandleGetter _m_getter;
+        // The pool that owns the handle.
+        [NotNull] private readonly _IObjectHandlePool _m_pool;
         
         // The managed object.
         private T_OBJECT _m_object;
@@ -32,9 +32,9 @@ namespace CodaGame
         private bool _m_isEnable;
         
         
-        internal GetterObjectHandle([NotNull] _IObjectHandleGetter _getter)
+        internal PoolObjectHandle([NotNull] _IObjectHandlePool _pool)
         {
-            _m_getter = _getter;
+            _m_pool = _pool;
             
             _m_isEnable = true;
         }
@@ -73,7 +73,7 @@ namespace CodaGame
         {
             if (!_m_isEnable)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, "The handle is released, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectPool, "The handle is released, it's meaningless to call this function.");
                 return;
             }
             
@@ -89,13 +89,13 @@ namespace CodaGame
         /// Adds an action to be performed when the object is loaded (load failed or released before load done will still trigger the action).
         /// </summary>
         /// <remarks>
-        /// Because of the getter system is async, you can add an action to be performed when the async load is done.
+        /// Because of the pool system is async, you can add an action to be performed when the async load is done.
         /// </remarks>
         public void AddLoadDoneAction(Action _action)
         {
             if (!_m_isEnable)
             {
-                Console.LogWarning(SystemNames.ObjectGetter, "The handle is released, it's meaningless to call this function.");
+                Console.LogWarning(SystemNames.ObjectPool, "The handle is released, it's meaningless to call this function.");
                 return;
             }
             
@@ -110,7 +110,7 @@ namespace CodaGame
         
         
         /// <summary>
-        /// Sets the object, called by getter system.
+        /// Sets the object, called by pool system.
         /// </summary>
         internal void SetObject(T_OBJECT _object)
         {
@@ -121,7 +121,7 @@ namespace CodaGame
             _m_onObjectSet = null;
         }
         /// <summary>
-        /// Sets the load done, called by getter system.
+        /// Sets the load done, called by pool system.
         /// </summary>
         internal void SetLoadDone()
         {
@@ -130,37 +130,37 @@ namespace CodaGame
             _m_onLoadDone = null;
         }
         /// <summary>
-        /// Disables the handle, called by getter system.
+        /// Disables the handle, called by pool system.
         /// </summary>
         internal void SetDisable()
         {
             _m_isEnable = false;
         }
         /// <summary>
-        /// Checks whether the getter is the owner of the handle.
+        /// Checks whether the pool is the owner of the handle.
         /// </summary>
-        internal bool CheckOwner(_IObjectHandleGetter _owner)
+        internal bool CheckOwner(_IObjectHandlePool _owner)
         {
-            return _m_getter == _owner;
+            return _m_pool == _owner;
         }
     }
 
     /// <summary>
-    /// Represents a handle for an object managed by a getter system.
+    /// Represents a handle for an object managed by a pool system.
     /// </summary>
     /// <remarks>
-    /// This class provides mechanisms to interact with the object and perform actions when the object is set by getter system.
+    /// This class provides mechanisms to interact with the object and perform actions when the object is set by pool system.
     /// </remarks>
     /// <typeparam name="T_KEY">The key of the object.</typeparam>
     /// <typeparam name="T_OBJECT">The type of the object.</typeparam>
-    public class GetterObjectHandle<T_KEY, T_OBJECT> : GetterObjectHandle<T_OBJECT>
+    public class PoolObjectHandle<T_KEY, T_OBJECT> : PoolObjectHandle<T_OBJECT>
     {
         // The key of the object.
         [NotNull] private readonly T_KEY _m_key;
         
         
-        internal GetterObjectHandle([NotNull] _IObjectHandleGetter _getter, [NotNull] T_KEY _key)
-            : base(_getter)
+        internal PoolObjectHandle([NotNull] _IObjectHandlePool _pool, [NotNull] T_KEY _key)
+            : base(_pool)
         {
             _m_key = _key;
         }

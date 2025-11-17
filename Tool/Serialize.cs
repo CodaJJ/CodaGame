@@ -14,11 +14,11 @@ namespace CodaGame
         private static uint _g_asyncParallelSerialize = 0;
         private static uint _g_asyncWaterfallSerialize = 0;
         private static uint _g_stateMachineSerialize = 0;
-        private static uint _g_safeAsyncObjectGetterSerialize = 0;
-        private static uint _g_unsafeAsyncObjectGetterSerialize = 0;
-        private static uint _g_safeSyncObjectGetterSerialize = 0;
-        private static uint _g_unsafeSyncObjectGetterSerialize = 0;
-        private static uint _g_objectHandleGetterSerialize = 0;
+        private static uint _g_safeAsyncObjectPoolSerialize = 0;
+        private static uint _g_unsafeAsyncObjectPoolSerialize = 0;
+        private static uint _g_safeSyncObjectPoolSerialize = 0;
+        private static uint _g_unsafeSyncObjectPoolSerialize = 0;
+        private static uint _g_objectHandlePoolSerialize = 0;
         private static uint _g_actionTaskSerialize = 0;
         private static uint _g_continuousTaskSerialize = 0;
         private static uint _g_delayActionTaskSerialize = 0;
@@ -53,25 +53,25 @@ namespace CodaGame
         {
             return _g_stateMachineSerialize++;
         }
-        internal static uint NextSafeAsyncObjectGetter()
+        internal static uint NextSafeAsyncObjectPool()
         {
-            return _g_safeAsyncObjectGetterSerialize++;
+            return _g_safeAsyncObjectPoolSerialize++;
         }
-        internal static uint NextUnsafeAsyncObjectGetter()
+        internal static uint NextUnsafeAsyncObjectPool()
         {
-            return _g_unsafeAsyncObjectGetterSerialize++;
+            return _g_unsafeAsyncObjectPoolSerialize++;
         }
-        internal static uint NextSafeSyncObjectGetter()
+        internal static uint NextSafeSyncObjectPool()
         {
-            return _g_safeSyncObjectGetterSerialize++;
+            return _g_safeSyncObjectPoolSerialize++;
         }
-        internal static uint NextUnsafeSyncObjectGetter()
+        internal static uint NextUnsafeSyncObjectPool()
         {
-            return _g_unsafeSyncObjectGetterSerialize++;
+            return _g_unsafeSyncObjectPoolSerialize++;
         }
-        internal static uint NextObjectHandleGetter()
+        internal static uint NextObjectHandlePool()
         {
-            return _g_objectHandleGetterSerialize++;
+            return _g_objectHandlePoolSerialize++;
         }
         internal static uint NextActionTask()
         {
