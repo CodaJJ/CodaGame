@@ -3,8 +3,6 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using CodaGame.Base;
 using JetBrains.Annotations;
 using UnityEngine;
