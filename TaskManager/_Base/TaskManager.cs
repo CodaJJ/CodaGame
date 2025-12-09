@@ -3,6 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
 using System.Threading;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -12,12 +13,12 @@ namespace CodaGame.Base
     /// <summary>
     /// A MonoBehaviour for running tasks.
     /// </summary>
-    internal class TaskManager : MonoBehaviour
+    internal class TaskManager : MonoBehaviour, _ITaskManager
     {
         /// <summary>
         /// The singleton of TaskManager.
         /// </summary>
-        [NotNull] public static TaskManager instance
+        [NotNull] public static _ITaskManager instance
         {
             get
             {
@@ -46,7 +47,7 @@ namespace CodaGame.Base
                 return _g_instance;
             }
         }
-        private static TaskManager _g_instance;
+        private static _ITaskManager _g_instance;
         [NotNull] private static readonly object _g_lock = new object();
 
 
@@ -766,6 +767,10 @@ namespace CodaGame.Base
                 _m_lateUpdateContinuousTaskContainer.NextFrame();
                 Monitor.Exit(_m_lateUpdateContinuousTaskContainer);
             }
+        }
+        private void OnApplicationQuit()
+        {
+            _g_instance = new NullTaskManager();
         }
     }
 }
