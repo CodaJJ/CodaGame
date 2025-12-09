@@ -256,15 +256,6 @@ namespace CodaGame
         #region Dictionary
         
         /// <summary>
-        /// Get the value of the dictionary, and remove it from the dictionary.
-        /// </summary>
-        public static T_VALUE GetValueAndRemove<T_KEY, T_VALUE>(this Dictionary<T_KEY, T_VALUE> _dictionary, T_KEY _key)
-        {
-            T_VALUE value = _dictionary[_key];
-            _dictionary.Remove(_key);
-            return value;
-        }
-        /// <summary>
         /// Get the value of the dictionary, if the key does not exist, add a new value with default constructor.
         /// </summary>
         [NotNull]

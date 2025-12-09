@@ -13,6 +13,16 @@ using UnityEngine;
 
 namespace CodaGame.Editor
 {
+    /// <summary>
+    /// Config Importer Window
+    /// </summary>
+    /// <remarks>
+    /// <para>Allows importing game config data from Excel files into ScriptableObject assets.</para>
+    /// <para>Supports both constants configs and table configs.</para>
+    /// <para>The window will collect all config types in the project that are subclasses of <see cref="_AConstantsConfig"/> or <see cref="_ATableConfig{T}"/>.</para>
+    /// <para>For each config type, the user can specify the Excel file path and sheet name to import from.</para>
+    /// <para>The imported data will be saved into ScriptableObject assets in the specified output folder.</para>
+    /// </remarks>
     public class ConfigImporterWindow : EditorWindow
     {
         private ConfigImporterSetting _m_setting;

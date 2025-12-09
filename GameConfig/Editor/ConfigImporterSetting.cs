@@ -9,6 +9,9 @@ using UnityEditor;
 
 namespace CodaGame.Editor
 {
+    /// <summary>
+    /// Settings for the Config Importer tool.
+    /// </summary>
     internal class ConfigImporterSetting : _AGameSetting
     {
         public AssetPath outputFolderPath = "Assets/Configs";
