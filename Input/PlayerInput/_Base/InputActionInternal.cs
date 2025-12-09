@@ -10,9 +10,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-namespace CodaGame
+namespace CodaGame.Base
 {
-    public partial class PlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>
+    public partial class _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>
         where T_ACTION_MAP_ENUM : Enum
         where T_ACTION_ENUM : Enum
     {
@@ -21,7 +21,7 @@ namespace CodaGame
         /// </summary>
         private class InputActionInternal
         {
-            [NotNull] private readonly PlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _m_playerInput;
+            [NotNull] private readonly _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _m_playerInput;
             // Cached action callback context circular buffer
             [NotNull] private readonly InputAction.CallbackContext[] _m_actionCtxBuffer;
             // Specific type event management dictionary
@@ -40,7 +40,7 @@ namespace CodaGame
             private event Action<InputAction.CallbackContext> _m_canceledWithCtx;
 
 
-            public InputActionInternal([NotNull] PlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _playerInput, [NotNull] InputAction _action)
+            public InputActionInternal([NotNull] _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _playerInput, [NotNull] InputAction _action)
             {
                 _m_playerInput = _playerInput;
                 _m_specificTypeEvents = new Dictionary<Type, _ASpecificTypeEvent>();

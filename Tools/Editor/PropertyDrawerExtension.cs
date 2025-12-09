@@ -31,18 +31,29 @@ namespace CodaGame.Editor
     [CustomPropertyDrawer(typeof(string), true)]
     public class PropertyDrawerExtension : PropertyDrawer
     {
-        public override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
+        public sealed override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
         {
             TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
-            return EditorGUI.GetPropertyHeight(_property, _label);
+            return GetPropertyHeightInternal(_property, _label);
         }
-        public override void OnGUI(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
+        public sealed override void OnGUI(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
         {
             TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
+            OnGUIInternal(_position, _property, _label);
+        }
+        
+        
+        protected virtual float GetPropertyHeightInternal([NotNull] SerializedProperty _property, GUIContent _label)
+        {
+            return EditorGUI.GetPropertyHeight(_property, _label, true);
+        }
+        protected virtual void OnGUIInternal(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
+        {
             EditorGUI.PropertyField(_position, _property, _label, true);
         }
+        
 
 
         /// <summary>

@@ -9,9 +9,9 @@ using UnityEngine;
 namespace CodaGame.Editor
 {
     [CustomPropertyDrawer(typeof(RadianAttribute), true)]
-    public class RadianDrawer : PropertyDrawer
+    public class RadianDrawer : PropertyDrawerExtension
     {
-        public override void OnGUI(Rect _position, SerializedProperty _property, GUIContent _label)
+        protected override void OnGUIInternal(Rect _position, SerializedProperty _property, GUIContent _label)
         {
             EditorGUI.BeginProperty(_position, _label, _property);
             {
@@ -36,8 +36,7 @@ namespace CodaGame.Editor
             }
             EditorGUI.EndProperty();
         }
-
-        public override float GetPropertyHeight(SerializedProperty _property, GUIContent _label)
+        protected override float GetPropertyHeightInternal(SerializedProperty _property, GUIContent _label)
         {
             return EditorGUI.GetPropertyHeight(_property, _label);
         }

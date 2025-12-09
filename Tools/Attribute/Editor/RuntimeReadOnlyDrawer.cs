@@ -9,9 +9,9 @@ using UnityEngine;
 namespace CodaGame.Editor
 {
     [CustomPropertyDrawer(typeof(RuntimeReadOnlyAttribute))]
-    public class RuntimeReadOnlyDrawer : PropertyDrawer
+    public class RuntimeReadOnlyDrawer : PropertyDrawerExtension
     {
-        public override void OnGUI(Rect _position, SerializedProperty _property, GUIContent _label)
+        protected sealed override void OnGUIInternal(Rect _position, SerializedProperty _property, GUIContent _label)
         {
             bool previousGUIState = GUI.enabled;
         
@@ -21,7 +21,7 @@ namespace CodaGame.Editor
             GUI.enabled = previousGUIState;
         }
     
-        public override float GetPropertyHeight(SerializedProperty _property, GUIContent _label)
+        protected override float GetPropertyHeightInternal(SerializedProperty _property, GUIContent _label)
         {
             return EditorGUI.GetPropertyHeight(_property, _label, true);
         }

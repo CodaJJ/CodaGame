@@ -158,6 +158,7 @@ namespace CodaGame
         /// <summary>
         /// Try parse Vector2Int from string "(x,y)"
         /// </summary>
+        [Pure]
         public static bool TryParse(string _str, out Vector2Int _result)
         {
             _result = Vector2Int.zero;
@@ -187,6 +188,7 @@ namespace CodaGame
         /// <summary>
         /// Try parse Vector3Int from string "(x,y,z)"
         /// </summary>
+        [Pure]
         public static bool TryParse(string _str, out Vector3Int _result)
         {
             _result = Vector3Int.zero;

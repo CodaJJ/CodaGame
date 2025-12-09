@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using RebindingOperation = UnityEngine.InputSystem.InputActionRebindingExtensions.RebindingOperation;
 
-namespace CodaGame
+namespace CodaGame.Base
 {
     /// <summary>
     /// Input management class for a single player
@@ -18,20 +18,18 @@ namespace CodaGame
     /// <remarks>
     /// Note: This class is not InputSystem's PlayerInput component, but they have similar functionality. You can find all methods related to player input here.
     /// </remarks>
-    public partial class PlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>
+    public abstract partial class _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> : _IInputDeviceUser
         where T_ACTION_MAP_ENUM : Enum
         where T_ACTION_ENUM : Enum
     {
-        // Name prefix for this class
-        private const string _k_prefixKey = "PlayerInput_";
         // How long actions will be buffered
         private const float _k_actionBufferTime = 2f;
 
 
         // Current player's input action asset
         [NotNull] private readonly InputActionAsset _m_actionAsset;
-        // Current player's index
-        private readonly int _m_playerIndex;
+        // Current player's name
+        private readonly string _m_playerName;
         // Devices used by this player
         [ItemNotNull, NotNull] private readonly List<InputDevice> _m_devices;
         // Dictionary mapping enum values to input action maps
@@ -49,80 +47,70 @@ namespace CodaGame
         /// <summary>
         /// Construct a player input manager
         /// </summary>
+        /// <param name="_playerName">Player's name</param>
         /// <param name="_actionAsset">Action asset resource</param>
-        /// <param name="_playerIndex">Player index number</param>
         /// <param name="_devices">Devices used by the player</param>
-        /// <param name="_actionPathMapping">Mapping from action enum to action path</param>
-        /// <param name="_actionMapPathMapping">Mapping from action map enum to action map path</param>
-        internal PlayerInput([NotNull] InputActionAsset _actionAsset, int _playerIndex, [NotNull] List<InputDevice> _devices, 
-            [NotNull] Dictionary<T_ACTION_ENUM, string> _actionPathMapping,
-            [NotNull] Dictionary<T_ACTION_MAP_ENUM, string> _actionMapPathMapping)
+        /// <param name="_actionPathMappingConfig">Mapping from action enum to action path</param>
+        /// <param name="_actionMapPathMappingConfig">Mapping from action map enum to action map path</param>
+        internal _APlayerInput(string _playerName, [NotNull] InputActionAsset _actionAsset, 
+            [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
+            [NotNull] _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
         {
             _m_enum2ActionDict = new Dictionary<T_ACTION_ENUM, InputActionInternal>();
             _m_enum2ActionMapDict = new Dictionary<T_ACTION_MAP_ENUM, InputActionMapInternal>();
+            _m_devices = new List<InputDevice>();
             
-            _m_playerIndex = _playerIndex;
+            _m_playerName = _playerName;
             _m_actionAsset = _actionAsset;
             _m_isEnable = true;
             _m_currentScheme = ControlSchemeType.Unknown;
-
-            _m_devices = new List<InputDevice>(_devices.Count);
-            foreach (InputDevice device in _devices)
-            {
-                if (device == null)
-                {
-                    Console.LogWarning(SystemNames.Input, name, "One of the devices is null, it will be ignored.");
-                    continue;
-                }
-                _m_devices.Add(device);
-            }
             
-            foreach (KeyValuePair<T_ACTION_ENUM, string> pair in _actionPathMapping)
+            foreach (InputActionPathConfigItem<T_ACTION_ENUM> configItem in _actionPathMappingConfig.notNullDataList)
             {
-                if (pair.Value == null)
+                if (string.IsNullOrEmpty(configItem.actionPath))
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action path for enum {pair.Key} is null, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action path for enum {configItem.actionEnum} is null or empty, it will be ignored.");
                     continue;
                 }
 
-                InputAction action = _m_actionAsset.FindAction(pair.Value);
+                InputAction action = _m_actionAsset.FindAction(configItem.actionPath);
                 if (action == null)
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action for enum {pair.Key} with path {pair.Value} is not found, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action for enum {configItem.actionEnum} with path {configItem.actionPath} is not found, it will be ignored.");
                     continue;
                 }
 
-                if (_m_enum2ActionDict.ContainsKey(pair.Key))
+                if (_m_enum2ActionDict.ContainsKey(configItem.actionEnum))
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action for enum {pair.Key} with path {pair.Value} is already mapped, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action for enum {configItem.actionEnum} with path {configItem.actionPath} is already mapped, it will be ignored.");
                     continue;
                 }
 
-                _m_enum2ActionDict.Add(pair.Key, new InputActionInternal(this, action));
+                _m_enum2ActionDict.Add(configItem.actionEnum, new InputActionInternal(this, action));
             }
             
-            foreach (KeyValuePair<T_ACTION_MAP_ENUM, string> pair in _actionMapPathMapping)
+            foreach (InputActionMapPathConfigItem<T_ACTION_MAP_ENUM> configItem in _actionMapPathMappingConfig.notNullDataList)
             {
-                if (pair.Value == null)
+                if (string.IsNullOrEmpty(configItem.actionMapPath))
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map path for enum {pair.Key} is null, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action map path for enum {configItem.actionMapEnum} is null or empty, it will be ignored.");
                     continue;
                 }
 
-                InputActionMap actionMap = _m_actionAsset.FindActionMap(pair.Value);
+                InputActionMap actionMap = _m_actionAsset.FindActionMap(configItem.actionMapPath);
                 if (actionMap == null)
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {pair.Key} with path {pair.Value} is not found, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {configItem.actionMapEnum} with path {configItem.actionMapPath} is not found, it will be ignored.");
                     continue;
                 }
 
-                if (_m_enum2ActionMapDict.ContainsKey(pair.Key))
+                if (_m_enum2ActionMapDict.ContainsKey(configItem.actionMapEnum))
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {pair.Key} with path {pair.Value} is already mapped, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {configItem.actionMapEnum} with path {configItem.actionMapPath} is already mapped, it will be ignored.");
                     continue;
                 }
 
-                _m_enum2ActionMapDict.Add(pair.Key, new InputActionMapInternal(actionMap));
+                _m_enum2ActionMapDict.Add(configItem.actionMapEnum, new InputActionMapInternal(actionMap));
             }
             
             Initialize();
@@ -152,7 +140,7 @@ namespace CodaGame
         /// <summary>
         /// Name of this player input
         /// </summary>
-        public string name { get { return _k_prefixKey + _m_playerIndex; } }
+        public string name { get { return _m_playerName; } }
         /// <summary>
         /// Whether this class is still enabled
         /// </summary>
@@ -170,57 +158,13 @@ namespace CodaGame
         /// <remarks>
         /// Automatically removed when devices disconnect, until they are added again
         /// </remarks>
-        public IReadOnlyList<InputDevice> devices { get { LogIfInvalid(); return _m_devices; } }
+        public ReadOnlyList<InputDevice> devices { get { LogIfInvalid(); return _m_devices; } }
+        /// <summary>
+        /// How the input devices are managed for this player
+        /// </summary>
+        public abstract PlayerInputDeviceManagementType deviceManagementType { get; }
         
         
-        /// <summary>
-        /// Add a new input device
-        /// </summary>
-        public void AddDevice(InputDevice _device)
-        {
-            if (LogIfInvalid())
-                return;
-            
-            if (_device == null)
-            {
-                Console.LogWarning(SystemNames.Input, name, "Add device failed, device is null.");
-                return;
-            }
-            if (_m_devices.Contains(_device))
-            {
-                Console.LogWarning(SystemNames.Input, name, $"Add device failed, device {_device.displayName} is already added.");
-                return;
-            }
-
-            _m_devices.Add(_device);
-            _m_actionAsset.devices = _m_devices.ToArray();
-            onDeviceAdded?.Invoke(_device);
-        }
-        /// <summary>
-        /// Remove an input device
-        /// </summary>
-        public void RemoveDevice(InputDevice _device)
-        {
-            if (LogIfInvalid())
-                return;
-            
-            if (_device == null)
-            {
-                Console.LogWarning(SystemNames.Input, name, "Remove device failed, device is null.");
-                return;
-            }
-            if (!_m_devices.Contains(_device))
-            {
-                Console.LogWarning(SystemNames.Input, name, $"Remove device failed, device {_device.displayName} is not found.");
-                return;
-            }
-
-            _m_devices.Remove(_device);
-            _m_actionAsset.devices = _m_devices.ToArray();
-            onDeviceLost?.Invoke(_device);
-            if (_m_devices.Count == 0)
-                onLostAllDevices?.Invoke();
-        }
         /// <summary>
         /// Enable an action map
         /// </summary>
@@ -629,7 +573,58 @@ namespace CodaGame
             return control;
         }
 
+        
+        /// <summary>
+        /// Add a new input device
+        /// </summary>
+        bool _IInputDeviceUser.AddDevice(InputDevice _device)
+        {
+            if (LogIfInvalid())
+                return false;
+            
+            if (_device == null)
+            {
+                Console.LogWarning(SystemNames.Input, name, "Add device failed, device is null.");
+                return false;
+            }
+            if (_m_devices.Contains(_device))
+            {
+                Console.LogWarning(SystemNames.Input, name, $"Add device failed, device {_device.displayName} is already added.");
+                return false;
+            }
 
+            _m_devices.Add(_device);
+            _m_actionAsset.devices = _m_devices.ToArray();
+            onDeviceAdded?.Invoke(_device);
+            return true;
+        }
+        /// <summary>
+        /// Remove an input device
+        /// </summary>
+        bool _IInputDeviceUser.RemoveDevice(InputDevice _device)
+        {
+            if (LogIfInvalid())
+                return false;
+            
+            if (_device == null)
+            {
+                Console.LogWarning(SystemNames.Input, name, "Remove device failed, device is null.");
+                return false;
+            }
+            if (!_m_devices.Contains(_device))
+            {
+                Console.LogWarning(SystemNames.Input, name, $"Remove device failed, device {_device.displayName} is not found.");
+                return false;
+            }
+
+            _m_devices.Remove(_device);
+            _m_actionAsset.devices = _m_devices.ToArray();
+            onDeviceLost?.Invoke(_device);
+            if (_m_devices.Count == 0)
+                onLostAllDevices?.Invoke();
+            return true;
+        }
+        
         /// <summary>
         /// Dispose function called by PlayerInputManager
         /// </summary>
@@ -646,7 +641,6 @@ namespace CodaGame
             _m_enum2ActionMapDict.Clear();
             
             _m_isEnable = false;
-            InputSystem.onDeviceChange -= OnDeviceChange;
         }
         
         
@@ -659,8 +653,6 @@ namespace CodaGame
                 _m_actionAsset.LoadBindingOverridesFromJson(bindingString);
             // Set devices used by this player
             _m_actionAsset.devices = _m_devices.ToArray();
-            // Listen for device disconnect events
-            InputSystem.onDeviceChange += OnDeviceChange;
         }
         // Log warning if the class is already disposed
         private bool LogIfInvalid()
@@ -683,18 +675,6 @@ namespace CodaGame
             {
                 _m_currentScheme = _controlSchemeType;
                 onSchemeChanged?.Invoke(_m_currentScheme);
-            }
-        }
-        // Handle device change events, remove disconnected devices
-        private void OnDeviceChange(InputDevice _device, InputDeviceChange _change)
-        {
-            if (!_m_isEnable || _device == null)
-                return;
-
-            if (_change is InputDeviceChange.Disconnected or InputDeviceChange.Removed)
-            {
-                if (_m_devices.Contains(_device))
-                    RemoveDevice(_device);
             }
         }
         // Callback when rebinding is complete

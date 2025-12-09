@@ -25,13 +25,13 @@ namespace CodaGame
         // Temporary list for storing candidates to be removed
         [NotNull] private readonly List<InputControl> _m_tempCandidates;
 
-        // The active rebinding operation (null when completed or cancelled)
+        // The active rebinding operation (null when completed or canceled)
         private RebindingOperation _m_startRebinding;
         // List of devices allowed for rebinding
         [NotNull] private readonly List<InputDevice> _m_devices;
         // Task handle for timeout functionality
         private readonly TaskHandle _m_timeOutTask;
-        // Callback invoked when rebinding completes or is cancelled
+        // Callback invoked when rebinding completes or is canceled
         private readonly CompleteCallback _m_endCallback;
 
         // Type of the captured input button

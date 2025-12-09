@@ -10,23 +10,31 @@ using UnityEngine;
 
 namespace CodaGame
 {
+    /// <summary>
+    /// Represents a normalized asset path within the Unity project.
+    /// </summary>
+    /// <remarks>
+    /// Created by a string path, and then you can get the unity path (relative to project root) or absolute path.
+    /// </remarks>
     [Serializable]
     public struct AssetPath : IEquatable<AssetPath>
     {
         [SerializeField] private string _m_unityPath;
 
 
-        public AssetPath(string _unityPath)
+        public AssetPath(string _path)
         {
-            _m_unityPath = NormalizePath(_unityPath);
+            _m_unityPath = NormalizePath(_path);
         }
 
 
-        public string unityPath
-        {
-            get { return _m_unityPath; }
-            set { _m_unityPath = NormalizePath(value); }
-        }
+        /// <summary>
+        /// Path relative to the Unity project root.
+        /// </summary>
+        public string unityPath { get { return _m_unityPath; } }
+        /// <summary>
+        /// Absolute path in the file system.
+        /// </summary>
         [NotNull] public string absolutePath
         {
             get

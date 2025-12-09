@@ -7,9 +7,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine.InputSystem;
 
-namespace CodaGame
+namespace CodaGame.Base
 {
-    public partial class PlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>
+    public partial class _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>
         where T_ACTION_MAP_ENUM : Enum
         where T_ACTION_ENUM : Enum
     {
