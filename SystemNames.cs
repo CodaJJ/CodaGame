@@ -21,5 +21,6 @@ namespace CodaGame
         public const string Config = "Config";
         public const string System = "System";
         public const string Input = "Input";
+        public const string Save = "Save";
     }
 }

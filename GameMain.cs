@@ -6,6 +6,7 @@
 using CodaGame.Base;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 namespace CodaGame
@@ -28,6 +29,8 @@ namespace CodaGame
 
         [SerializeField, RuntimeReadOnly]
         private int _m_logicFps = 60;
+        [SerializeField, RuntimeReadOnly]
+        private string _m_gameVersion = "1.0.0";
 
         [NotNull] private readonly LogicLoop _m_logicLoopTask;
         [NotNull] private readonly ShowLoop _m_showLoopTask;
@@ -42,6 +45,7 @@ namespace CodaGame
         
         public int logicFps { get { return _m_logicFps; } }
         public int logicFrameCount { get { return _m_logicLoopTask.frameCount; } }
+        public string gameVersion { get { return _m_gameVersion; } }
 
 
         public int CalculateLogicFrameIndex(double _timeSinceStartup)

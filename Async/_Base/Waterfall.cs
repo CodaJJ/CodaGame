@@ -59,7 +59,6 @@ namespace CodaGame.Base
             _m_functionQueue.Enqueue(_function);
             Console.LogVerbose(SystemNames.Async, _m_name, $"Enqueue a new function, now the function count is {_m_functionQueue.Count}.");
             
-
             TryToRunTheNextFunction();
         }
         /// <summary>

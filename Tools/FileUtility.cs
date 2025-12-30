@@ -22,7 +22,7 @@ namespace CodaGame
             }
             catch (Exception e)
             {
-                Console.LogCrush(SystemNames.Config, $"Failed to create temp copy of '{_originalFilePath}': {e.Message}");
+                Console.LogCrush(SystemNames.System, $"Failed to create temp copy of '{_originalFilePath}': {e.Message}");
                 throw;
             }
         }
@@ -35,7 +35,27 @@ namespace CodaGame
             }
             catch (Exception e)
             {
-                Console.LogError(SystemNames.Config, $"Failed to delete temporary file '{_tempFilePath}': {e.Message}");
+                Console.LogError(SystemNames.System, $"Failed to delete temporary file '{_tempFilePath}': {e.Message}");
+            }
+        }
+        public static bool DeleteFileIfExists(string _filePath)
+        {
+            if (string.IsNullOrEmpty(_filePath))
+                return false;
+            
+            try
+            {
+                if (File.Exists(_filePath))
+                {
+                    File.Delete(_filePath);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.LogError(SystemNames.System, $"Failed to delete file '{_filePath}': {e.Message}");
+                return false;
             }
         }
     }

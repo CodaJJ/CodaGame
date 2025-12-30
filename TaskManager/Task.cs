@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
+using System.Threading;
 using CodaGame.Tasks;
 
 namespace CodaGame
@@ -113,6 +114,120 @@ namespace CodaGame
             NextFrameActionTask task = new NextFrameActionTask(_delegate, _runType);
             task.Run();
             return new TaskHandle(task);
+        }
+        /// <summary>
+        /// Run a action on a separate thread.
+        /// </summary>
+        /// <param name="_action">The action you want to run on a separate thread.</param>
+        /// <param name="_complete">The action to run on the main thread when the separate thread action complete.</param>
+        public static void RunThread(Action _action, Action _complete = null)
+        {
+            if (_action == null)
+            {
+                RunActionTask(_complete);
+                return;
+            }
+            
+            System.Threading.Tasks.Task.Run(_action)
+                .ContinueWith(_t =>
+                {
+                    if (_t.IsFaulted)
+                        Console.LogError(SystemNames.Task, $"RunThread Exception: {_t.Exception.InnerException}");
+
+                    RunActionTask(_complete);
+                });
+        }
+        /// <summary>
+        /// Run a action with cancellation token on a separate thread.
+        /// </summary>
+        /// <remarks>
+        /// <para>If you want to cancel the action, you can call Cancel() on the returned CancellationTokenSource.</para>
+        /// <para>Make sure your action support cancellation by checking the CancellationToken.IsCancellationRequested property.</para>
+        /// </remarks>
+        /// <param name="_action">The action you want to run on a separate thread.</param>
+        /// <param name="_complete">The action to run on the main thread when the separate thread action complete.</param>
+        /// <returns>The cancellation token source to cancel the action.</returns>
+        public static CancellationTokenSource RunThread(Action<CancellationToken> _action, Action _complete = null)
+        {
+            if (_action == null)
+            {
+                RunActionTask(_complete);
+                return null;
+            }
+            
+            CancellationTokenSource cts = new CancellationTokenSource();
+            System.Threading.Tasks.Task.Run(() => _action?.Invoke(cts.Token), cts.Token)
+                .ContinueWith(_t => 
+                {
+                    if (_t.IsFaulted)
+                        Console.LogError(SystemNames.Task, $"RunThread Exception: {_t.Exception.InnerException}");
+            
+                    RunActionTask(_complete);
+                });
+    
+            return cts;
+        }
+        /// <summary>
+        /// Run a function on a separate thread.
+        /// </summary>
+        /// <param name="_action">The function you want to run on a separate thread.</param>
+        /// <param name="_complete">>The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
+        /// <typeparam name="T_RESULT">The result type of the function.</typeparam>
+        public static void RunThread<T_RESULT>(Func<T_RESULT> _action, Action<T_RESULT> _complete)
+        {
+            if (_action == null)
+            {
+                RunActionTask(() => _complete?.Invoke(default));
+                return;
+            }
+            
+            System.Threading.Tasks.Task.Run(_action)
+                .ContinueWith(_t =>
+                {
+                    if (_t.IsFaulted)
+                        Console.LogError(SystemNames.Task, $"RunThread Exception: {_t.Exception.InnerException}");
+                    
+                    T_RESULT result = default;
+                    if (_t.IsCompletedSuccessfully)
+                        result = _t.Result;
+                    
+                    RunActionTask(() => _complete?.Invoke(result));
+                });
+        }
+        /// <summary>
+        /// Run a function with cancellation token on a separate thread.
+        /// </summary>
+        /// <remarks>
+        /// <para>If you want to cancel the function, you can call Cancel() on the returned CancellationTokenSource.</para>
+        /// <para>Make sure your function support cancellation by checking the CancellationToken.IsCancellationRequested property.</para>
+        /// </remarks>
+        /// <param name="_action">The function you want to run on a separate thread.</param>
+        /// <param name="_complete">>The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
+        /// <typeparam name="T_RESULT">The result type of the function.</typeparam>
+        /// <returns>The cancellation token source to cancel the function.</returns>
+        public static CancellationTokenSource RunThread<T_RESULT>(Func<CancellationToken, T_RESULT> _action, Action<T_RESULT> _complete = null)
+        {
+            if (_action == null)
+            {
+                RunActionTask(() => _complete?.Invoke(default));
+                return null;
+            }
+            
+            CancellationTokenSource cts = new CancellationTokenSource();
+            System.Threading.Tasks.Task.Run(() => _action.Invoke(cts.Token), cts.Token)
+                .ContinueWith(_t =>
+                {
+                    if (_t.IsFaulted)
+                        Console.LogError(SystemNames.Task, $"RunThread Exception: {_t.Exception.InnerException}");
+                    
+                    T_RESULT result = default;
+                    if (_t.IsCompletedSuccessfully)
+                        result = _t.Result;
+                    
+                    RunActionTask(() => _complete?.Invoke(result));
+                });
+
+            return cts;
         }
     }
 }
