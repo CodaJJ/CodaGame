@@ -22,5 +22,6 @@ namespace CodaGame
         public const string System = "System";
         public const string Input = "Input";
         public const string Save = "Save";
+        public const string EventBus = "EventBus";
     }
 }

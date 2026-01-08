@@ -30,6 +30,7 @@ namespace CodaGame
         private static uint _g_cameraValueBehaviourSerialize = 0;
         private static uint _g_cameraValueOffsetSerialize = 0;
         private static uint _g_cameraValueConstraintSerialize = 0;
+        private static uint _g_eventKeySerialize = 0;
 
 
         /// <summary>
@@ -116,6 +117,10 @@ namespace CodaGame
         internal static uint NextCameraValueConstraint()
         {
             return _g_cameraValueConstraintSerialize++;
+        }
+        internal static uint NextEventKey()
+        {
+            return _g_eventKeySerialize++;
         }
     }
 }
