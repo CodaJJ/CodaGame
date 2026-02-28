@@ -1,10 +1,9 @@
 // Copyright (c) 2025 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
 using System;
-using CodaGame.Base;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -20,11 +19,8 @@ namespace CodaGame
         /// Load Asset Synchronously
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
-        public static T_ASSET LoadSync<T_ASSET>(_AAssetIndex _assetIndex)
+        public static T_ASSET LoadSync<T_ASSET>(AssetIndex _assetIndex)
         {
-            if (_assetIndex == null)
-                return default;
-
             return LoadSync<T_ASSET>(_assetIndex.ToAddressableKey());
         }
         /// <summary>
@@ -32,39 +28,24 @@ namespace CodaGame
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
         /// <param name="_complete">Callback when load is complete</param>
-        public static void LoadAsync<T_ASSET>(_AAssetIndex _assetIndex, Action<T_ASSET> _complete)
+        public static void LoadAsync<T_ASSET>(AssetIndex _assetIndex, Action<T_ASSET> _complete)
         {
-            if (_complete == null)
-                return;
-            
-            if (_assetIndex == null)
-            {
-                _complete.Invoke(default);
-                return;
-            }
-
             LoadAsync(_assetIndex.ToAddressableKey(), _complete);
         }
         /// <summary>
         /// Load Asset Asynchronously
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
-        public static AsyncOperationHandle<T_ASSET> LoadAsync<T_ASSET>(_AAssetIndex _assetIndex)
+        public static AsyncOperationHandle<T_ASSET> LoadAsync<T_ASSET>(AssetIndex _assetIndex)
         {
-            if (_assetIndex == null)
-                return default;
-
             return LoadAsync<T_ASSET>(_assetIndex.ToAddressableKey());
         }
         /// <summary>
         /// Instantiate GameObject Synchronously
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
-        public static GameObject InstantiateSync(_AAssetIndex _assetIndex)
+        public static GameObject InstantiateSync(AssetIndex _assetIndex)
         {
-            if (_assetIndex == null)
-                return null;
-
             return InstantiateSync(_assetIndex.ToAddressableKey());
         }
         /// <summary>
@@ -72,28 +53,16 @@ namespace CodaGame
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
         /// <param name="_complete">Callback when load is complete</param>
-        public static void InstantiateAsync(_AAssetIndex _assetIndex, Action<GameObject> _complete)
+        public static void InstantiateAsync(AssetIndex _assetIndex, Action<GameObject> _complete)
         {
-            if (_complete == null)
-                return;
-            
-            if (_assetIndex == null)
-            {
-                _complete.Invoke(null);
-                return;
-            }
-
             InstantiateAsync(_assetIndex.ToAddressableKey(), _complete);
         }
         /// <summary>
         /// Instantiate GameObject Asynchronously
         /// </summary>
         /// <param name="_assetIndex">The index of the asset to load</param>
-        public static AsyncOperationHandle<GameObject> InstantiateAsync(_AAssetIndex _assetIndex)
+        public static AsyncOperationHandle<GameObject> InstantiateAsync(AssetIndex _assetIndex)
         {
-            if (_assetIndex == null)
-                return default;
-
             return InstantiateAsync(_assetIndex.ToAddressableKey());
         }
         /// <summary>
@@ -126,7 +95,7 @@ namespace CodaGame
         {
             if (_complete == null)
                 return;
-            
+
             if (string.IsNullOrEmpty(_assetPath))
             {
                 _complete.Invoke(default);
@@ -195,7 +164,7 @@ namespace CodaGame
         {
             if (_complete == null)
                 return;
-            
+
             if (string.IsNullOrEmpty(_assetPath))
             {
                 _complete.Invoke(null);
@@ -223,7 +192,7 @@ namespace CodaGame
         {
             if (string.IsNullOrEmpty(_assetPath))
                 return default;
-            
+
             try
             {
                 return Addressables.InstantiateAsync(_assetPath);

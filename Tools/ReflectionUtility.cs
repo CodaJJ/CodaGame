@@ -178,6 +178,28 @@ namespace CodaGame
         
         
         /// <summary>
+        /// Gets a field by name, searching up the inheritance hierarchy.
+        /// Unlike Type.GetField, this finds private fields declared in base classes.
+        /// </summary>
+        /// <param name="_type">The type to start searching from</param>
+        /// <param name="_fieldName">The field name to find</param>
+        /// <param name="_flags">Binding flags</param>
+        /// <returns>The FieldInfo if found, otherwise null</returns>
+        public static FieldInfo GetFieldInHierarchy(Type _type, string _fieldName, BindingFlags _flags)
+        {
+            Type current = _type;
+            while (current != null && current != typeof(object))
+            {
+                FieldInfo field = current.GetField(_fieldName, _flags);
+                if (field != null)
+                    return field;
+                current = current.BaseType;
+            }
+            return null;
+        }
+
+
+        /// <summary>
         /// Checks if a type is a Unity built-in serializable type.
         /// </summary>
         private static bool IsUnityBuiltInSerializableType(Type _type)

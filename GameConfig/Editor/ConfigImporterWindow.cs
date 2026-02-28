@@ -135,24 +135,24 @@ namespace CodaGame.Editor
                 if (_type.IsAbstract || _type.IsGenericTypeDefinition)
                     return false;
 
-                FieldInfo dataListField = _type.GetField("dataList");
+                FieldInfo dataListField = ReflectionUtility.GetFieldInHierarchy(_type, "_m_dataList", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (dataListField == null)
                 {
-                    Console.LogError(SystemNames.Config, $"Config table type '{_type.FullName}' does not have a 'dataList' field.");
+                    Console.LogError(SystemNames.Config, $"Config table type '{_type.FullName}' does not have a '_m_dataList' field.");
                     return false;
                 }
 
                 Type fieldType = dataListField.FieldType;
                 if (!fieldType.IsGenericType)
                 {
-                    Console.LogError(SystemNames.Config, $"Field 'dataList' in config table type '{_type.FullName}' is not a generic type.");
+                    Console.LogError(SystemNames.Config, $"Field '_m_dataList' in config table type '{_type.FullName}' is not a generic type.");
                     return false;
                 }
 
                 Type elementType = fieldType.GetGenericArguments()[0];
                 if (!ReflectionUtility.CheckTypeIsSerializable(elementType))
                 {
-                    Console.LogWarning(SystemNames.Config, $"Element type '{elementType.FullName}' of 'dataList' in config table type '{_type.FullName}' is not serializable.");
+                    Console.LogWarning(SystemNames.Config, $"Element type '{elementType.FullName}' of '_m_dataList' in config table type '{_type.FullName}' is not serializable.");
                     return false;
                 }
 
