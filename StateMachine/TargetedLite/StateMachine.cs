@@ -17,6 +17,8 @@ namespace CodaGame.StateMachine.TargetedLite
     {
         // The current state.
         private _AStateBase<T_STATE_TYPE, T_TARGET> _m_curState;
+        // Whether the state machine is currently in the middle of a state exit.
+        private bool _m_isExiting;
         // The target of this state machine.
         private readonly T_TARGET _m_target;
         // The name of this state machine.
@@ -66,12 +68,20 @@ namespace CodaGame.StateMachine.TargetedLite
         /// </summary>
         public void ChangeState(_AState<T_STATE_TYPE, T_TARGET> _state)
         {
+            if (_m_isExiting)
+            {
+                Console.LogError("StateMachine", _m_name, "Cannot change state during OnExit.");
+                return;
+            }
+
             _AStateBase<T_STATE_TYPE, T_TARGET> lastState = _m_curState;
+            _m_isExiting = true;
             lastState?.Exit();
-            
+            _m_isExiting = false;
+
             _m_curState = _state;
             _state?.Enter(_m_target, this);
-            
+
             OnStateChg?.Invoke(lastState, _state);
         }
         /// <summary>
@@ -79,12 +89,20 @@ namespace CodaGame.StateMachine.TargetedLite
         /// </summary>
         public void ChangeState<T_PARAM_1>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1> _state, T_PARAM_1 _param1)
         {
+            if (_m_isExiting)
+            {
+                Console.LogError("StateMachine", _m_name, "Cannot change state during OnExit.");
+                return;
+            }
+
             _AStateBase<T_STATE_TYPE, T_TARGET> lastState = _m_curState;
+            _m_isExiting = true;
             lastState?.Exit();
-            
+            _m_isExiting = false;
+
             _m_curState = _state;
             _state?.Enter(_m_target, this, _param1);
-            
+
             OnStateChg?.Invoke(lastState, _state);
         }
         /// <summary>
@@ -92,12 +110,20 @@ namespace CodaGame.StateMachine.TargetedLite
         /// </summary>
         public void ChangeState<T_PARAM_1, T_PARAM_2>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2> _state, T_PARAM_1 _param1, T_PARAM_2 _param2)
         {
+            if (_m_isExiting)
+            {
+                Console.LogError("StateMachine", _m_name, "Cannot change state during OnExit.");
+                return;
+            }
+
             _AStateBase<T_STATE_TYPE, T_TARGET> lastState = _m_curState;
+            _m_isExiting = true;
             lastState?.Exit();
-            
+            _m_isExiting = false;
+
             _m_curState = _state;
             _state?.Enter(_m_target, this, _param1, _param2);
-            
+
             OnStateChg?.Invoke(lastState, _state);
         }
         /// <summary>
@@ -105,12 +131,20 @@ namespace CodaGame.StateMachine.TargetedLite
         /// </summary>
         public void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3)
         {
+            if (_m_isExiting)
+            {
+                Console.LogError("StateMachine", _m_name, "Cannot change state during OnExit.");
+                return;
+            }
+
             _AStateBase<T_STATE_TYPE, T_TARGET> lastState = _m_curState;
+            _m_isExiting = true;
             lastState?.Exit();
-            
+            _m_isExiting = false;
+
             _m_curState = _state;
             _state?.Enter(_m_target, this, _param1, _param2, _param3);
-            
+
             OnStateChg?.Invoke(lastState, _state);
         }
         /// <summary>
@@ -118,12 +152,20 @@ namespace CodaGame.StateMachine.TargetedLite
         /// </summary>
         public void ChangeState<T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4>(_AState<T_STATE_TYPE, T_TARGET, T_PARAM_1, T_PARAM_2, T_PARAM_3, T_PARAM_4> _state, T_PARAM_1 _param1, T_PARAM_2 _param2, T_PARAM_3 _param3, T_PARAM_4 _param4)
         {
+            if (_m_isExiting)
+            {
+                Console.LogError("StateMachine", _m_name, "Cannot change state during OnExit.");
+                return;
+            }
+
             _AStateBase<T_STATE_TYPE, T_TARGET> lastState = _m_curState;
+            _m_isExiting = true;
             lastState?.Exit();
-            
+            _m_isExiting = false;
+
             _m_curState = _state;
             _state?.Enter(_m_target, this, _param1, _param2, _param3, _param4);
-            
+
             OnStateChg?.Invoke(lastState, _state);
         }
     }

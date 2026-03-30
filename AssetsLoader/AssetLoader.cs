@@ -204,6 +204,20 @@ namespace CodaGame
             }
         }
         /// <summary>
+        /// Release an instantiated GameObject created by <see cref="InstantiateAsync(string, Action{GameObject})"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>This destroys the GameObject and releases the Addressable reference.</para>
+        /// <para>Returns false if the GameObject was not created via Addressables.</para>
+        /// </remarks>
+        public static bool ReleaseInstance(GameObject _instance)
+        {
+            if (_instance == null)
+                return false;
+
+            return Addressables.ReleaseInstance(_instance);
+        }
+        /// <summary>
         /// Release the loaded asset
         /// </summary>
         public static void Release<T_ASSET>(AsyncOperationHandle<T_ASSET> _handle)

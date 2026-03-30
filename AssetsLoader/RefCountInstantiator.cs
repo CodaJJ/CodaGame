@@ -64,7 +64,7 @@ namespace CodaGame
         /// </summary>
         protected override void OnOperationEnd(Action _complete)
         {
-            AssetLoader.Release(_m_asset);
+            AssetLoader.ReleaseInstance(_m_asset);
             _m_releaseComplete?.Invoke();
             _complete.Invoke();
         }

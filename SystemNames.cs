@@ -25,5 +25,6 @@ namespace CodaGame
         public const string EventBus = "EventBus";
         public const string Localization = "Localization";
         public const string TemplateParser = "TemplateParser";
+        public const string UI = "UI";
     }
 }

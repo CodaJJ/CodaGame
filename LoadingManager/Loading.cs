@@ -5,12 +5,14 @@
 
 using System;
 using CodaGame.Base;
+using JetBrains.Annotations;
 
 namespace CodaGame
 {
     /// <summary>
     /// The class for loading with a loading show.
     /// </summary>
+    [PublicAPI]
     public static class Loading
     {
         /// <summary>

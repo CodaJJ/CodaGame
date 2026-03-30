@@ -3,6 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System.Collections.Generic;
 using CodaGame.Base;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -31,6 +32,8 @@ namespace CodaGame
         private int _m_logicFps = 60;
         [SerializeField, RuntimeReadOnly]
         private string _m_gameVersion = "1.0.0";
+        [SerializeField, RuntimeReadOnly]
+        private List<Transform> _m_uiLayers;
 
         [NotNull] private readonly LogicLoop _m_logicLoopTask;
         [NotNull] private readonly ShowLoop _m_showLoopTask;
@@ -46,6 +49,7 @@ namespace CodaGame
         public int logicFps { get { return _m_logicFps; } }
         public int logicFrameCount { get { return _m_logicLoopTask.frameCount; } }
         public string gameVersion { get { return _m_gameVersion; } }
+        public ReadOnlyList<Transform> uiLayers { get { return _m_uiLayers; } }
 
 
         public int CalculateLogicFrameIndex(double _timeSinceStartup)
