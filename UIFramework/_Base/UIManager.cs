@@ -63,6 +63,66 @@ namespace CodaGame.Base
             return panel;
         }
         /// <summary>
+        /// Create a widget instance from the given asset index, parented to a custom transform.
+        /// The widget auto-registers with its nearest owner (_AUIWidget or _AUIPanel) in the hierarchy.
+        /// </summary>
+        public _AUIPrefab CreatePrefab(AssetIndex _widgetAsset, Transform _parent)
+        {
+            if (!_widgetAsset.isValid)
+            {
+                Console.LogWarning(SystemNames.UI, "Invalid asset index for widget prefab.");
+                return null;
+            }
+
+            if (_parent == null)
+            {
+                Console.LogWarning(SystemNames.UI, "Cannot create widget prefab with null parent.");
+                return null;
+            }
+
+            GameObject go = AssetLoader.InstantiateSync(_widgetAsset);
+            if (go == null)
+            {
+                Console.LogError(SystemNames.UI, "Failed to instantiate widget prefab.");
+                return null;
+            }
+
+            _AUIPrefab widget = go.GetComponent<_AUIPrefab>();
+            if (widget == null)
+            {
+                Console.LogError(SystemNames.UI, "Instantiated prefab does not have an _AUIPrefab component.");
+                AssetLoader.ReleaseInstance(go);
+                return null;
+            }
+
+            // Parent first, then search for owner
+            go.transform.SetParent(_parent, false);
+
+            // Auto-register with nearest owner
+            _AUIComponent owner = null;
+            go.transform.TraverseParents(parent =>
+            {
+                owner = parent.GetComponent<_AUIComponent>();
+                return owner != null ? ETraverseOp.Stop : ETraverseOp.Continue;
+            });
+
+            // Init first, then register (Register may TriggerShow if owner is active)
+            widget.Init();
+
+            if (owner != null)
+            {
+                owner.RegisterChildWidget(widget);
+            }
+            else
+            {
+                Console.LogWarning(SystemNames.UI, widget.widgetName,
+                    "Widget prefab has no owner (_AUIPanel or _AUIWidget) in its parent hierarchy. Lifecycle events will not propagate.");
+            }
+
+            Console.LogVerbose(SystemNames.UI, widget.widgetName, "Widget prefab created.");
+            return widget;
+        }
+        /// <summary>
         /// Destroy a panel immediately, skipping any hide animation.
         /// </summary>
         public void DestroyImmediate(_AUIPanel _panel)

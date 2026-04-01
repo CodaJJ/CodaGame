@@ -6,6 +6,7 @@
 using System;
 using CodaGame.Base;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace CodaGame
 {
@@ -28,7 +29,7 @@ namespace CodaGame
         /// Create a new panel instance from the given asset index, in Hidden state.
         /// </summary>
         /// <remarks>
-        /// <para>The panel's <see cref="_AUIPanel.OnPanelInit"/> is called after creation.</para>
+        /// <para>The panel's <see cref="_AUIPanel.OnInit"/> is called after creation.</para>
         /// <para>Use <see cref="_AUIPanel.Open"/> to show the panel.</para>
         /// </remarks>
         /// <param name="_panelAsset">The asset index identifying the panel prefab.</param>
@@ -41,7 +42,7 @@ namespace CodaGame
         /// Create a new panel instance with a typed return value, in Hidden state.
         /// </summary>
         /// <remarks>
-        /// <para>The panel's <see cref="_AUIPanel.OnPanelInit"/> is called after creation.</para>
+        /// <para>The panel's <see cref="_AUIPanel.OnInit"/> is called after creation.</para>
         /// <para>Use <see cref="_AUIPanel.Open"/> to show the panel.</para>
         /// </remarks>
         /// <typeparam name="T">The expected panel type.</typeparam>
@@ -57,6 +58,40 @@ namespace CodaGame
             {
                 Console.LogError(SystemNames.UI, $"Panel type mismatch. Expected {typeof(T).Name}, got {panel.GetType().Name}.");
                 panel.DestroyImmediate();
+            }
+            return null;
+        }
+        /// <summary>
+        /// Create a prefab widget instance from the given asset, parented to a custom transform.
+        /// </summary>
+        /// <remarks>
+        /// <para>The widget auto-registers with its nearest <see cref="_AUIWidget"/> or <see cref="_AUIPanel"/> owner.</para>
+        /// <para>Lifecycle events (show/hide/destroy) propagate from the owner.</para>
+        /// </remarks>
+        /// <param name="_widgetAsset">The asset index identifying the widget prefab.</param>
+        /// <param name="_parent">The transform to parent the widget under.</param>
+        /// <returns>The prefab widget instance, or null on failure.</returns>
+        public static _AUIPrefab CreatePrefab(AssetIndex _widgetAsset, Transform _parent)
+        {
+            return manager.CreatePrefab(_widgetAsset, _parent);
+        }
+        /// <summary>
+        /// Create a typed prefab widget instance from the given asset, parented to a custom transform.
+        /// </summary>
+        /// <typeparam name="T">The expected prefab widget type.</typeparam>
+        /// <param name="_widgetAsset">The asset index identifying the widget prefab.</param>
+        /// <param name="_parent">The transform to parent the widget under.</param>
+        /// <returns>The typed prefab widget instance, or null on failure or type mismatch.</returns>
+        public static T CreatePrefab<T>(AssetIndex _widgetAsset, Transform _parent) where T : _AUIPrefab
+        {
+            _AUIPrefab widget = manager.CreatePrefab(_widgetAsset, _parent);
+            if (widget is T typed)
+                return typed;
+
+            if (widget != null)
+            {
+                Console.LogError(SystemNames.UI, $"Widget type mismatch. Expected {typeof(T).Name}, got {widget.GetType().Name}.");
+                widget.Destroy();
             }
             return null;
         }

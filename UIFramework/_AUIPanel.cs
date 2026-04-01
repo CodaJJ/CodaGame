@@ -19,15 +19,16 @@ namespace CodaGame
     /// <para>Create panel instances via <see cref="UI.Create"/>.</para>
     /// <para>Override lifecycle hooks to implement custom behavior.</para>
     /// <para>
-    /// For show/hide animations, override <see cref="OnPanelShow"/> and <see cref="OnPanelHide"/>,
+    /// For show/hide animations, override <see cref="OnShow"/> and <see cref="OnHide"/>,
     /// and invoke the '_complete' callback when the animation finishes.
     /// </para>
     /// </remarks>
-    public abstract class _AUIPanel : MonoBehaviour
+    public abstract class _AUIPanel : _AUIComponent
     {
         [SerializeField] private int _m_layer;
 
         private AssetIndex _m_panelAssetIndex;
+        // Destroy requested — flow may still be in progress
         private bool _m_isDestroyed;
 
         // Active reference count
@@ -85,7 +86,7 @@ namespace CodaGame
             _m_activeRef++;
             Console.LogVerbose(SystemNames.UI, panelName, $"Open: active ref={_m_activeRef}.");
             _m_stateMachine.Update(0);
-            
+
             if (panelState == EUIPanelState.Active)
                 _complete?.Invoke();
             else if (_complete != null)
@@ -114,7 +115,7 @@ namespace CodaGame
             }
 
             Console.LogVerbose(SystemNames.UI, panelName, $"Hide: active ref={_m_activeRef}.");
-            _m_stateMachine.Update(0);
+            _m_stateMachine?.Update(0);
 
             if (panelState == EUIPanelState.Hidden)
                 _complete?.Invoke();
@@ -143,7 +144,7 @@ namespace CodaGame
                 _m_destroyComplete += _complete;
 
             Console.LogVerbose(SystemNames.UI, panelName, "Destroy requested.");
-            _m_stateMachine.Update(0);
+            _m_stateMachine?.Update(0);
         }
 
 
@@ -153,7 +154,7 @@ namespace CodaGame
         /// <remarks>
         /// <para>Use this for one-time initialization such as caching component references.</para>
         /// </remarks>
-        protected virtual void OnPanelInit() { }
+        protected virtual void OnInit() { }
         /// <summary>
         /// Called when the panel should become visible. Implement show animation here.
         /// </summary>
@@ -164,7 +165,7 @@ namespace CodaGame
         /// </para>
         /// </remarks>
         /// <param name="_complete">Callback that must be invoked when the show process is complete.</param>
-        protected virtual void OnPanelShow([NotNull] Action _complete) { _complete.Invoke(); }
+        protected virtual void OnShow([NotNull] Action _complete) { _complete.Invoke(); }
         /// <summary>
         /// Called when the panel has fully entered the Active state.
         /// </summary>
@@ -174,14 +175,14 @@ namespace CodaGame
         /// Register input handlers or begin gameplay logic here.
         /// </para>
         /// </remarks>
-        protected virtual void OnPanelActiveEnter() { }
+        protected virtual void OnActiveEnter() { }
         /// <summary>
         /// Called when the panel is about to leave the Active state (before hide animation).
         /// </summary>
         /// <remarks>
         /// <para>Unregister input handlers or pause gameplay logic here.</para>
         /// </remarks>
-        protected virtual void OnPanelActiveExit() { }
+        protected virtual void OnActiveExit() { }
         /// <summary>
         /// Called when the panel should become hidden. Implement hide animation here.
         /// </summary>
@@ -192,14 +193,14 @@ namespace CodaGame
         /// </para>
         /// </remarks>
         /// <param name="_complete">Callback that must be invoked when the hide process is complete.</param>
-        protected virtual void OnPanelHide(Action _complete) { _complete?.Invoke(); }
+        protected virtual void OnHide([NotNull] Action _complete) { _complete.Invoke(); }
         /// <summary>
         /// Called before the panel is destroyed.
         /// </summary>
         /// <remarks>
         /// <para>Use this for final cleanup. The GameObject will be destroyed immediately after this call.</para>
         /// </remarks>
-        protected virtual void OnPanelDestroy() { }
+        protected virtual void OnDiscard() { }
 
 
         /// <summary>
@@ -208,10 +209,13 @@ namespace CodaGame
         internal void Init(AssetIndex _assetIndex)
         {
             _m_panelAssetIndex = _assetIndex;
+
+            InitChildWidgets();
+
             _m_stateMachine = new StateMachine<EUIPanelState, _AUIPanel>(this, panelName);
             _m_stateMachine.ChangeState(new HiddenState());
 
-            OnPanelInit();
+            OnInit();
         }
         /// <summary>
         /// Destroy this panel immediately, skipping any hide animation.
@@ -230,9 +234,12 @@ namespace CodaGame
             // Open callbacks are meaningless — the panel never finished opening
             _m_openComplete = null;
 
-            // If active, notify exit
+            // If active, notify exit and propagate hide to children
             if (panelState == EUIPanelState.Active)
-                OnPanelActiveExit();
+            {
+                OnActiveExit();
+                PropagateHideToChildren();
+            }
 
             DestroyInternal();
 
@@ -258,7 +265,7 @@ namespace CodaGame
                 return true;
             }
 
-            if (_m_isDestroyed)
+            if (_m_isDestroyed || _m_stateMachine == null)
             {
                 Console.LogError(SystemNames.UI, panelName, "Panel has already been destroyed and should not be used.");
                 return true;
@@ -270,7 +277,9 @@ namespace CodaGame
 
         private void DestroyInternal()
         {
-            OnPanelDestroy();
+            _m_stateMachine = null;
+            PropagateDestroyToChildren();
+            OnDiscard();
             UIManager.instance.DestroyPanel(this);
         }
 
@@ -289,9 +298,9 @@ namespace CodaGame
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now hidden.");
 
                 ActionUtility.InvokeAndClear(ref target._m_hideComplete);
-                
+
                 // Re-evaluate in case state changed during callbacks
-                target._m_stateMachine.Update(0);
+                target._m_stateMachine?.Update(0);
             }
             protected override void OnExit()
             {
@@ -325,7 +334,7 @@ namespace CodaGame
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Showing panel...");
 
                 uint serialize = enterSerialize;
-                target.OnPanelShow(() =>
+                target.OnShow(() =>
                 {
                     if (serialize != enterSerialize)
                         return;
@@ -346,23 +355,26 @@ namespace CodaGame
 
             protected override void OnEnter()
             {
-                target.OnPanelActiveEnter();
+                target.OnActiveEnter();
+                target.PropagateShowToChildren();
+
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now active.");
 
                 ActionUtility.InvokeAndClear(ref target._m_openComplete);
 
                 // Re-evaluate in case state changed during callbacks
-                target._m_stateMachine.Update(0);
+                target._m_stateMachine?.Update(0);
             }
-            protected override void OnExit() { }
+            protected override void OnExit()
+            {
+                target.OnActiveExit();
+                target.PropagateHideToChildren();
+            }
             protected override void OnUpdate(float _)
             {
                 // Destroy or activeRef dropped to 0
                 if (target._m_isDestroyed || target._m_activeRef <= 0)
-                {
-                    target.OnPanelActiveExit();
                     ChangeState(new HidingState());
-                }
             }
         }
         // Hiding: playing hide animation.
@@ -377,7 +389,7 @@ namespace CodaGame
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Hiding panel...");
 
                 uint serialize = enterSerialize;
-                target.OnPanelHide(() =>
+                target.OnHide(() =>
                 {
                     if (serialize != enterSerialize)
                         return;
