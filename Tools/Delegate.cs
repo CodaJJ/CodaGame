@@ -8,8 +8,8 @@ using JetBrains.Annotations;
 
 namespace CodaGame
 {
-    public delegate void AsyncFunction(Action _complete);
-    public delegate void AsyncFunction<in T_ARG1>(T_ARG1 _arg1, Action _complete);
+    public delegate void AsyncFunction([NotNull] Action _complete);
+    public delegate void AsyncFunction<in T_ARG1>(T_ARG1 _arg1, [NotNull] Action _complete);
     public delegate void NotNullAction<in T_ARG1>([NotNull] T_ARG1 _arg1);
     public delegate bool NotNullPredicate<in T_ARG>([NotNull] T_ARG _arg);
     public delegate T_RESULT NotNullFunc<in T_ARG, out T_RESULT>([NotNull] T_ARG _arg);
