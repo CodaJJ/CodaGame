@@ -70,9 +70,6 @@ namespace CodaGame
         {
             if (_delegate == null)
                 return;
-
-            if (_m_isProcessing)
-                return;
             
             if (_m_isStarted)
             {

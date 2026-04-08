@@ -27,5 +27,6 @@ namespace CodaGame
         public const string TemplateParser = "TemplateParser";
         public const string UI = "UI";
         public const string Flow = "Flow";
+        public const string Stage = "Stage";
     }
 }
