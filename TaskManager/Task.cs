@@ -48,7 +48,7 @@ namespace CodaGame
         /// Run a continuous action task.
         /// </summary>
         /// <param name="_delegate">The delegate you want to run, the parameter is the time passed since the last invoke.</param>
-        /// <param name="_duration">The duration of this task.</param>
+        /// <param name="_duration">The duration of this task, negative or zero means never stop.</param>
         /// <param name="_runType">Where does the task run on.</param>
         /// <param name="_useUnscaledTime">Use unscaled time or not.</param>
         /// <returns>The handle of this task.</returns>
