@@ -1,7 +1,9 @@
 // Copyright (c) 2024 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
+
+using System.Threading;
 
 namespace CodaGame
 {
@@ -10,27 +12,29 @@ namespace CodaGame
     /// </summary>
     public static class Serialize
     {
-        private static uint _g_serialize = 0;
-        private static uint _g_asyncParallelSerialize = 0;
-        private static uint _g_asyncWaterfallSerialize = 0;
-        private static uint _g_stateMachineSerialize = 0;
-        private static uint _g_safeAsyncObjectPoolSerialize = 0;
-        private static uint _g_unsafeAsyncObjectPoolSerialize = 0;
-        private static uint _g_safeSyncObjectPoolSerialize = 0;
-        private static uint _g_unsafeSyncObjectPoolSerialize = 0;
-        private static uint _g_objectHandlePoolSerialize = 0;
-        private static uint _g_actionTaskSerialize = 0;
-        private static uint _g_continuousTaskSerialize = 0;
-        private static uint _g_delayActionTaskSerialize = 0;
-        private static uint _g_timeIntervalContinuousTaskSerialize = 0;
-        private static uint _g_frameIntervalContinuousTaskSerialize = 0;
-        private static uint _g_frameDelayActionTaskSerialize = 0;
-        private static uint _g_frameActionTaskSerialize = 0;
-        private static uint _g_limitedValueRecoverTaskSerialize = 0;
-        private static uint _g_cameraValueBehaviourSerialize = 0;
-        private static uint _g_cameraValueOffsetSerialize = 0;
-        private static uint _g_cameraValueConstraintSerialize = 0;
-        private static uint _g_eventKeySerialize = 0;
+        // All counters start at -1 so that Interlocked.Increment returns 0 on the first call,
+        // preserving the original `field++` (post-increment) semantics.
+        private static int _g_serialize = -1;
+        private static int _g_asyncParallelSerialize = -1;
+        private static int _g_asyncWaterfallSerialize = -1;
+        private static int _g_stateMachineSerialize = -1;
+        private static int _g_safeAsyncObjectPoolSerialize = -1;
+        private static int _g_unsafeAsyncObjectPoolSerialize = -1;
+        private static int _g_safeSyncObjectPoolSerialize = -1;
+        private static int _g_unsafeSyncObjectPoolSerialize = -1;
+        private static int _g_objectHandlePoolSerialize = -1;
+        private static int _g_actionTaskSerialize = -1;
+        private static int _g_continuousTaskSerialize = -1;
+        private static int _g_delayActionTaskSerialize = -1;
+        private static int _g_timeIntervalContinuousTaskSerialize = -1;
+        private static int _g_frameIntervalContinuousTaskSerialize = -1;
+        private static int _g_frameDelayActionTaskSerialize = -1;
+        private static int _g_frameActionTaskSerialize = -1;
+        private static int _g_limitedValueRecoverTaskSerialize = -1;
+        private static int _g_cameraValueBehaviourSerialize = -1;
+        private static int _g_cameraValueOffsetSerialize = -1;
+        private static int _g_cameraValueConstraintSerialize = -1;
+        private static int _g_eventKeySerialize = -1;
 
 
         /// <summary>
@@ -38,89 +42,89 @@ namespace CodaGame
         /// </summary>
         public static uint Next()
         {
-            return _g_serialize++;
+            return (uint)Interlocked.Increment(ref _g_serialize);
         }
-        
-        
+
+
         internal static uint NextAsyncParallel()
         {
-            return _g_asyncParallelSerialize++;
+            return (uint)Interlocked.Increment(ref _g_asyncParallelSerialize);
         }
         internal static uint NextAsyncWaterfall()
         {
-            return _g_asyncWaterfallSerialize++;
+            return (uint)Interlocked.Increment(ref _g_asyncWaterfallSerialize);
         }
         internal static uint NextStateMachine()
         {
-            return _g_stateMachineSerialize++;
+            return (uint)Interlocked.Increment(ref _g_stateMachineSerialize);
         }
         internal static uint NextSafeAsyncObjectPool()
         {
-            return _g_safeAsyncObjectPoolSerialize++;
+            return (uint)Interlocked.Increment(ref _g_safeAsyncObjectPoolSerialize);
         }
         internal static uint NextUnsafeAsyncObjectPool()
         {
-            return _g_unsafeAsyncObjectPoolSerialize++;
+            return (uint)Interlocked.Increment(ref _g_unsafeAsyncObjectPoolSerialize);
         }
         internal static uint NextSafeSyncObjectPool()
         {
-            return _g_safeSyncObjectPoolSerialize++;
+            return (uint)Interlocked.Increment(ref _g_safeSyncObjectPoolSerialize);
         }
         internal static uint NextUnsafeSyncObjectPool()
         {
-            return _g_unsafeSyncObjectPoolSerialize++;
+            return (uint)Interlocked.Increment(ref _g_unsafeSyncObjectPoolSerialize);
         }
         internal static uint NextObjectHandlePool()
         {
-            return _g_objectHandlePoolSerialize++;
+            return (uint)Interlocked.Increment(ref _g_objectHandlePoolSerialize);
         }
         internal static uint NextActionTask()
         {
-            return _g_actionTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_actionTaskSerialize);
         }
         internal static uint NextContinuousTask()
         {
-            return _g_continuousTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_continuousTaskSerialize);
         }
         internal static uint NextDelayActionTask()
         {
-            return _g_delayActionTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_delayActionTaskSerialize);
         }
         internal static uint NextTimeIntervalContinuousTask()
         {
-            return _g_timeIntervalContinuousTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_timeIntervalContinuousTaskSerialize);
         }
         internal static uint NextFrameIntervalContinuousTask()
         {
-            return _g_frameIntervalContinuousTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_frameIntervalContinuousTaskSerialize);
         }
         internal static uint NextFrameDelayActionTask()
         {
-            return _g_frameDelayActionTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_frameDelayActionTaskSerialize);
         }
         internal static uint NextNextFrameActionTask()
         {
-            return _g_frameActionTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_frameActionTaskSerialize);
         }
         internal static uint NextNextLimitedValueRecoverTask()
         {
-            return _g_limitedValueRecoverTaskSerialize++;
+            return (uint)Interlocked.Increment(ref _g_limitedValueRecoverTaskSerialize);
         }
         internal static uint NextCameraValueBehaviour()
         {
-            return _g_cameraValueBehaviourSerialize++;
+            return (uint)Interlocked.Increment(ref _g_cameraValueBehaviourSerialize);
         }
         internal static uint NextCameraValueOffset()
         {
-            return _g_cameraValueOffsetSerialize++;
+            return (uint)Interlocked.Increment(ref _g_cameraValueOffsetSerialize);
         }
         internal static uint NextCameraValueConstraint()
         {
-            return _g_cameraValueConstraintSerialize++;
+            return (uint)Interlocked.Increment(ref _g_cameraValueConstraintSerialize);
         }
         internal static uint NextEventKey()
         {
-            return _g_eventKeySerialize++;
+            return (uint)Interlocked.Increment(ref _g_eventKeySerialize);
         }
     }
 }

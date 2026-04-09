@@ -27,9 +27,12 @@ namespace CodaGame.Base
         /// <para>Makes sure the <see cref="_timeInterval"/>> is greater than 0, otherwise it will throw an exception.</para>
         /// <para>The <see cref="_executeOnceImmediately"/>> parameter is used to determine whether the task should execute once immediately.</para>
         /// </remarks>
-        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime) 
+        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime)
             : base(_name, _runType, _useUnscaledTime)
         {
+            if (_timeInterval <= 0)
+                Console.LogCrush(SystemNames.Task, _name, "Time interval must be greater than 0.");
+
             _m_timeInterval = _timeInterval;
             _m_executeOnceImmediately = _executeOnceImmediately;
         }
@@ -56,22 +59,25 @@ namespace CodaGame.Base
 
         internal override void Tick(float _deltaTime)
         {
+            // Defensive guard: a non-positive interval would cause an infinite loop below.
+            // The constructor already rejects this, but keep the guard in case LogCrush did not terminate execution.
+            if (_m_timeInterval <= 0)
+                return;
+
+            _m_intervalTimeCounter += _deltaTime;
+
             while (_m_intervalTimeCounter >= _m_timeInterval)
             {
                 OnTick();
 
                 _m_intervalTimeCounter -= _m_timeInterval;
             }
-            
-            _m_intervalTimeCounter += _deltaTime;
         }
 
 
         private protected override void OnInternalRun()
         {
             _m_intervalTimeCounter = _m_executeOnceImmediately ? _m_timeInterval : 0;
-            if (_m_timeInterval <= 0)
-                Console.LogCrush(SystemNames.Task, name, "Time interval must be greater than 0.");
         }
         private protected override void OnInternalStop()
         {
