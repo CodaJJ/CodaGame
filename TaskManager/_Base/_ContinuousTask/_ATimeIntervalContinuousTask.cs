@@ -56,14 +56,14 @@ namespace CodaGame.Base
 
         internal override void Tick(float _deltaTime)
         {
+            _m_intervalTimeCounter += _deltaTime;
+
             while (_m_intervalTimeCounter >= _m_timeInterval)
             {
                 OnTick();
 
                 _m_intervalTimeCounter -= _m_timeInterval;
             }
-            
-            _m_intervalTimeCounter += _deltaTime;
         }
 
 
