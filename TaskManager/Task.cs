@@ -5,6 +5,7 @@
 
 using System;
 using System.Threading;
+using CodaGame.Base;
 using CodaGame.Tasks;
 
 namespace CodaGame
@@ -127,7 +128,13 @@ namespace CodaGame
                 RunActionTask(_complete);
                 return;
             }
-            
+
+            // Force the TaskManager singleton to initialize on the current (assumed main) thread.
+            // Otherwise, the ContinueWith callback below — which runs on the thread pool — would
+            // be the first caller of `TaskManager.instance` and would try to `new GameObject` /
+            // `AddComponent` off the main thread, which Unity forbids.
+            _ = TaskManager.instance;
+
             System.Threading.Tasks.Task.Run(_action)
                 .ContinueWith(_t =>
                 {
@@ -154,7 +161,10 @@ namespace CodaGame
                 RunActionTask(_complete);
                 return null;
             }
-            
+
+            // See RunThread(Action, Action) for the reason behind this eager initialization.
+            _ = TaskManager.instance;
+
             CancellationTokenSource cts = new CancellationTokenSource();
             System.Threading.Tasks.Task.Run(() => _action?.Invoke(cts.Token), cts.Token)
                 .ContinueWith(_t => 
@@ -180,7 +190,10 @@ namespace CodaGame
                 RunActionTask(() => _complete?.Invoke(default));
                 return;
             }
-            
+
+            // See RunThread(Action, Action) for the reason behind this eager initialization.
+            _ = TaskManager.instance;
+
             System.Threading.Tasks.Task.Run(_action)
                 .ContinueWith(_t =>
                 {
@@ -212,7 +225,10 @@ namespace CodaGame
                 RunActionTask(() => _complete?.Invoke(default));
                 return null;
             }
-            
+
+            // See RunThread(Action, Action) for the reason behind this eager initialization.
+            _ = TaskManager.instance;
+
             CancellationTokenSource cts = new CancellationTokenSource();
             System.Threading.Tasks.Task.Run(() => _action.Invoke(cts.Token), cts.Token)
                 .ContinueWith(_t =>
