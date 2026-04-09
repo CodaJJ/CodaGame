@@ -15,7 +15,7 @@ namespace CodaGame.Base
         // Running type
         private readonly UpdateType _m_runType;
         // Is task running?
-        private bool _m_isRunning;
+        private volatile bool _m_isRunning;
         
         
         internal _ABaseTask(string _name, UpdateType _runType)

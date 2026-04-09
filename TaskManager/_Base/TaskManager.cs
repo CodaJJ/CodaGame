@@ -46,7 +46,7 @@ namespace CodaGame.Base
                 return _g_instance;
             }
         }
-        private static _ITaskManager _g_instance;
+        private static volatile _ITaskManager _g_instance;
         [NotNull] private static readonly object _g_lock = new object();
 
 
