@@ -28,8 +28,8 @@ namespace CodaGame.Tasks
             if (_duration > 0)
                 _m_durationTask = new DelayActionTask(Stop, _duration, _runType, _useUnscaledTime);
         }
-        public TimeIntervalContinuousActionTask(Action<float> _delegate, float _timeInterval, bool _dealOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
-            : this($"TimeIntervalContinuousActionTask_{Serialize.NextTimeIntervalContinuousTask()}", _delegate, _timeInterval, _dealOnceImmediately, _duration, _runType, _useUnscaledTime)
+        public TimeIntervalContinuousActionTask(Action<float> _delegate, float _timeInterval, bool _executeOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
+            : this($"TimeIntervalContinuousActionTask_{Serialize.NextTimeIntervalContinuousTask()}", _delegate, _timeInterval, _executeOnceImmediately, _duration, _runType, _useUnscaledTime)
         {
         }
 
