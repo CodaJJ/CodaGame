@@ -68,7 +68,7 @@ namespace CodaGame.Base
                 if (_m_frameIntervalCounter == 0)
                 {
                     float deltaTime = _m_intervalDeltaTime;
-                    _m_frameIntervalCounter = _m_frameInterval;
+                    _m_frameIntervalCounter = _m_frameInterval - 1;
                     _m_intervalDeltaTime = 0;
                     
                     OnTick(deltaTime);
