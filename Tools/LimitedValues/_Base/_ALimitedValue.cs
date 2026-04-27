@@ -208,7 +208,7 @@ namespace CodaGame.Base
             
             
             public RecoverTask([NotNull] WeakReference<_ALimitedValue<T_VALUE, T_RANGE>> _reference, UpdateType _runType, bool _useUnscaledTime) 
-                : base($"LimitedValueRecoverTask_{Serialize.NextNextLimitedValueRecoverTask()}", _runType, _useUnscaledTime)
+                : base($"LimitedValueRecoverTask_{Serialize.NextLimitedValueRecoverTask()}", _runType, _useUnscaledTime)
             {
                 _m_reference = _reference;
             }

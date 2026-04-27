@@ -106,7 +106,7 @@ namespace CodaGame
         {
             return (uint)Interlocked.Increment(ref _g_frameActionTaskSerialize);
         }
-        internal static uint NextNextLimitedValueRecoverTask()
+        internal static uint NextLimitedValueRecoverTask()
         {
             return (uint)Interlocked.Increment(ref _g_limitedValueRecoverTaskSerialize);
         }
