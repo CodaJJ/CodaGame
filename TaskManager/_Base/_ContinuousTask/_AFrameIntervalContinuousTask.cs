@@ -28,7 +28,7 @@ namespace CodaGame.Base
         /// Constructor.
         /// </summary>
         /// <remarks>
-        /// <para>If the <see cref="_frameInterval"/>> is 0 or negative, the task will execute every frame.</para>
+        /// <para>If the <see cref="_frameInterval"/> is 0 or negative, the task will execute every frame.</para>
         /// <para>The <see cref="_executeOnceImmediately"/> parameter is used to determine whether the task should execute once immediately.</para>
         /// </remarks>
         protected _AFrameIntervalContinuousTask(string _name, int _frameInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime) 

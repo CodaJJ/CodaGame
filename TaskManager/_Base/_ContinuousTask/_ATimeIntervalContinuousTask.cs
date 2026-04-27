@@ -24,8 +24,8 @@ namespace CodaGame.Base
         /// Constructor.
         /// </summary>
         /// <remarks>
-        /// <para>Makes sure the <see cref="_timeInterval"/>> is greater than 0, otherwise it will throw an exception.</para>
-        /// <para>The <see cref="_executeOnceImmediately"/>> parameter is used to determine whether the task should execute once immediately.</para>
+        /// <para>Makes sure the <see cref="_timeInterval"/> is greater than 0, otherwise it will throw an exception.</para>
+        /// <para>The <see cref="_executeOnceImmediately"/> parameter is used to determine whether the task should execute once immediately.</para>
         /// </remarks>
         protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime)
             : base(_name, _runType, _useUnscaledTime)

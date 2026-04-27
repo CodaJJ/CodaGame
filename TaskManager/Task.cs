@@ -181,7 +181,7 @@ namespace CodaGame
         /// Run a function on a separate thread.
         /// </summary>
         /// <param name="_action">The function you want to run on a separate thread.</param>
-        /// <param name="_complete">>The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
+        /// <param name="_complete">The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
         /// <typeparam name="T_RESULT">The result type of the function.</typeparam>
         public static void RunThread<T_RESULT>(Func<T_RESULT> _action, Action<T_RESULT> _complete = null)
         {
@@ -215,7 +215,7 @@ namespace CodaGame
         /// <para>Make sure your function support cancellation by checking the CancellationToken.IsCancellationRequested property.</para>
         /// </remarks>
         /// <param name="_action">The function you want to run on a separate thread.</param>
-        /// <param name="_complete">>The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
+        /// <param name="_complete">The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
         /// <typeparam name="T_RESULT">The result type of the function.</typeparam>
         /// <returns>The cancellation token source to cancel the function.</returns>
         public static CancellationTokenSource RunThread<T_RESULT>(Func<CancellationToken, T_RESULT> _action, Action<T_RESULT> _complete = null)
