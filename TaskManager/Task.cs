@@ -183,7 +183,7 @@ namespace CodaGame
         /// <param name="_action">The function you want to run on a separate thread.</param>
         /// <param name="_complete">>The action to run on the main thread when the separate thread function complete, with the function result as parameter.</param>
         /// <typeparam name="T_RESULT">The result type of the function.</typeparam>
-        public static void RunThread<T_RESULT>(Func<T_RESULT> _action, Action<T_RESULT> _complete)
+        public static void RunThread<T_RESULT>(Func<T_RESULT> _action, Action<T_RESULT> _complete = null)
         {
             if (_action == null)
             {
