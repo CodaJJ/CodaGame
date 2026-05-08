@@ -3,7 +3,6 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-using System.Collections.Generic;
 using CodaGame.Base;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -33,7 +32,9 @@ namespace CodaGame
         [SerializeField, RuntimeReadOnly]
         private string _m_gameVersion = "1.0.0";
         [SerializeField, RuntimeReadOnly]
-        private List<Transform> _m_uiLayers;
+        private InspectorList<Transform> _m_uiLayers;
+        [SerializeField, RuntimeReadOnly]
+        private AudioMixer _m_audioMixer;
 
         [NotNull] private readonly LogicLoop _m_logicLoopTask;
         [NotNull] private readonly ShowLoop _m_showLoopTask;
@@ -48,8 +49,10 @@ namespace CodaGame
         
         public int logicFps { get { return _m_logicFps; } }
         public int logicFrameCount { get { return _m_logicLoopTask.frameCount; } }
+        public float logicAlpha { get { return _m_logicLoopTask.currentAlpha; } }
         public string gameVersion { get { return _m_gameVersion; } }
         public ReadOnlyList<Transform> uiLayers { get { return _m_uiLayers; } }
+        public AudioMixer audioMixer { get { return _m_audioMixer; } }
 
 
         public int CalculateLogicFrameIndex(double _timeSinceStartup)
@@ -85,6 +88,9 @@ namespace CodaGame
                 InputSystem.settings.updateMode = InputSettings.UpdateMode.ProcessEventsInDynamicUpdate;
                 Console.LogWarning(SystemNames.Main, "Input System update mode set to ProcessEventsInDynamicUpdate.");
             }
+
+            Physics.autoSyncTransforms = false;
+            Physics2D.autoSyncTransforms = false;
             
             _m_logicLoopTask.Run();
             _m_showLoopTask.Run();
@@ -106,24 +112,27 @@ namespace CodaGame
 
             private double _m_startTime;
             private int _m_frameCount;
+            private float _m_currentAlpha;
 
 
-            public LogicLoop([NotNull] GameMain _gameMain) 
+            public LogicLoop([NotNull] GameMain _gameMain)
                 : base("Main Logic Loop", UpdateType.Update, true)
             {
                 _m_gameMain = _gameMain;
                 _m_timeInterval = 1f / _m_gameMain._m_logicFps;
             }
-            
-            
+
+
             public double startTime { get { return _m_startTime; } }
             public int frameCount { get { return _m_frameCount; } }
-            
-            
+            public float currentAlpha { get { return _m_currentAlpha; } }
+
+
             protected override void OnRun()
             {
                 _m_startTime = Time.realtimeSinceStartupAsDouble;
                 _m_frameCount = 0;
+                _m_currentAlpha = 0f;
             }
             protected override void OnStop()
             {
@@ -137,15 +146,21 @@ namespace CodaGame
                 {
                     deltaTime -= _m_timeInterval;
                     
-                    LogicTick();
+                    Physics.SyncTransforms();
+                    Physics2D.SyncTransforms();
                     
+                    LogicTick();
+
                     _m_frameCount++;
                 }
+                // Remaining `deltaTime` in [0, _m_timeInterval) is the lead into the next logic frame.
+                _m_currentAlpha = (float)(deltaTime / _m_timeInterval);
             }
 
 
             private void LogicTick()
             {
+                ActorManager.instance.LogicTick();
             }
         }
         private class ShowLoop : _AEveryFrameContinuousTask
@@ -168,6 +183,7 @@ namespace CodaGame
             }
             protected override void OnTick(float _deltaTime)
             {
+                ActorManager.instance.ShowTick(_m_gameMain.logicAlpha);
             }
         }
     }

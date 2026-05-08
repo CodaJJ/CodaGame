@@ -28,5 +28,7 @@ namespace CodaGame
         public const string UI = "UI";
         public const string Flow = "Flow";
         public const string Stage = "Stage";
+        public const string Audio = "Audio";
+        public const string Gameplay = "Gameplay";
     }
 }

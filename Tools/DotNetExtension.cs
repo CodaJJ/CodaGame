@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
+using Random = UnityEngine.Random;
 
 namespace CodaGame
 {
@@ -249,6 +250,13 @@ namespace CodaGame
                     _list.RemoveAt(i);
                 }
             }
+        }
+        public static T GetRandomElement<T>(this List<T> _list)
+        {
+            if (_list.Count == 0)
+                return default;
+            
+            return _list[Random.Range(0, _list.Count)];
         }
 
         #endregion

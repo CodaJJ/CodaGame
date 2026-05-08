@@ -3,6 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -29,16 +30,23 @@ namespace CodaGame.Editor
     [CustomPropertyDrawer(typeof(bool), true)]
     [CustomPropertyDrawer(typeof(char), true)]
     [CustomPropertyDrawer(typeof(string), true)]
+    [CustomPropertyDrawer(typeof(InspectorList<>), true)]
     public class PropertyDrawerExtension : PropertyDrawer
     {
         public sealed override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
         {
+            if (!ShouldShow(_property))
+                return 0f;
+            
             TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
             return GetPropertyHeightInternal(_property, _label);
         }
         public sealed override void OnGUI(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
         {
+            if (!ShouldShow(_property))
+                return;
+            
             TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
             OnGUIInternal(_position, _property, _label);
@@ -54,8 +62,49 @@ namespace CodaGame.Editor
             EditorGUI.PropertyField(_position, _property, _label, true);
         }
         
+        
+        private bool ShouldShow([NotNull] SerializedProperty _property)
+        {
+            if (fieldInfo == null)
+                return true;
 
+            ShowIfAttribute showIf = (ShowIfAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(ShowIfAttribute));
+            if (showIf == null || string.IsNullOrEmpty(showIf.conditionFieldName))
+                return true;
 
+            SerializedProperty conditionProperty = FindConditionProperty(_property, showIf.conditionFieldName);
+            if (conditionProperty == null || conditionProperty.propertyType != SerializedPropertyType.Boolean)
+                return true;
+
+            return conditionProperty.boolValue == showIf.expectedValue;
+        }
+        private SerializedProperty FindConditionProperty([NotNull] SerializedProperty _property, [NotNull] string _conditionFieldName)
+        {
+            SerializedObject serializedObject = _property.serializedObject;
+            
+            // Global path (for cases like "m_settings.m_useAdvanced").
+            SerializedProperty conditionProperty = serializedObject.FindProperty(_conditionFieldName);
+            if (conditionProperty != null)
+                return conditionProperty;
+
+            // Relative path lookup from current field upward to support nested structs/classes.
+            string currentPath = _property.propertyPath;
+            int splitIndex = currentPath.LastIndexOf('.');
+            while (splitIndex >= 0)
+            {
+                string parentPath = currentPath.Substring(0, splitIndex);
+                string candidatePath = $"{parentPath}.{_conditionFieldName}";
+
+                conditionProperty = serializedObject.FindProperty(candidatePath);
+                if (conditionProperty != null)
+                    return conditionProperty;
+
+                currentPath = parentPath;
+                splitIndex = currentPath.LastIndexOf('.');
+            }
+
+            return null;
+        }
         /// <summary>
         /// Try to flatten the property if it has only one child.
         /// </summary>

@@ -16,6 +16,8 @@ namespace CodaGame
     {
         // Separators for parsing arrays/lists at different depths
         [NotNull] private static readonly char[] _k_separators = new char[] { ';', '|', ':' };
+        // Minimum volume in decibels for audio conversion (corresponds to a very low linear volume)
+        private const float _k_minVolumeDB = -80f;
         
         
         /// <summary>
@@ -158,7 +160,8 @@ namespace CodaGame
 
                 return array;
             }
-            else if (_type.IsGenericType && _type.GetGenericTypeDefinition() == typeof(List<>))
+            else if (_type.IsGenericType && 
+                     (_type.GetGenericTypeDefinition() == typeof(List<>) || _type.GetGenericTypeDefinition() == typeof(InspectorList<>)))
             {
                 Type elementType = _type.GetGenericArguments()[0];
                 string[] stringValues = _value.Split(new[] { _k_separators[_depth] }, StringSplitOptions.RemoveEmptyEntries);
@@ -195,6 +198,15 @@ namespace CodaGame
 
             return null;
         }
-        
+        public static float LinearToDb(float _linear)
+        {
+            if (_linear <= 0.0001f) return _k_minVolumeDB;
+            return 20f * Mathf.Log10(_linear);
+        }
+        public static float DbToLinear(float _db)
+        {
+            if (_db <= _k_minVolumeDB) return 0f;
+            return Mathf.Pow(10f, _db / 20f);
+        }
     }
 }
