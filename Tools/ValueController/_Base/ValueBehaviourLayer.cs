@@ -144,7 +144,7 @@ namespace CodaGame.Base
                 {
                     behaviour.InternalUpdate(_deltaTime);
                     if (behaviour.isDead)
-                        _m_valueController.RemoveBehaviour(behaviour);
+                        _m_valueController.InternalRemoveDeadBehaviour(behaviour, this);
                 }
 
                 _SetBlendFactorDirty();

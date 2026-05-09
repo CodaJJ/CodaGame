@@ -43,15 +43,15 @@ namespace CodaGame
         /// <summary>
         /// Set the constraint to be added to a controller.
         /// </summary>
-        internal void SetConstraintAdded(_AValueController<T_VALUE> _aValueController)
+        internal void SetConstraintAdded(_AValueController<T_VALUE> _controller)
         {
             if (_m_controller != null)
             {
-                Console.LogWarning(SystemNames.ValueController, _m_controller.name, "Constraint already added to another controller");
+                Console.LogWarning(SystemNames.ValueController, _controller.name, "Constraint already added to another controller");
                 return;
             }
 
-            _m_controller = _aValueController;
+            _m_controller = _controller;
         }
         /// <summary>
         /// Set the constraint to be removed from a controller.

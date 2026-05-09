@@ -46,7 +46,7 @@ namespace CodaGame
         {
             get
             {
-                if (LogIfCameraControllerNull())
+                if (EnsureCameraController())
                     return _m_cameraController.position;
 
                 return Vector3.zero;
@@ -59,7 +59,7 @@ namespace CodaGame
         {
             get
             {
-                if (LogIfCameraControllerNull()) 
+                if (EnsureCameraController()) 
                     return _m_cameraController.rotation;
 
                 return Quaternion.identity;
@@ -72,7 +72,7 @@ namespace CodaGame
         {
             get
             {
-                if (LogIfCameraControllerNull()) 
+                if (EnsureCameraController()) 
                     return _m_cameraController.size;
 
                 return 0;
@@ -84,11 +84,11 @@ namespace CodaGame
         /// Log an error if the camera controller is null
         /// </summary>
         [MemberNotNullWhen(true, nameof(_m_cameraController))]
-        protected bool LogIfCameraControllerNull()
+        protected bool EnsureCameraController()
         {
             if (_m_cameraController == null)
             {
-                Console.LogError(SystemNames.CameraController, _m_name, "Camera");
+                Console.LogError(SystemNames.CameraController, _m_name, "Cannot access camera state, this behaviour is not attached to any CameraController.");
                 return false;
             }
 
@@ -106,9 +106,9 @@ namespace CodaGame
         
         
         /// <inheritdoc />
-        private protected sealed override void OnRemovedInternal()
+        private protected sealed override void OnRemoveInternal()
         {
-            base.OnRemovedInternal();
+            base.OnRemoveInternal();
             if (_m_cameraController != null)
                 Console.LogVerbose(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_m_name} removed from controller {_m_cameraController.name}.");
             _m_cameraController = null;

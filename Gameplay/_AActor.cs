@@ -214,9 +214,9 @@ namespace CodaGame
 
         /// <summary>
         /// Registers a user Attribute on this Actor. Must be called from OnInitAttributes()
-        /// (or from a built-in factory). Calling after Awake will Crush — Attributes are static
-        /// for the lifetime of the Actor; Capability lookups via GetAttribute&lt;T&gt;() are cached
-        /// at construction and won't see Attributes added later.
+        /// (or from a built-in factory). Calling after Awake logs an error and is a no-op —
+        /// Attributes are static for the lifetime of the Actor; Capability lookups via
+        /// GetAttribute&lt;T&gt;() are cached at construction and won't see Attributes added later.
         /// </summary>
         protected T AddAttribute<T>(T _attr) where T : _AAttribute
         {
@@ -316,8 +316,11 @@ namespace CodaGame
             foreach (int t in _tags)
             {
                 if (!_m_blockTagRefCount.TryGetValue(t, out int c) || c <= 0)
+                {
                     Console.LogCrush(SystemNames.Gameplay, $"PopBlockTags underflow: tag {t} on Actor {name}.");
-                
+                    continue;
+                }
+
                 if (c == 1)
                     _m_blockTagRefCount.Remove(t);
                 else
@@ -385,7 +388,7 @@ namespace CodaGame
             _m_capabilities.Clear();
 
             foreach (_AAttribute attr in _m_attributes.Values)
-                attr?.OnDiscard();
+                attr.OnDiscard();
             _m_attributes.Clear();
             _m_showSyncAttrs.Clear();
         }
@@ -442,9 +445,9 @@ namespace CodaGame
         }
         private void DeactivateAllCapabilities()
         {
-            // Iterate in reverse priority order (low priority first out). This only matters
-            // for symmetry with the resolution order; behavior is identical either way since
-            // we clear the block-tag refcount dict afterwards.
+            // Iterate in reverse priority order (low priority first out) for symmetry with the
+            // activation pass. Each Deactivate() pops its own blockTags, so the refcount dict
+            // naturally drains to empty after this — no manual clear needed.
             for (int i = _m_capabilities.Count - 1; i >= 0; --i)
             {
                 _ACapability cap = _m_capabilities[i];

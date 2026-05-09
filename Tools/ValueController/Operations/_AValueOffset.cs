@@ -15,17 +15,8 @@ namespace CodaGame
     {
         // The controller that owns this offset.
         private _AValueController<T_VALUE> _m_controller;
-        
-        
-        /// <summary>
-        /// Is the offset finished?
-        /// </summary>
-        /// <remarks>
-        /// <para>True if the offset is finished and will be automatically removed from the controller.</para>
-        /// </remarks>
-        public abstract bool isFinished { get; }
-        
-        
+
+
         /// <summary>
         /// Update the offset.
         /// </summary>
@@ -56,7 +47,7 @@ namespace CodaGame
         {
             if (_m_controller != null)
             {
-                Console.LogWarning(SystemNames.ValueController, _m_controller.name, "Offset already added to another controller");
+                Console.LogWarning(SystemNames.ValueController, _controller.name, "Offset already added to another controller");
                 return;
             }
 

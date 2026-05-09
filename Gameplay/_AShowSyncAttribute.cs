@@ -13,7 +13,7 @@ namespace CodaGame
     /// then OnShowSync(alpha) every ShowTick to interpolate `last -> current` and apply to the show layer.
     /// Subclasses may also expose CollapseShow() — collapses `last` onto `current` so the next ShowTick
     /// shows no interpolation. Used for teleports, respawns, cuts, or any instant state change.
-    /// Built-in concrete examples: _APositionAttribute, _ARotationAttribute, _AScaleAttribute.
+    /// Built-in concrete examples (in CodaGame.Base): PositionAttribute, RotationAttribute, ScaleAttribute.
     /// </summary>
     public abstract class _AShowSyncAttribute : _AAttribute
     {

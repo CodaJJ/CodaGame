@@ -12,7 +12,14 @@ namespace CodaGame.Base
     internal class CameraControllerState : MonoBehaviour
     {
         public CameraController controller;
-        
+
         // todo: show the camera controller state in the inspector
+
+
+        private void OnDestroy()
+        {
+            if (controller != null)
+                controller.NotifyStateDestroyed();
+        }
     }
 }

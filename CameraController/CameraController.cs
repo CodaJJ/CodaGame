@@ -66,7 +66,7 @@ namespace CodaGame
             CameraControllerState controllerState = _camera.gameObject.GetComponent<CameraControllerState>();
             if (controllerState != null)
             {
-                Console.LogError(SystemNames.CameraController, _m_name, "Create CameraController failed, the camera already controller by another CameraController", _camera);
+                Console.LogError(SystemNames.CameraController, _m_name, "Create CameraController failed, the camera is already controlled by another CameraController", _camera);
                 return;
             }
             
@@ -84,11 +84,11 @@ namespace CodaGame
         /// <summary>
         /// The camera instance controlled by this controller.
         /// </summary>
-        public Camera camera { get { LogIfDisposed(); return _m_camera; } }
+        public Camera camera { get { return LogIfDisposed() ? null : _m_camera; } }
         /// <summary>
         /// The Transform component of the controlled camera.
         /// </summary>
-        public Transform cameraTransform { get { LogIfDisposed(); return _m_cameraTransform; } }
+        public Transform cameraTransform { get { return LogIfDisposed() ? null : _m_cameraTransform; } }
         /// <summary>
         /// The position of the camera.
         /// </summary>
@@ -96,7 +96,11 @@ namespace CodaGame
         /// <para>Setting this value assigns a base position to the controller, which acts as the lowest-priority input.</para>
         /// <para>Getting this value returns the final blended result after applying all active behaviors, offsets, and constraints.</para>
         /// </remarks>
-        public Vector3 position { get { LogIfDisposed(); return _m_position.value; } set { LogIfDisposed(); _m_position.baseValue = value; } }
+        public Vector3 position
+        {
+            get { return LogIfDisposed() ? Vector3.zero : _m_position.value; }
+            set { if (LogIfDisposed()) return; _m_position.baseValue = value; }
+        }
         /// <summary>
         /// The rotation of the camera.
         /// </summary>
@@ -104,7 +108,11 @@ namespace CodaGame
         /// <para>Setting this value assigns a base rotation to the controller, which acts as the lowest-priority input.</para>
         /// <para>Getting this value returns the final blended result after applying all active behaviors, offsets, and constraints.</para>
         /// </remarks>
-        public Quaternion rotation { get { LogIfDisposed(); return _m_rotation.value; } set { LogIfDisposed(); _m_rotation.baseValue = value; } }
+        public Quaternion rotation
+        {
+            get { return LogIfDisposed() ? Quaternion.identity : _m_rotation.value; }
+            set { if (LogIfDisposed()) return; _m_rotation.baseValue = value; }
+        }
         /// <summary>
         /// The size of the camera.
         /// </summary>
@@ -113,19 +121,23 @@ namespace CodaGame
         /// <para>Setting this value assigns a base size to the controller, which acts as the lowest-priority input.</para>
         /// <para>Getting this value returns the final blended result after applying all active behaviors, offsets, and constraints.</para>
         /// </remarks>
-        public float size { get { LogIfDisposed(); return _m_size.value; } set { LogIfDisposed(); _m_size.baseValue = value; } }
+        public float size
+        {
+            get { return LogIfDisposed() ? 0f : _m_size.value; }
+            set { if (LogIfDisposed()) return; _m_size.baseValue = value; }
+        }
         /// <summary>
         /// The position controller for managing camera position behaviors.
         /// </summary>
-        public CameraBehaviourController<Vector3> positionController { get { LogIfDisposed(); return _m_positionController; } }
+        public CameraBehaviourController<Vector3> positionController { get { return LogIfDisposed() ? null : _m_positionController; } }
         /// <summary>
         /// The rotation controller for managing camera rotation behaviors.
         /// </summary>
-        public CameraBehaviourController<Quaternion> rotationController { get { LogIfDisposed(); return _m_rotationController; } }
+        public CameraBehaviourController<Quaternion> rotationController { get { return LogIfDisposed() ? null : _m_rotationController; } }
         /// <summary>
         /// The size controller for managing camera size behaviors.
         /// </summary>
-        public CameraBehaviourController<float> sizeController { get { LogIfDisposed(); return _m_sizeController; } }
+        public CameraBehaviourController<float> sizeController { get { return LogIfDisposed() ? null : _m_sizeController; } }
         /// <summary>
         /// Indicates whether this controller is enabled and actively controlling the camera.
         /// </summary>
@@ -154,8 +166,9 @@ namespace CodaGame
         /// </summary>
         public void Update(float _deltaTime)
         {
-            LogIfDisposed();
-            
+            if (LogIfDisposed())
+                return;
+
             _m_position.Update(_deltaTime);
             _m_rotation.Update(_deltaTime);
             _m_size.Update(_deltaTime);
@@ -177,12 +190,30 @@ namespace CodaGame
         
         
         /// <summary>
-        /// Logs a warning if the controller is disposed.
+        /// Called by <see cref="CameraControllerState"/> when its GameObject is destroyed externally
+        /// (e.g. the camera GameObject is destroyed without going through <see cref="Dispose"/>).
         /// </summary>
-        protected void LogIfDisposed()
+        internal void NotifyStateDestroyed()
         {
-            if (!isEnable)
-                Console.LogWarning(SystemNames.CameraController, _m_name, "The CameraController is already disposed. You can't use it anymore.");
+            if (_m_controllerState == null)
+                return;
+
+            Console.LogSystem(SystemNames.CameraController, _m_name, $"Camera was destroyed externally, controller {_m_name} is now disposed.");
+            _m_controllerState = null;
+        }
+
+
+        /// <summary>
+        /// Logs a warning and returns true if the controller is disposed.
+        /// </summary>
+        /// <returns>True if the controller is disposed (caller should bail out); false if it is still alive.</returns>
+        protected bool LogIfDisposed()
+        {
+            if (isEnable)
+                return false;
+
+            Console.LogWarning(SystemNames.CameraController, _m_name, "The CameraController is already disposed. You can't use it anymore.");
+            return true;
         }
     }
 }

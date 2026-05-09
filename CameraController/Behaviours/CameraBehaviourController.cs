@@ -32,27 +32,38 @@ namespace CodaGame
         /// <remarks>
         /// <inheritdoc cref="_AValueController{T_VALUE}.AddBehaviour(_AValueBehaviour{T_VALUE})" />
         /// </remarks>
+        /// <remarks>
+        /// <para>
+        /// <see cref="AddBehaviour"/> and <see cref="RemoveBehaviour"/> are idempotent target-state operations.
+        /// Calling <see cref="AddBehaviour"/> on a behaviour that is currently fading out will smoothly
+        /// reverse the fade and bring it back to active, picking up from the current blend factor.
+        /// Symmetrically, calling <see cref="RemoveBehaviour"/> on a behaviour that is currently fading in
+        /// will reverse it back to fade-out from where it is now.
+        /// </para>
+        /// </remarks>
         public void AddBehaviour(_ACameraValueBehaviour<T_VALUE> _behaviour)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_behaviour == null)
                 return;
 
-            if (_behaviour.IsBehaviourAdded(_m_valueController))
+            bool isFirstAdd = !_behaviour.IsBehaviourAdded(_m_valueController);
+
+            if (isFirstAdd)
             {
-                Console.LogWarning(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} already added.");
-                return;
+                if (_behaviour.IsBehaviourAdded())
+                {
+                    Console.LogWarning(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} already added to another controller.");
+                    return;
+                }
+                _behaviour.SetCameraController(_m_cameraController);
             }
-            if (_behaviour.IsBehaviourAdded())
-            {
-                Console.LogWarning(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} already added to another controller.");
-                return;
-            }
-            
-            _behaviour.SetCameraController(_m_cameraController);
-            _m_valueController?.AddBehaviour(_behaviour);
-            Console.LogVerbose(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} added to controller {_m_cameraController.name}.");
+
+            _m_valueController.AddBehaviour(_behaviour);
+
+            if (isFirstAdd)
+                Console.LogVerbose(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} added to controller {_m_cameraController.name}.");
         }
         /// <summary>
         /// Remove a behaviour from the camera controller.
@@ -62,7 +73,7 @@ namespace CodaGame
         /// </remarks>
         public void RemoveBehaviour(_ACameraValueBehaviour<T_VALUE> _behaviour)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_behaviour == null)
                 return;
@@ -73,7 +84,7 @@ namespace CodaGame
                 return;
             }
 
-            _m_valueController?.RemoveBehaviour(_behaviour);
+            _m_valueController.RemoveBehaviour(_behaviour);
         }
         /// <summary>
         /// Force remove a behaviour from the camera controller.
@@ -83,7 +94,7 @@ namespace CodaGame
         /// </remarks>
         public void ForceRemoveBehaviour(_ACameraValueBehaviour<T_VALUE> _behaviour)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_behaviour == null)
                 return;
@@ -93,8 +104,8 @@ namespace CodaGame
                 Console.LogWarning(SystemNames.CameraController, _m_cameraController.name, $"Behaviour {_behaviour.name} not added to this controller.");
                 return;
             }
-            
-            _m_valueController?.ForceRemoveBehaviour(_behaviour);
+
+            _m_valueController.ForceRemoveBehaviour(_behaviour);
         }
         /// <summary>
         /// Add an offset to the camera controller.
@@ -104,7 +115,7 @@ namespace CodaGame
         /// </remarks>
         public void AddOffset(_ACameraValueOffset<T_VALUE> _offset)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_offset == null)
                 return;
@@ -132,7 +143,7 @@ namespace CodaGame
         /// </remarks>
         public void RemoveOffset(_ACameraValueOffset<T_VALUE> _offset)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_offset == null)
                 return;
@@ -155,7 +166,7 @@ namespace CodaGame
         /// </remarks>
         public void AddConstraint(_ACameraValueConstraint<T_VALUE> _constraint)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_constraint == null)
                 return;
@@ -183,7 +194,7 @@ namespace CodaGame
         /// </remarks>
         public void RemoveConstraint(_ACameraValueConstraint<T_VALUE> _constraint)
         {
-            if (_m_cameraController == null)
+            if (LogIfCannotOperate())
                 return;
             if (_constraint == null)
                 return;
@@ -197,6 +208,23 @@ namespace CodaGame
             _constraint.SetCameraController(null);
             _m_valueController?.RemoveConstraint(_constraint);
             Console.LogVerbose(SystemNames.CameraController, _m_cameraController.name, $"Constraint {_constraint.name} removed from controller {_m_cameraController.name}.");
+        }
+
+
+        /// <summary>
+        /// Returns true if this wrapper cannot operate - either the owning controller is null or already disposed.
+        /// Logs a warning when the owning controller is disposed.
+        /// </summary>
+        private bool LogIfCannotOperate()
+        {
+            if (_m_cameraController == null)
+                return true;
+            if (!_m_cameraController.isEnable)
+            {
+                Console.LogWarning(SystemNames.CameraController, _m_cameraController.name, "CameraController is already disposed, operation ignored.");
+                return true;
+            }
+            return false;
         }
     }
 }

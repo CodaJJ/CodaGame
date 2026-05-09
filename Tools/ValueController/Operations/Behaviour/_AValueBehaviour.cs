@@ -55,7 +55,7 @@ namespace CodaGame
         
 
         /// <summary>
-        /// The controller that owns this behaviour.
+        /// The priority of this behaviour. Higher priority behaviours override lower ones during blending.
         /// </summary>
         public int priority { get { return _m_priority; } }
         /// <summary>
@@ -170,9 +170,9 @@ namespace CodaGame
         /// indicating that the behaviour is no longer active within the controller.
         /// </para>
         /// </remarks>
-        protected virtual void OnRemoved()
+        protected virtual void OnRemove()
         {
-            
+
         }
 
 
@@ -196,7 +196,7 @@ namespace CodaGame
         {
             if (_m_controller != null)
             {
-                Console.LogWarning(SystemNames.ValueController, _m_controller.name, "Behaviour already added to another controller");
+                Console.LogWarning(SystemNames.ValueController, _controller.name, "Behaviour already added to another controller");
                 return;
             }
 
@@ -207,8 +207,8 @@ namespace CodaGame
         /// </summary>
         internal void SetBehaviourRemoved()
         {
-            OnRemovedInternal();
-            OnRemoved();
+            OnRemoveInternal();
+            OnRemove();
             
             _m_controller = null;
             _m_state = State.Dead;
@@ -308,6 +308,6 @@ namespace CodaGame
         /// <summary>
         /// Additional internal method to be called when the behaviour is removed.
         /// </summary>
-        private protected virtual void OnRemovedInternal() { }
+        private protected virtual void OnRemoveInternal() { }
     }
 }

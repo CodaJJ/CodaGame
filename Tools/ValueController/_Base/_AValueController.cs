@@ -36,7 +36,13 @@ namespace CodaGame.Base
         [ItemNotNull, NotNull] private readonly List<ValueBehaviourLayer> _m_layerListForTraversal;
         [ItemNotNull, NotNull] private readonly List<_AValueOffset<T_VALUE>> _m_offsetListForTraversal;
         [ItemNotNull, NotNull] private readonly List<_AValueConstraint<T_VALUE>> _m_constraintListForTraversal;
-        
+
+        // Dirty flags - set when the source list mutates, cleared after the traversal snapshot is refreshed.
+        // This avoids redundant Clear+AddRange every frame when nothing has changed.
+        private bool _m_layersDirty;
+        private bool _m_offsetsDirty;
+        private bool _m_constraintsDirty;
+
         // The final value after all processing.
         private T_VALUE _m_value;
         // The base value is a lowest priority behaviour that is always present.
@@ -47,11 +53,11 @@ namespace CodaGame.Base
         {
             _m_name = _name;
             _m_baseValue = _initValue;
-            
+
             _m_behaviourLayers = new List<ValueBehaviourLayer>();
             _m_offsetList = new List<_AValueOffset<T_VALUE>>();
             _m_constraintList = new List<_AValueConstraint<T_VALUE>>();
-            
+
             _m_layerListForTraversal = new List<ValueBehaviourLayer>();
             _m_offsetListForTraversal = new List<_AValueOffset<T_VALUE>>();
             _m_constraintListForTraversal = new List<_AValueConstraint<T_VALUE>>();
@@ -76,7 +82,7 @@ namespace CodaGame.Base
         /// <remarks>
         /// <para>The base value is a lowest priority behaviour that is always present.</para>
         /// </remarks>
-        public T_VALUE baseValue { set { _m_baseValue = value; } }
+        public T_VALUE baseValue { get { return _m_baseValue; } set { _m_baseValue = value; } }
 
 
         /// <summary>
@@ -148,7 +154,10 @@ namespace CodaGame.Base
             ValueBehaviourLayer layer = GetOrCreateBehaviourLayer(_behaviour.priority);
             layer.RemoveBehaviour(_behaviour);
             if (layer.IsEmpty())
+            {
                 _m_behaviourLayers.RemoveSorted(layer);
+                _m_layersDirty = true;
+            }
             _m_value = Evaluate();
         }
         /// <summary>
@@ -182,7 +191,10 @@ namespace CodaGame.Base
             ValueBehaviourLayer layer = GetOrCreateBehaviourLayer(_behaviour.priority);
             layer.RemoveBehaviour(_behaviour);
             if (layer.IsEmpty())
+            {
                 _m_behaviourLayers.RemoveSorted(layer);
+                _m_layersDirty = true;
+            }
             _m_value = Evaluate();
         }
         /// <summary>
@@ -208,6 +220,7 @@ namespace CodaGame.Base
             
             _offset.SetOffsetAdded(this);
             _m_offsetList.Add(_offset);
+            _m_offsetsDirty = true;
             _m_value = Evaluate();
         }
         /// <summary>
@@ -232,6 +245,7 @@ namespace CodaGame.Base
             
             _offset.SetOffsetRemoved();
             _m_offsetList.Remove(_offset);
+            _m_offsetsDirty = true;
             _m_value = Evaluate();
         }
         /// <summary>
@@ -263,6 +277,7 @@ namespace CodaGame.Base
             
             _constraint.SetConstraintAdded(this);
             _m_constraintList.Add(_constraint);
+            _m_constraintsDirty = true;
             _m_value = Evaluate();
         }
         /// <summary>
@@ -287,6 +302,7 @@ namespace CodaGame.Base
             
             _constraint.SetConstraintRemoved();
             _m_constraintList.Remove(_constraint);
+            _m_constraintsDirty = true;
             _m_value = Evaluate();
         }
         /// <summary>
@@ -294,24 +310,31 @@ namespace CodaGame.Base
         /// </summary>
         public void Update(float _deltaTime)
         {
-            _m_layerListForTraversal.Clear();
-            _m_offsetListForTraversal.Clear();
-            _m_constraintListForTraversal.Clear();
-            
-            _m_layerListForTraversal.AddRange(_m_behaviourLayers);
-            _m_offsetListForTraversal.AddRange(_m_offsetList);
-            _m_constraintListForTraversal.AddRange(_m_constraintList);
+            if (_m_layersDirty)
+            {
+                _m_layerListForTraversal.Clear();
+                _m_layerListForTraversal.AddRange(_m_behaviourLayers);
+                _m_layersDirty = false;
+            }
+            if (_m_offsetsDirty)
+            {
+                _m_offsetListForTraversal.Clear();
+                _m_offsetListForTraversal.AddRange(_m_offsetList);
+                _m_offsetsDirty = false;
+            }
+            if (_m_constraintsDirty)
+            {
+                _m_constraintListForTraversal.Clear();
+                _m_constraintListForTraversal.AddRange(_m_constraintList);
+                _m_constraintsDirty = false;
+            }
 
             foreach (ValueBehaviourLayer layer in _m_layerListForTraversal)
                 layer.Update(_deltaTime);
-            
+
             foreach (_AValueOffset<T_VALUE> offset in _m_offsetListForTraversal)
-            {
                 offset.InternalUpdate(_deltaTime);
-                if (offset.isFinished)
-                    RemoveOffset(offset);
-            }
-            
+
             foreach (_AValueConstraint<T_VALUE> constraint in _m_constraintListForTraversal)
                 constraint.InternalUpdate(_deltaTime);
 
@@ -329,15 +352,31 @@ namespace CodaGame.Base
         protected abstract T_VALUE Lerp(T_VALUE _value1, T_VALUE _value2, float _t);
         
         
+        /// <summary>
+        /// Fast-path removal for dead behaviours auto-cleaned by their owning layer's Update loop.
+        /// layer lookup that the public <see cref="RemoveBehaviour"/> would otherwise perform.
+        /// </summary>
+        private void InternalRemoveDeadBehaviour([NotNull] _AValueBehaviour<T_VALUE> _behaviour, [NotNull] ValueBehaviourLayer _layer)
+        {
+            _behaviour.SetBehaviourRemoved();
+            _layer.RemoveBehaviour(_behaviour);
+            if (_layer.IsEmpty())
+            {
+                _m_behaviourLayers.RemoveSorted(_layer);
+                _m_layersDirty = true;
+            }
+            _m_value = Evaluate();
+        }
         [NotNull]
         private ValueBehaviourLayer GetOrCreateBehaviourLayer(int _priority)
         {
             ValueBehaviourLayer layer = _m_behaviourLayers.Find(_layer => _layer.priority == _priority);
             if (layer != null)
                 return layer;
-            
+
             layer = new ValueBehaviourLayer(this, _priority);
             _m_behaviourLayers.InsertSorted(layer);
+            _m_layersDirty = true;
             return layer;
         }
         private T_VALUE Evaluate()
