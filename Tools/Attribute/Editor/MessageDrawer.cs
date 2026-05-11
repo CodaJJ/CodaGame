@@ -14,7 +14,7 @@ namespace CodaGame.Editor
         public override void OnGUI(Rect _position)
         {
             _AMessageAttribute target = (_AMessageAttribute)attribute;
-            EditorUtility.DrawHelpBox(_position, target.content, target.type, true);
+            EditorUtility.DrawHelpBox(_position, target.content, (MessageType)target.type, true);
         }
         public override float GetHeight()
         {

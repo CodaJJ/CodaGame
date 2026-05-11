@@ -3,8 +3,6 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
-using UnityEditor;
-
 namespace CodaGame
 {
     /// <summary>
@@ -12,12 +10,12 @@ namespace CodaGame
     /// </summary>
     public class WarningAttribute : _AMessageAttribute
     {
-        public WarningAttribute(string _content) 
+        public WarningAttribute(string _content)
             : base(_content)
         {
         }
 
 
-        public override MessageType type { get { return MessageType.Warning; } }  
+        public override EMessageType type { get { return EMessageType.Warning; } }
     }
 }

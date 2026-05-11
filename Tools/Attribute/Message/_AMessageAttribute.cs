@@ -5,10 +5,9 @@
 
 using System.Diagnostics;
 using UnityEngine;
-using UnityEditor;
 
 namespace CodaGame
-{ 
+{
     /// <summary>
     /// Show a message in the inspector.
     /// </summary>
@@ -16,15 +15,15 @@ namespace CodaGame
     public abstract class _AMessageAttribute : PropertyAttribute
     {
         private readonly string _m_content;
-        
+
 
         public _AMessageAttribute(string _content)
         {
             _m_content = _content;
         }
-        
+
 
         public string content { get { return _m_content; } }
-        public abstract MessageType type { get; }
+        public abstract EMessageType type { get; }
     }
 }

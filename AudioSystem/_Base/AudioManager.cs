@@ -16,7 +16,7 @@ namespace CodaGame.Base
 {
     /// <summary>
     /// Internal manager for the Audio system. Owns the source pool and BGM layers.
-    /// The <see cref="AudioMixer"/> reference is held by <see cref="GameMain"/>.
+    /// The <see cref="AudioMixer"/> reference is held by <see cref="_AGameMain"/>.
     /// </summary>
     /// <remarks>
     /// Per-playback lifecycle (play/stop/fade/recycle) lives on <see cref="Playback"/>.
@@ -41,7 +41,7 @@ namespace CodaGame.Base
         {
             _m_bgmLayers = new Dictionary<int, BGMLayer>();
 
-            _m_mixer = GameMain.instance.audioMixer;
+            _m_mixer = _AGameMain.instance.audioMixer;
             if (_m_mixer == null)
             {
                 _m_initFailed = true;

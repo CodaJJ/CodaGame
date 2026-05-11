@@ -48,7 +48,7 @@ namespace CodaGame.Base
             {
                 if (!_sceneInstance.Scene.IsValid())
                 {
-                    Console.LogError(SystemNames.Stage, "Failed to load scene for AssetIndex " + _m_assetIndex);
+                    Console.LogError(SystemNames.Stage, $"Failed to load scene for AssetIndex {_m_assetIndex}.");
                     _m_stage = null;
                     _complete.Invoke();
                     return;
@@ -56,22 +56,31 @@ namespace CodaGame.Base
 
                 _m_sceneInstance = _sceneInstance;
 
-                // Find _AStage component on a root GameObject of the loaded scene.
+                // Convention: exactly one root GameObject of the scene carries an _AStage. We still scan all
+                // roots and warn loudly if multiple are present, so authoring mistakes don't fail silently.
                 GameObject[] roots = _sceneInstance.Scene.GetRootGameObjects();
                 _AStage found = null;
                 if (roots != null)
                 {
                     foreach (GameObject go in roots)
                     {
-                        if (go == null) 
+                        if (go == null)
                             continue;
-                        
+
                         _AStage comp = go.GetComponent<_AStage>();
-                        if (comp != null)
+                        if (comp == null)
+                            continue;
+
+                        if (found == null)
                         {
                             found = comp;
-                            break;
+                            continue;
                         }
+
+                        Console.LogError(SystemNames.Stage,
+                            $"Scene for AssetIndex {_m_assetIndex} contains multiple _AStage components on root GameObjects "
+                            + $"(at least {found.GetType().Name} and {comp.GetType().Name}). Exactly one is required; using {found.GetType().Name}.");
+                        break;
                     }
                 }
 
@@ -101,10 +110,7 @@ namespace CodaGame.Base
 
             SceneInstance toUnload = _m_sceneInstance;
             _m_sceneInstance = default;
-            AssetLoader.UnloadSceneAsync(toUnload, () =>
-            {
-                _complete.Invoke();
-            });
+            AssetLoader.UnloadSceneAsync(toUnload, _complete.Invoke);
         }
     }
 }

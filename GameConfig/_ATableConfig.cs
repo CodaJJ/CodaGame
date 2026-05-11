@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for license information.
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -39,7 +40,6 @@ namespace CodaGame
                 return _m_notNullDataList;
             }
         }
-        
         
         internal List<T> dataList { get { return _m_dataList; } set { _m_dataList = value; } }
     }

@@ -8,13 +8,14 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace CodaGame
 {
-    public class GameMain : MonoBehaviour
+    public abstract class _AGameMain : MonoBehaviour
     {
         [NotNull]
-        public static GameMain instance
+        public static _AGameMain instance
         {
             get
             {
@@ -24,7 +25,7 @@ namespace CodaGame
                 return _g_instance;
             }
         }
-        private static GameMain _g_instance;
+        private static _AGameMain _g_instance;
 
 
         [SerializeField, RuntimeReadOnly]
@@ -40,9 +41,13 @@ namespace CodaGame
         [NotNull] private readonly ShowLoop _m_showLoopTask;
 
         private float _m_gameSpeed = 1f;
+        // The Unity Scene this GameMain instance lives in. Cached in Awake. By project convention this is
+        // the persistent "Base" scene that is loaded at game launch and never unloaded; all other scenes
+        // are loaded additively (typically via the Stage system).
+        private Scene _m_baseScene;
 
 
-        public GameMain()
+        public _AGameMain()
         {
             _m_logicLoopTask = new LogicLoop(this);
             _m_showLoopTask = new ShowLoop(this);
@@ -62,6 +67,12 @@ namespace CodaGame
         public string gameVersion { get { return _m_gameVersion; } }
         public ReadOnlyList<Transform> uiLayers { get { return _m_uiLayers; } }
         public AudioMixer audioMixer { get { return _m_audioMixer; } }
+        /// <summary>
+        /// The persistent Base scene this <see cref="_AGameMain"/> lives in. By project convention this scene
+        /// is loaded at game launch and never unloaded; all other scenes are loaded additively (typically via
+        /// the Stage system).
+        /// </summary>
+        public Scene baseScene { get { return _m_baseScene; } }
 
 
         /// <summary>
@@ -89,7 +100,7 @@ namespace CodaGame
             }
 
             _g_instance = this;
-            DontDestroyOnLoad(gameObject);
+            _m_baseScene = gameObject.scene;
 
             if (_m_logicFps <= 0)
             {
@@ -109,6 +120,12 @@ namespace CodaGame
             _m_logicLoopTask.Run();
             _m_showLoopTask.Run();
         }
+        private void Start()
+        {
+            // Called by Unity after every component in the Base scene has finished Awake. This is the project's
+            // game-logic entry point — concrete subclasses kick off their first Flow / Stage / save load here.
+            OnStartGame();
+        }
         private void OnDestroy()
         {
             _m_logicLoopTask.Stop();
@@ -119,13 +136,21 @@ namespace CodaGame
         }
 
 
+        /// <summary>
+        /// Project-specific game entry point. Called once after framework initialization and after every
+        /// other component in the Base scene has finished its <c>Awake</c>. Implementations typically start
+        /// the initial <c>Flow</c>, load the first Main <c>Stage</c>, or trigger save-load.
+        /// </summary>
+        protected abstract void OnStartGame();
+
+
         private class LogicLoop : _AEveryFrameContinuousTask
         {
             // History ring buffer: ~4.27s at 60Hz. Inputs older than this can't be precisely
             // attributed; the lookup falls back to frame 0.
             private const int _k_historySize = 256;
 
-            [NotNull] private readonly GameMain _m_gameMain;
+            [NotNull] private readonly _AGameMain _m_gameMain;
             [NotNull] private readonly TickRecord[] _m_history = new TickRecord[_k_historySize];
 
             private double _m_lastRealTime;
@@ -142,7 +167,7 @@ namespace CodaGame
             }
 
 
-            public LogicLoop([NotNull] GameMain _gameMain)
+            public LogicLoop([NotNull] _AGameMain _gameMain)
                 : base("Main Logic Loop", UpdateType.Update, true)
             {
                 _m_gameMain = _gameMain;
@@ -257,10 +282,10 @@ namespace CodaGame
         }
         private class ShowLoop : _AEveryFrameContinuousTask
         {
-            [NotNull] private readonly GameMain _m_gameMain;
+            [NotNull] private readonly _AGameMain _m_gameMain;
 
 
-            public ShowLoop([NotNull] GameMain _gameMain)
+            public ShowLoop([NotNull] _AGameMain _gameMain)
                 : base("Main Show Loop", UpdateType.LateUpdate, false)
             {
                 _m_gameMain = _gameMain;

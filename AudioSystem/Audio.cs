@@ -14,7 +14,7 @@ namespace CodaGame
 {
     /// <summary>
     /// Public facade for the Audio system. Auto-initializes on first use; requires
-    /// <see cref="GameMain"/> to have an <see cref="AudioMixer"/> assigned.
+    /// <see cref="_AGameMain"/> to have an <see cref="AudioMixer"/> assigned.
     /// </summary>
     public static class Audio
     {

@@ -161,7 +161,7 @@ namespace CodaGame.Base
 
         private static Transform GetLayerRoot(int _layer)
         {
-            ReadOnlyList<Transform> layers = GameMain.instance.uiLayers;
+            ReadOnlyList<Transform> layers = _AGameMain.instance.uiLayers;
             if (layers.Count == 0)
             {
                 Console.LogError(SystemNames.UI, "GameMain.uiLayers is not configured.");

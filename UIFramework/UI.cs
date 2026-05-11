@@ -17,7 +17,7 @@ namespace CodaGame
     /// <para>Create panel instances via <see cref="Create"/>. Each call creates a new instance.</para>
     /// <para>Panel lifecycle (Open/Hide) is managed on the panel instance itself.</para>
     /// <para>Destroy panels via <see cref="Destroy"/> or <see cref="_AUIPanel.Destroy(Action)"/>.</para>
-    /// <para>Layer root transforms are configured on <see cref="GameMain"/>.</para>
+    /// <para>Layer root transforms are configured on <see cref="_AGameMain"/>.</para>
     /// </remarks>
     [PublicAPI]
     public static class UI

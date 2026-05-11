@@ -44,7 +44,7 @@ namespace CodaGame.Base
             {
                 _m_playerInput = _playerInput;
                 _m_specificTypeEvents = new Dictionary<Type, _ASpecificTypeEvent>();
-                _m_actionCtxBuffer = new InputAction.CallbackContext[Mathf.CeilToInt(_k_actionBufferTime * GameMain.instance.logicFps)];
+                _m_actionCtxBuffer = new InputAction.CallbackContext[Mathf.CeilToInt(_k_actionBufferTime * _AGameMain.instance.logicFps)];
 
                 _m_action = _action;
                 _m_action.Enable();
@@ -198,8 +198,8 @@ namespace CodaGame.Base
 
             private void InsertContextToBuffer(InputAction.CallbackContext _ctx)
             {
-                int frameIndex = GameMain.instance.CalculateLogicFrameIndex(_ctx.time);
-                int frameCount = GameMain.instance.CalculateLogicFrameIndex(Time.realtimeSinceStartupAsDouble);
+                int frameIndex = _AGameMain.instance.CalculateLogicFrameIndex(_ctx.time);
+                int frameCount = _AGameMain.instance.CalculateLogicFrameIndex(Time.realtimeSinceStartupAsDouble);
 
                 if (frameIndex > frameCount)
                 {
@@ -218,7 +218,7 @@ namespace CodaGame.Base
                 int bufferIndex = _logicFrame % _m_actionCtxBuffer.Length;
                 InputAction.CallbackContext ctx = _m_actionCtxBuffer[bufferIndex];
 
-                int ctxFrame = GameMain.instance.CalculateLogicFrameIndex(ctx.time);
+                int ctxFrame = _AGameMain.instance.CalculateLogicFrameIndex(ctx.time);
                 return ctxFrame == _logicFrame ? ctx : null;
             }
 

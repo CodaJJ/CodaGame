@@ -1,0 +1,19 @@
+{
+    "name": "CodaGame.Tools.Attribute.Editor",
+    "rootNamespace": "",
+    "references": [
+        "CodaGame",
+        "CodaGame.Tools.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
