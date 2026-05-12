@@ -15,7 +15,7 @@ namespace CodaGame
     public abstract class _AGameMain : MonoBehaviour
     {
         [NotNull]
-        public static _AGameMain instance
+        protected internal static _AGameMain instance
         {
             get
             {
@@ -28,6 +28,15 @@ namespace CodaGame
         private static _AGameMain _g_instance;
 
 
+        /// <summary>
+        /// The log level of the console.
+        /// </summary>
+        /// <remarks>
+        /// <para>The log level is used to filter the log messages.</para>
+        /// <para>The log messages with a log type lower than the log level will be ignored.(Verbose &lt; Debug &lt; System &lt; Warning &lt; Error &lt; Crush)</para>
+        /// </remarks>
+        public ELogLevel logLevel = ELogLevel.Debug;
+        
         [SerializeField, RuntimeReadOnly]
         private int _m_logicFps = 60;
         [SerializeField, RuntimeReadOnly]

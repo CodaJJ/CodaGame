@@ -19,16 +19,6 @@ namespace CodaGame
     public class Console
     {
         /// <summary>
-        /// The log level of the console.
-        /// </summary>
-        /// <remarks>
-        /// <para>The log level is used to filter the log messages.</para>
-        /// <para>The log messages with a log type lower than the log level will be ignored.(Verbose &lt; Debug &lt; System &lt; Warning &lt; Error &lt; Crush)</para>
-        /// </remarks>
-        public static ELogLevel logLevel { get { return instance._m_logLevel; } set { instance._m_logLevel = value; } }
-        
-        
-        /// <summary>
         /// Log a verbose message.
         /// </summary>
         /// <param name="_system">The system that logs this message.</param>
@@ -197,21 +187,9 @@ namespace CodaGame
         private static Console _g_instance;
         [JetBrains.Annotations.NotNull] private static readonly object _g_lock = new object();
 
-
-        /// <summary>
-        /// The log level of the console.
-        /// </summary>
-        /// <remarks>
-        /// <para>The log level is used to filter the log messages.</para>
-        /// <para>The log messages with a log type lower than the log level will be ignored.(Verbose &lt; Debug &lt; System &lt; Warning &lt; Error &lt; Crush)</para>
-        /// </remarks>
-        private ELogLevel _m_logLevel;
-
         
         private Console()
         {
-            // Set the default log level to verbose.
-            _m_logLevel = ELogLevel.Verbose;
         }
 
 
@@ -226,7 +204,7 @@ namespace CodaGame
         [HideInCallstack]
         private void Log(ELogType _logType, string _system, string _contextName, string _message, Object _contextObj = null)
         {
-            if ((int)_logType < (int)_m_logLevel) 
+            if ((int)_logType < (int)_AGameMain.instance.logLevel) 
                 return;
             
             string logString = MakeLogString(_logType, _system, _contextName, _message);
