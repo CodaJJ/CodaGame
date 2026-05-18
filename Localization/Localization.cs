@@ -76,13 +76,12 @@ namespace CodaGame
             LocalizationManager.instance.RegisterVoiceConfig(_language, _assetIndex);
         }
         /// <summary>
-        /// Returns the AssetIndex for the given voice key in the current language.
-        /// Returns AssetIndex.Invalid if not found — check with isValid before use.
-        /// Use AssetLoader to load the audio asset.
+        /// Returns the SoundDefinition for the given voice key in the current language.
+        /// Returns null if not found. Pass to Audio.Play to play the voice.
         /// </summary>
-        public static AssetIndex GetVoiceAssetIndex(string _key)
+        public static SoundDefinition GetVoice(string _key)
         {
-            return LocalizationManager.instance.GetVoiceAssetIndex(_key);
+            return LocalizationManager.instance.GetVoice(_key);
         }
 
         #endregion

@@ -20,17 +20,13 @@ namespace CodaGame
         private Text _m_text;
 
 
-        protected override void OnEnable()
+        private void Awake()
         {
             _m_text = GetComponent<Text>();
-            base.OnEnable();
         }
 
         protected override void Refresh()
         {
-            if (_m_text == null)
-                return;
-
             // Update text
             if (!string.IsNullOrEmpty(_m_textKey))
             {

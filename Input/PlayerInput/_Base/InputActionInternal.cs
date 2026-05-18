@@ -22,8 +22,9 @@ namespace CodaGame.Base
         private class InputActionInternal
         {
             [NotNull] private readonly _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _m_playerInput;
-            // Cached action callback context circular buffer
-            [NotNull] private readonly InputAction.CallbackContext[] _m_actionCtxBuffer;
+            // Cached per-frame action records (circular buffer). Same-frame phases are OR-merged so that
+            // started/performed/canceled emitted on the same frame are all queryable.
+            [NotNull] private readonly FrameRecord[] _m_actionCtxBuffer;
             // Specific type event management dictionary
             [NotNull] private readonly Dictionary<Type, _ASpecificTypeEvent> _m_specificTypeEvents;
             // Action object
@@ -44,7 +45,9 @@ namespace CodaGame.Base
             {
                 _m_playerInput = _playerInput;
                 _m_specificTypeEvents = new Dictionary<Type, _ASpecificTypeEvent>();
-                _m_actionCtxBuffer = new InputAction.CallbackContext[Mathf.CeilToInt(_k_actionBufferTime * _AGameMain.instance.logicFps)];
+                _m_actionCtxBuffer = new FrameRecord[Mathf.CeilToInt(_k_actionBufferTime * _AGameMain.instance.logicFps)];
+                for (int i = 0; i < _m_actionCtxBuffer.Length; i++)
+                    _m_actionCtxBuffer[i].frameIndex = -1;
 
                 _m_action = _action;
                 _m_action.Enable();
@@ -167,20 +170,26 @@ namespace CodaGame.Base
             }
             public bool WasActionStarted(int _logicFrame)
             {
-                return GetContextForFrame(_logicFrame)?.started ?? false;
+                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
+                return record.frameIndex == _logicFrame && record.started;
             }
             public bool WasActionPerformed(int _logicFrame)
             {
-                return GetContextForFrame(_logicFrame)?.performed ?? false;
+                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
+                return record.frameIndex == _logicFrame && record.performed;
             }
             public bool WasActionCanceled(int _logicFrame)
             {
-                return GetContextForFrame(_logicFrame)?.canceled ?? false;
+                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
+                return record.frameIndex == _logicFrame && record.canceled;
             }
             public T_VALUE ReadValue<T_VALUE>(int _logicFrame)
                 where T_VALUE : struct
             {
-                return GetContextForFrame(_logicFrame)?.ReadValue<T_VALUE>() ?? default;
+                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
+                if (record.frameIndex != _logicFrame)
+                    return default;
+                return record.lastCtx.ReadValue<T_VALUE>();
             }
             public InputActionRebindingExtensions.RebindingOperation StartRebinding(int _bindingIndex)
             {
@@ -188,11 +197,27 @@ namespace CodaGame.Base
             }
             public InputControl GetBindingControl(int _bindingIndex)
             {
-                ReadOnlyArray<InputControl> controls = _m_action.controls;
-                if (_bindingIndex < 0 || _bindingIndex >= controls.Count)
+                ReadOnlyArray<InputBinding> bindings = _m_action.bindings;
+                if (_bindingIndex < 0 || _bindingIndex >= bindings.Count)
                     return null;
 
-                return controls[_bindingIndex];
+                InputBinding binding = bindings[_bindingIndex];
+                if (binding.isComposite)
+                {
+                    Console.LogError(SystemNames.Input, $"Binding index {_bindingIndex} of action {_m_action.name} refers to a composite root, which has no single control. Pass the index of a composite part instead.");
+                    return null;
+                }
+
+                string path = binding.effectivePath;
+                if (string.IsNullOrEmpty(path))
+                    return null;
+
+                foreach (InputControl control in _m_action.controls)
+                {
+                    if (InputControlPath.Matches(path, control))
+                        return control;
+                }
+                return null;
             }
 
 
@@ -211,15 +236,33 @@ namespace CodaGame.Base
                     return;
 
                 int bufferIndex = frameIndex % _m_actionCtxBuffer.Length;
-                _m_actionCtxBuffer[bufferIndex] = _ctx;
+                ref FrameRecord record = ref _m_actionCtxBuffer[bufferIndex];
+                // Different frame in this slot (either stale wrap-around or first write) — reset before merging.
+                if (record.frameIndex != frameIndex)
+                {
+                    record.frameIndex = frameIndex;
+                    record.started = false;
+                    record.performed = false;
+                    record.canceled = false;
+                }
+                if (_ctx.started)
+                    record.started = true;
+                if (_ctx.performed)
+                    record.performed = true;
+                if (_ctx.canceled)
+                    record.canceled = true;
+                record.lastCtx = _ctx;
             }
-            private InputAction.CallbackContext? GetContextForFrame(int _logicFrame)
-            {
-                int bufferIndex = _logicFrame % _m_actionCtxBuffer.Length;
-                InputAction.CallbackContext ctx = _m_actionCtxBuffer[bufferIndex];
 
-                int ctxFrame = _AGameMain.instance.CalculateLogicFrameIndex(ctx.time);
-                return ctxFrame == _logicFrame ? ctx : null;
+
+            // Per-frame slot in the action callback circular buffer.
+            private struct FrameRecord
+            {
+                public int frameIndex;
+                public bool started;
+                public bool performed;
+                public bool canceled;
+                public InputAction.CallbackContext lastCtx;
             }
 
 

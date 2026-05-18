@@ -79,9 +79,20 @@ namespace CodaGame.Base
 
             Console.LogSystem(SystemNames.Save, $"Saving game data to slot {_slot}...");
             _IDataEncryptor encryptor = _m_encryptor;
-            object slotLock = _m_slotLocks.GetValueDefinitely(_slot);
-            _data.UpdateMetadata();
-            string dataJson = JsonUtility.ToJson(_data, true);
+            object slotLock;
+            string dataJson;
+            try
+            {
+                slotLock = _m_slotLocks.GetValueDefinitely(_slot);
+                _data.UpdateMetadata();
+                dataJson = JsonUtility.ToJson(_data, true);
+            }
+            catch (Exception ex)
+            {
+                Console.LogError(SystemNames.Save, $"Failed to save to slot {_slot}: Serialization error ({ex.Message}).");
+                _complete?.Invoke(SaveResult.Failure(SaveToSlotErrorType.SerializationError));
+                return;
+            }
             Task.RunThread(() =>
             {
                 string tempFilePath = null;
@@ -177,7 +188,7 @@ namespace CodaGame.Base
                     return result;
                 }
 
-                Console.LogWarning(SystemNames.Save, $"Failed to load from slot {_slot}, attempting to load from backup...");
+                Console.LogSystem(SystemNames.Save, $"Failed to load from slot {_slot}, attempting to load from backup...");
                 string backupFilePath = GetSlotFilePath(_slot, BACKUP_FILE_EXTENSION);
                 LoadResult<T_DATA> backupResult = LoadFromFile<T_DATA>(backupFilePath, encryptor);
                 return backupResult;
@@ -189,18 +200,24 @@ namespace CodaGame.Base
         /// <returns>True if the file was deleted, false if it didn't exist</returns>
         public bool DeleteSlot(int _slot)
         {
-            string filePath = GetSlotFilePath(_slot, SAVE_FILE_EXTENSION);
-            string backupFilePath = GetSlotFilePath(_slot, BACKUP_FILE_EXTENSION);
-            bool deleted = false;
-            deleted |= FileUtility.DeleteFileIfExists(filePath);
-            deleted |= FileUtility.DeleteFileIfExists(backupFilePath);
+            object slotLock = _m_slotLocks.GetValueDefinitely(_slot);
+            lock (slotLock)
+            {
+                string filePath = GetSlotFilePath(_slot, SAVE_FILE_EXTENSION);
+                string backupFilePath = GetSlotFilePath(_slot, BACKUP_FILE_EXTENSION);
+                string tempFilePath = GetSlotFilePath(_slot, TEMP_FILE_EXTENSION);
+                bool deleted = false;
+                deleted |= FileUtility.DeleteFileIfExists(filePath);
+                deleted |= FileUtility.DeleteFileIfExists(backupFilePath);
+                deleted |= FileUtility.DeleteFileIfExists(tempFilePath);
 
-            if (deleted)
-                Console.LogSystem(SystemNames.Save, $"Save slot {_slot} deleted successfully.");
-            else
-                Console.LogWarning(SystemNames.Save, $"Save slot {_slot} does not exist.");
+                if (deleted)
+                    Console.LogSystem(SystemNames.Save, $"Save slot {_slot} deleted successfully.");
+                else
+                    Console.LogWarning(SystemNames.Save, $"Save slot {_slot} does not exist.");
 
-            return deleted;
+                return deleted;
+            }
         }
 
 

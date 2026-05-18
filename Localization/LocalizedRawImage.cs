@@ -14,25 +14,21 @@ namespace CodaGame
     [RequireComponent(typeof(RawImage))]
     public class LocalizedRawImage : LocalizedMonoBehaviour
     {
-        [SerializeField] private string _textureKey;
+        [SerializeField] private string _m_textureKey;
 
         private RawImage _m_rawImage;
 
 
-        protected override void OnEnable()
+        private void Awake()
         {
             _m_rawImage = GetComponent<RawImage>();
-            base.OnEnable();
         }
 
         protected override void Refresh()
         {
-            if (_m_rawImage == null)
-                return;
-
-            if (!string.IsNullOrEmpty(_textureKey))
+            if (!string.IsNullOrEmpty(_m_textureKey))
             {
-                Texture texture = Localization.GetTexture(_textureKey);
+                Texture texture = Localization.GetTexture(_m_textureKey);
                 if (texture != null)
                     _m_rawImage.texture = texture;
             }

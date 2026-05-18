@@ -3,7 +3,9 @@
     "rootNamespace": "",
     "references": [
         "CodaGame",
-        "CodaGame.Tools.Editor"
+        "CodaGame.Tools.Editor",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

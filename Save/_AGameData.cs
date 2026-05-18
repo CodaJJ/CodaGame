@@ -15,7 +15,11 @@ namespace CodaGame
     public abstract class _AGameData
     {
         // Metadata
-        public string saveTime;
+        /// <summary>
+        /// Save time as Unix timestamp (seconds since 1970-01-01 UTC).
+        /// Use <see cref="DateTimeOffset.FromUnixTimeSeconds"/> + <c>.ToLocalTime()</c> to convert for UI display.
+        /// </summary>
+        public long saveTime;
         public string gameVersion;
 
 
@@ -26,7 +30,7 @@ namespace CodaGame
         /// <param name="_loadedVersion">The version string loaded from the save file</param>
         /// <returns>True if migration succeeded, false if the save is incompatible</returns>
         public abstract bool OnVersionCheck(string _loadedVersion);
-        
+
 
         /// <summary>
         /// Updates the metadata (save time and game version).
@@ -34,7 +38,7 @@ namespace CodaGame
         /// </summary>
         internal void UpdateMetadata()
         {
-            saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            saveTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             gameVersion = Application.version;
         }
     }

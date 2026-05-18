@@ -12,22 +12,34 @@ namespace CodaGame
     /// </summary>
     public abstract class LocalizedMonoBehaviour : MonoBehaviour
     {
-        protected virtual void OnEnable()
-        {
-            Localization.onLanguageChanged += OnLanguageChanged;
-            Refresh();
-        }
-        protected virtual void OnDisable()
-        {
-            Localization.onLanguageChanged -= OnLanguageChanged;
-        }
+        /// <summary>
+        /// Called after the component is enabled, before the first Refresh.
+        /// Override to do one-shot setup on enable.
+        /// </summary>
+        protected virtual void OnEnabled() { }
+        /// <summary>
+        /// Called after the component is disabled.
+        /// Override to do cleanup on disable.
+        /// </summary>
+        protected virtual void OnDisabled() { }
         /// <summary>
         /// Called when the component is enabled or when the language changes.
         /// Implement this to update the component's content.
         /// </summary>
         protected abstract void Refresh();
-        
 
+
+        private void OnEnable()
+        {
+            Localization.onLanguageChanged += OnLanguageChanged;
+            OnEnabled();
+            Refresh();
+        }
+        private void OnDisable()
+        {
+            Localization.onLanguageChanged -= OnLanguageChanged;
+            OnDisabled();
+        }
         private void OnLanguageChanged(int _language)
         {
             Refresh();

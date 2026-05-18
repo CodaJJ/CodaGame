@@ -22,6 +22,7 @@ namespace CodaGame
     public abstract class _ALocalizedAssetConfig : _ATableConfig<LocalizedAssetEntry>
     {
         [NotNull] private readonly Dictionary<string, AssetIndex> _m_indexDictionary;
+        private bool _m_dictionaryBuilt;
 
 
         public _ALocalizedAssetConfig()
@@ -42,19 +43,22 @@ namespace CodaGame
                 return AssetIndex.Invalid;
             }
 
+            if (!_m_dictionaryBuilt)
+            {
+                foreach (LocalizedAssetEntry entry in notNullDataList)
+                {
+                    if (!string.IsNullOrEmpty(entry.key))
+                        _m_indexDictionary[entry.key] = entry.assetIndex;
+                }
+                _m_dictionaryBuilt = true;
+            }
+
             if (_m_indexDictionary.TryGetValue(_key, out AssetIndex index))
                 return index;
 
-            foreach (LocalizedAssetEntry entry in notNullDataList)
-            {
-                if (entry.key == _key)
-                {
-                    _m_indexDictionary[_key] = entry.assetIndex;
-                    return entry.assetIndex;
-                }
-            }
-
+            // Cache miss to suppress repeated warnings on subsequent lookups.
             Console.LogWarning(SystemNames.Localization, $"Key '{_key}' not found");
+            _m_indexDictionary[_key] = AssetIndex.Invalid;
             return AssetIndex.Invalid;
         }
     }

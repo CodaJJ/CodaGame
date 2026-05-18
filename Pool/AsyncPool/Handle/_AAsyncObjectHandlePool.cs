@@ -94,7 +94,7 @@ namespace CodaGame
                 return;
             }
             
-            if (_handle.CheckOwner(this))
+            if (!_handle.CheckOwner(this))
             {
                 Console.LogWarning(SystemNames.ObjectPool, name, "The handle is not owned by this pool, it's meaningless to call this function.");
                 return;
@@ -152,7 +152,7 @@ namespace CodaGame
             _m_handleCount = 0;
         }
         protected _AAsyncObjectHandlePool(int _initialCapacityOfCacheList = 4)
-            : this($"MultiObjectPool_{Serialize.NextObjectHandlePool()}", _initialCapacityOfCacheList)
+            : this($"ObjectHandlePool_{Serialize.NextObjectHandlePool()}", _initialCapacityOfCacheList)
         {
         }
         
@@ -208,7 +208,7 @@ namespace CodaGame
                 return;
             }
             
-            if (_handle.CheckOwner(this))
+            if (!_handle.CheckOwner(this))
             {
                 Console.LogWarning(SystemNames.ObjectPool, name, "The handle is not owned by this pool, it's meaningless to call this function.");
                 return;
@@ -219,7 +219,7 @@ namespace CodaGame
                 Console.LogWarning(SystemNames.ObjectPool, name, "The handle is released, it's meaningless to call this function.");
                 return;
             }
-            
+
             if (_handle.obj != null)
                 PushBackToCache(_handle.obj);
             _handle.SetDisable();

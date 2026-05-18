@@ -143,7 +143,7 @@ namespace CodaGame
         {
             _m_objects = new HashSet<T_OBJECT>();
         }
-        protected _ASafeSyncObjectPool(int _initialCapacityOfCacheList)
+        protected _ASafeSyncObjectPool(int _initialCapacityOfCacheList = 4)
             : this($"SafeSyncObjectPool_{Serialize.NextSafeSyncObjectPool()}", _initialCapacityOfCacheList)
         {
         }

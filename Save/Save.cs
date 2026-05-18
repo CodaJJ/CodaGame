@@ -13,6 +13,11 @@ namespace CodaGame
     /// Public API for the save system.
     /// Provides methods to save, load, and manage save files.
     /// </summary>
+    /// <remarks>
+    /// All methods in this class must be called from the main thread.
+    /// Save operations dispatch their file I/O to a background thread internally,
+    /// but the entry points themselves are not thread-safe.
+    /// </remarks>
     public static class Save
     {
         [NotNull] private static SaveManager manager { get { return SaveManager.instance; } }

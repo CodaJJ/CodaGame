@@ -213,7 +213,7 @@ namespace CodaGame.Base
         /// <para>Also, you can use the predicate to specify the condition to release the cache.</para>
         /// </remarks>
         /// <param name="_predicate">The predicate to specify the condition to release the cache, return true will destroy the cached object.</param>
-        public void ClearCache(Predicate<T_OBJECT> _predicate)
+        public void ClearCache(Predicate<T_OBJECT> _predicate = null)
         {
             if (_predicate == null)
             {

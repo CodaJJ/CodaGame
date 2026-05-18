@@ -314,7 +314,7 @@ namespace CodaGame.Base
         /// <param name="_action">Action type</param>
         /// <param name="_callback">Callback function</param>
         /// <param name="_callbackType">Callback trigger type</param>
-        public void RegisterActionCallbacks(T_ACTION_ENUM _action, Action _callback, InputCallbackType _callbackType = InputCallbackType.Performed)
+        public void RegisterActionCallback(T_ACTION_ENUM _action, Action _callback, InputCallbackType _callbackType = InputCallbackType.Performed)
         {
             if (LogIfInvalid())
                 return;
@@ -402,7 +402,7 @@ namespace CodaGame.Base
         /// <param name="_action">Action type</param>
         /// <param name="_callback">Callback function</param>
         /// <param name="_callbackType">Trigger type set during registration</param>
-        public void UnregisterActionCallbacks(T_ACTION_ENUM _action, Action _callback, InputCallbackType _callbackType = InputCallbackType.Performed)
+        public void UnregisterActionCallback(T_ACTION_ENUM _action, Action _callback, InputCallbackType _callbackType = InputCallbackType.Performed)
         {
             if (LogIfInvalid())
                 return;
@@ -633,13 +633,16 @@ namespace CodaGame.Base
         /// </remarks>
         internal void Dispose()
         {
+            // Cancel in-progress rebinding so the native RebindingOperation and timeout task don't outlive this player.
+            _m_rebindingHandle?.Cancel();
+
             foreach (InputActionInternal action in _m_enum2ActionDict.Values)
                 action.Dispose();
             _m_enum2ActionDict.Clear();
             foreach (InputActionMapInternal actionMap in _m_enum2ActionMapDict.Values)
                 actionMap.Dispose();
             _m_enum2ActionMapDict.Clear();
-            
+
             _m_isEnable = false;
         }
         

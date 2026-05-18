@@ -14,33 +14,29 @@ namespace CodaGame
     [RequireComponent(typeof(TMP_Text))]
     public class LocalizedText : LocalizedMonoBehaviour
     {
-        [SerializeField] private string _textKey;
-        [SerializeField] private string _fontKey;
+        [SerializeField] private string _m_textKey;
+        [SerializeField] private string _m_fontKey;
 
         private TMP_Text _m_text;
 
 
-        protected override void OnEnable()
+        private void Awake()
         {
             _m_text = GetComponent<TMP_Text>();
-            base.OnEnable();
         }
 
         protected override void Refresh()
         {
-            if (_m_text == null)
-                return;
-
             // Update text
-            if (!string.IsNullOrEmpty(_textKey))
+            if (!string.IsNullOrEmpty(_m_textKey))
             {
-                _m_text.text = Localization.GetText(_textKey);
+                _m_text.text = Localization.GetText(_m_textKey);
             }
 
             // Update font
-            if (!string.IsNullOrEmpty(_fontKey))
+            if (!string.IsNullOrEmpty(_m_fontKey))
             {
-                TMP_FontAsset font = Localization.GetFont(_fontKey);
+                TMP_FontAsset font = Localization.GetFont(_m_fontKey);
                 if (font != null)
                     _m_text.font = font;
             }

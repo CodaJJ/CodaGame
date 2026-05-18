@@ -156,7 +156,8 @@ namespace CodaGame
         /// <param name="_player">The manual player to remove.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
-        public static void RemoveManualPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _player)
+        public static void RemoveManualPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(
+            [NotNull] ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _player)
             where T_ACTION_MAP_ENUM : Enum
             where T_ACTION_ENUM : Enum
         {

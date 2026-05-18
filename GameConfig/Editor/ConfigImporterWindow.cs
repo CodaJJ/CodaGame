@@ -64,7 +64,17 @@ namespace CodaGame.Editor
             
             // Line 1: Output Folder Path
             _m_setting.outputFolderPath = EditorUtility.DrawFolderPathField("Output Folder Path", _m_setting.outputFolderPath, _m_setting.outputFolderPath.absolutePath);
-            
+
+            // Addressables auto-registration
+            _m_setting.autoRegisterAddressables = EditorGUILayout.Toggle("Auto-Register to Addressables", _m_setting.autoRegisterAddressables);
+            if (_m_setting.autoRegisterAddressables)
+            {
+                EditorGUI.indentLevel++;
+                _m_setting.addressablesGroupName = EditorGUILayout.TextField("Group Name", _m_setting.addressablesGroupName);
+                _m_setting.addressPrefix = EditorGUILayout.TextField("Address Prefix", _m_setting.addressPrefix);
+                EditorGUI.indentLevel--;
+            }
+
             // Line 2: Recollect All Config Types Button
             EditorGUILayout.BeginHorizontal();
             {
@@ -248,6 +258,15 @@ namespace CodaGame.Editor
 
                 ScriptableObject configAsset = GetOrCreateConfig(_setting.outputFolderPath);
                 ImportDataFromExcel(excelData.filePath.absolutePath, excelData.sheetName, configAsset);
+
+                // Auto-register the asset in Addressables so the project's AssetIndex resolver can find it
+                // at runtime — saves having to drag every imported asset into a group manually.
+                if (_setting.autoRegisterAddressables && configAsset != null)
+                {
+                    string address = _setting.addressPrefix + _m_type.Name;
+                    AddressableEditorUtility.RegisterAddressable(configAsset, _setting.addressablesGroupName, address);
+                }
+
                 if (!_m_hasExcelData)
                 {
                     // Add new mapping to setting

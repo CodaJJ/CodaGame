@@ -19,17 +19,13 @@ namespace CodaGame
         private Image _m_image;
 
 
-        protected override void OnEnable()
+        private void Awake()
         {
             _m_image = GetComponent<Image>();
-            base.OnEnable();
         }
 
         protected override void Refresh()
         {
-            if (_m_image == null)
-                return;
-
             if (!string.IsNullOrEmpty(_m_spriteKey))
             {
                 Sprite sprite = Localization.GetSprite(_m_spriteKey);

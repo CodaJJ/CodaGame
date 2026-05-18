@@ -15,6 +15,15 @@ namespace CodaGame.Editor
     internal class ConfigImporterSetting : _AGameSetting
     {
         public AssetPath outputFolderPath = "Assets/Configs";
+
+        // ── Addressables auto-registration ─────────────────────────────────────
+        // When enabled, ConfigImporter places each imported asset into an Addressables group named
+        // <see cref="addressablesGroupName"/> with address "<see cref="addressPrefix"/>{TypeShortName}".
+        // The address pattern must match the project's resolver registered via AssetIndex.RegisterGroup.
+        public bool autoRegisterAddressables = true;
+        public string addressablesGroupName = "Configs";
+        public string addressPrefix = "Configs/";
+
         public List<ExcelSheetMapping> excelSheetMappings;
         
         
