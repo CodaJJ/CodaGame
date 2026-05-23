@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 
 namespace CodaGame.Base
 {
@@ -54,6 +55,13 @@ namespace CodaGame.Base
         // Users who manually specify devices
         [ItemNotNull, NotNull] private readonly List<_IInputDeviceUser> _m_manualUsers;
         
+        // Bridge to UnityEngine.InputSystem.InputSystem.onAnyButtonPress. The underlying API uses an
+        // IDisposable subscription handle; we lazily acquire it when the first listener subscribes and
+        // dispose it again when the last listener unsubscribes, so we don't pay the global "any button"
+        // poll cost when nobody is listening.
+        private Action<InputControl> _m_onAnyKeyPress;
+        private IDisposable _m_anyKeyPressHandle;
+        
 
         private PlayerInputManager()
         {
@@ -88,7 +96,31 @@ namespace CodaGame.Base
         /// Event fired when a device is disconnected.
         /// </summary>
         public event Action<InputDevice> onDeviceDisconnected;
-        
+        /// <summary>
+        /// Event fired when any button on any device is pressed. The <see cref="InputControl"/> argument
+        /// identifies which button triggered the event. Reference-counted: the underlying subscription
+        /// to <c>InputSystem.onAnyButtonPress</c> is only active while there is at least one listener.
+        /// </summary>
+        public event Action<InputControl> onAnyKeyPress
+        {
+            add
+            {
+                if (value == null)
+                    return;
+                if (_m_onAnyKeyPress == null)
+                    _m_anyKeyPressHandle = InputSystem.onAnyButtonPress.Call(InvokeOnAnyKeyPress);
+                _m_onAnyKeyPress += value;
+            }
+            remove
+            {
+                _m_onAnyKeyPress -= value;
+                if (_m_onAnyKeyPress == null)
+                {
+                    _m_anyKeyPressHandle?.Dispose();
+                    _m_anyKeyPressHandle = null;
+                }
+            }
+        }
         /// <summary>
         /// All connected input devices.
         /// </summary>
@@ -588,6 +620,10 @@ namespace CodaGame.Base
                     onDeviceDisconnected?.Invoke(_device);
                     break;
             }
+        }
+        private void InvokeOnAnyKeyPress(InputControl _control)
+        {
+            _m_onAnyKeyPress?.Invoke(_control);
         }
     }
 }

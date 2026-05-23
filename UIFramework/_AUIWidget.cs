@@ -30,6 +30,10 @@ namespace CodaGame
         /// Whether this widget has been destroyed.
         /// </summary>
         public bool isDestroyed { get { return _m_isDestroyed; } }
+        /// <summary>
+        /// Whether this widget has been initialized.
+        /// </summary>
+        public bool isInitialized { get { return _m_isInitialized; } }
 
 
         /// <summary>
@@ -58,11 +62,12 @@ namespace CodaGame
             if (_m_isInitialized)
                 return;
 
-            _m_isInitialized = true;
-
             InitChildWidgets();
 
             OnInit();
+            
+            _m_isInitialized = true;
+            
             Console.LogVerbose(SystemNames.UI, widgetName, "Widget initialized.");
         }
         /// <summary>

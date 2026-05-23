@@ -30,6 +30,17 @@ namespace CodaGame
         /// Event fired when a device is disconnected.
         /// </summary>
         public static event Action<InputDevice> onDeviceDisconnected { add { manager.onDeviceDisconnected += value; } remove { manager.onDeviceDisconnected -= value; } }
+        /// <summary>
+        /// Event fired when any button on any connected device is pressed. The <see cref="InputControl"/>
+        /// argument identifies the specific button. Useful for "press any key to continue" prompts
+        /// and similar global input gates.
+        /// </summary>
+        /// <remarks>
+        /// Backed by <c>UnityEngine.InputSystem.InputSystem.onAnyButtonPress</c>. The underlying subscription
+        /// is reference-counted: it is only active while there is at least one listener, so subscribing
+        /// is free when no-one is listening.
+        /// </remarks>
+        public static event Action<InputControl> onAnyKeyPress { add { manager.onAnyKeyPress += value; } remove { manager.onAnyKeyPress -= value; } }
 
         /// <summary>
         /// All connected input devices.

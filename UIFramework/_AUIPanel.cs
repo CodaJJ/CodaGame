@@ -28,6 +28,7 @@ namespace CodaGame
         [SerializeField] private int _m_layer;
 
         private AssetIndex _m_panelAssetIndex;
+        private bool _m_isInitialized;
         // Destroy requested — flow may still be in progress
         private bool _m_isDestroyed;
 
@@ -62,6 +63,10 @@ namespace CodaGame
         /// Whether this panel has been destroyed.
         /// </summary>
         public bool isDestroyed { get { return _m_isDestroyed; } }
+        /// <summary>
+        /// Whether this widget has been initialized.
+        /// </summary>
+        public bool isInitialized { get { return _m_isInitialized; } }
         /// <summary>
         /// The name of this panel, used for logging and debugging. Defaults to the class name, but can be overridden for more descriptive names.
         /// </summary>
@@ -216,6 +221,8 @@ namespace CodaGame
             _m_stateMachine.ChangeState(new HiddenState());
 
             OnInit();
+            
+            _m_isInitialized = true;
         }
         /// <summary>
         /// Destroy this panel immediately, skipping any hide animation.

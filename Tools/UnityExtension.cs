@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -80,6 +81,34 @@ namespace CodaGame
                     return;
 
                 current = current.parent;
+            }
+        }
+        public static void SafeSetActive(this GameObject _obj, bool _active)
+        {
+            if (_obj == null)
+            {
+                Console.LogError(SystemNames.Utility, "SafeSetActive: _obj is null.");
+                return;
+            }
+
+            if (_obj.activeSelf != _active)
+                _obj.SetActive(_active);
+        }
+        public static void SafeSetActive(this List<GameObject> _objList, bool _active)
+        {
+            if (_objList == null)
+            {
+                Console.LogError(SystemNames.Utility, "SafeSetActive: _objList is null.");
+                return;
+            }
+
+            for (int i = 0; i < _objList.Count; i++)
+            {
+                GameObject obj = _objList[i];
+                if (obj == null)
+                    continue;
+
+                obj.SafeSetActive(_active);
             }
         }
         

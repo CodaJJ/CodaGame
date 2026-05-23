@@ -37,8 +37,9 @@ namespace CodaGame.Editor
         {
             if (!ShouldShow(_property))
                 return 0f;
-            
-            TryFlattenProperty(_property);
+
+            if (shouldFlatten)
+                TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
             return GetPropertyHeightInternal(_property, _label);
         }
@@ -46,13 +47,24 @@ namespace CodaGame.Editor
         {
             if (!ShouldShow(_property))
                 return;
-            
-            TryFlattenProperty(_property);
+
+            if (shouldFlatten)
+                TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
             OnGUIInternal(_position, _property, _label);
         }
-        
-        
+
+
+        /// <summary>
+        /// Whether single-child properties should be flattened (the SerializedProperty handed to
+        /// <see cref="OnGUIInternal"/> / <see cref="GetPropertyHeightInternal"/> is advanced to the
+        /// sole child). Useful for thin wrappers like <see cref="InspectorList{T}"/> where the wrapper
+        /// itself is not worth a foldout. Override to <c>false</c> in drawers that render the wrapper
+        /// type itself (the wrapper has meaningful Inspector UI of its own).
+        /// </summary>
+        protected virtual bool shouldFlatten { get { return true; } }
+
+
         protected virtual float GetPropertyHeightInternal([NotNull] SerializedProperty _property, GUIContent _label)
         {
             return EditorGUI.GetPropertyHeight(_property, _label, true);
