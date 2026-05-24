@@ -28,9 +28,8 @@ namespace CodaGame
 
         internal PreferredDevicePlayerInput(string _playerName, [NotNull] InputActionAsset _actionAsset,
             [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            [NotNull] _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig,
             [NotNull] List<PreferInputDeviceType> _preferredTypes)
-            : base(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig)
+            : base(_playerName, _actionAsset, _actionPathMappingConfig)
         {
             _m_preferredTypes = new List<PreferInputDeviceType>(_preferredTypes);
         }

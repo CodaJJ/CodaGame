@@ -20,12 +20,26 @@ namespace CodaGame
             get
             {
                 if (_g_instance == null)
-                    Console.LogCrush(SystemNames.Main, "GameMain instance is null.");
+                {
+                    // Do NOT route this through Console.LogCrush — Console.Log reads
+                    // _AGameMain.instance.logLevel, which re-enters this getter and recurses
+                    // until StackOverflow kills the Editor process (no managed catch possible).
+                    // Use UnityEngine.Debug directly to break the cycle.
+                    UnityEngine.Debug.LogError($"[{SystemNames.Main}] GameMain instance is null.");
+                    throw new System.NullReferenceException("GameMain instance is null.");
+                }
 
                 return _g_instance;
             }
         }
         private static _AGameMain _g_instance;
+
+        /// <summary>
+        /// Null-safe variant of <see cref="instance"/>. Returns null instead of throwing when
+        /// no GameMain exists yet — for callers (Editor tooling, internal logging) that must
+        /// not re-enter <see cref="instance"/> from inside their own error path.
+        /// </summary>
+        internal static _AGameMain instanceOrNull { get { return _g_instance; } }
 
 
         /// <summary>

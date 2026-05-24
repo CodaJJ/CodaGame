@@ -13,5 +13,16 @@ MonoBehaviour:
   m_Name: ConfigImporterSetting
   m_EditorClassIdentifier: 
   outputFolderPath:
-    _m_unityPath: Assets/Configs
-  excelSheetMappings: []
+    _m_unityPath: Assets/GameAssets/Configs
+  autoRegisterAddressables: 1
+  addressablesGroupName: Configs
+  addressPrefix: Configs/
+  excelSheetMappings:
+  - typeName: CatTower.ChineseTranslationConfig
+    filePath:
+      _m_unityPath: Excels/trasnlation.xlsx
+    sheetName: chinese
+  - typeName: CatTower.InputActionPathConfig
+    filePath:
+      _m_unityPath: Excels/input.xlsx
+    sheetName: actions

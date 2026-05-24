@@ -111,6 +111,102 @@ namespace CodaGame
                 obj.SafeSetActive(_active);
             }
         }
+        /// <summary>
+        /// Play the named clip on this <see cref="Animation"/> component and invoke <paramref name="_complete"/>
+        /// after the clip finishes.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Completion is scheduled via <see cref="Task.RunDelayActionTask"/> using the clip's length divided by its
+        /// playback speed; the callback fires on the main thread. Looping clips will still trigger the callback
+        /// after one nominal pass — callers are responsible for not mixing this with <see cref="WrapMode.Loop"/>.
+        /// </para>
+        /// <para>
+        /// If the clip is missing on the component, an error is logged and <paramref name="_complete"/> is not invoked.
+        /// </para>
+        /// </remarks>
+        /// <param name="_animation">The animation component.</param>
+        /// <param name="_clipName">The clip name registered on the component.</param>
+        /// <param name="_complete">Optional callback fired after the clip's nominal duration elapses.</param>
+        public static void Play(this Animation _animation, string _clipName, Action _complete)
+        {
+            if (_animation == null)
+            {
+                Console.LogError(SystemNames.Utility, "Play: _animation is null.");
+                return;
+            }
+            if (string.IsNullOrEmpty(_clipName))
+            {
+                Console.LogError(SystemNames.Utility, "Play: _clipName is null or empty.");
+                return;
+            }
+
+            AnimationState state = _animation[_clipName];
+            if (state == null)
+            {
+                Console.LogError(SystemNames.Utility, $"Play: clip '{_clipName}' is not registered on the Animation component.");
+                return;
+            }
+
+            _animation.Play(_clipName);
+
+            if (_complete == null)
+                return;
+
+            float speed = Mathf.Abs(state.speed);
+            if (speed <= Mathf.Epsilon)
+            {
+                Console.LogError(SystemNames.Utility, $"Play: clip '{_clipName}' has zero speed; completion callback will not fire.");
+                return;
+            }
+            Task.RunDelayActionTask(_complete, state.length / speed);
+        }
+        /// <summary>
+        /// Sample the named clip at a normalized time without playing it.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="_normalizedTime"/> is clamped to [0, 1] and mapped to the clip's length. The clip's
+        /// <see cref="AnimationState"/> is temporarily enabled with weight 1 so that <see cref="Animation.Sample"/>
+        /// evaluates it, then restored to disabled.
+        /// </para>
+        /// </remarks>
+        /// <param name="_animation">The animation component.</param>
+        /// <param name="_clipName">The clip name registered on the component.</param>
+        /// <param name="_normalizedTime">Normalized time in [0, 1].</param>
+        public static void Sample(this Animation _animation, string _clipName, float _normalizedTime)
+        {
+            if (_animation == null)
+            {
+                Console.LogError(SystemNames.Utility, "Sample: _animation is null.");
+                return;
+            }
+            if (string.IsNullOrEmpty(_clipName))
+            {
+                Console.LogError(SystemNames.Utility, "Sample: _clipName is null or empty.");
+                return;
+            }
+
+            AnimationState state = _animation[_clipName];
+            if (state == null)
+            {
+                Console.LogError(SystemNames.Utility, $"Sample: clip '{_clipName}' is not registered on the Animation component.");
+                return;
+            }
+
+            bool prevEnabled = state.enabled;
+            float prevWeight = state.weight;
+            float prevTime = state.time;
+
+            state.enabled = true;
+            state.weight = 1f;
+            state.time = Mathf.Clamp01(_normalizedTime) * state.length;
+            _animation.Sample();
+
+            state.time = prevTime;
+            state.weight = prevWeight;
+            state.enabled = prevEnabled;
+        }
         
         
         /// <returns>True if the entire traversal should stop.</returns>

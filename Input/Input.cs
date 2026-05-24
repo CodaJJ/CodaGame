@@ -68,19 +68,17 @@ namespace CodaGame
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
         /// <returns>The created all-devices player input.</returns>
         public static AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> AddAllDevicesPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(
             string _playerName,
             InputActionAsset _actionAsset,
-            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
+            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig)
             where T_ACTION_MAP_ENUM : Enum
             where T_ACTION_ENUM : Enum
         {
-            return manager.AddAllDevicesPlayer(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig);
+            return manager.AddAllDevicesPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig);
         }
         /// <summary>
         /// Removes an all-devices player input user.
@@ -106,7 +104,6 @@ namespace CodaGame
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <param name="_preferredTypes">
         /// The preferred device types in priority order (first = highest priority).
         /// If null, defaults to [KeyboardMouse, Gamepad, Touch].
@@ -118,12 +115,11 @@ namespace CodaGame
             string _playerName,
             InputActionAsset _actionAsset,
             _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig,
             List<PreferInputDeviceType> _preferredTypes = null)
             where T_ACTION_MAP_ENUM : Enum
             where T_ACTION_ENUM : Enum
         {
-            return manager.AddPreferredDevicePlayer(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig, _preferredTypes);
+            return manager.AddPreferredDevicePlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig, _preferredTypes);
         }
         /// <summary>
         /// Removes a preferred device player input user.
@@ -147,19 +143,17 @@ namespace CodaGame
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
         /// <returns>The created manual player input.</returns>
         public static ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> AddManualPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(
             string _playerName,
             InputActionAsset _actionAsset,
-            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
+            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig)
             where T_ACTION_MAP_ENUM : Enum
             where T_ACTION_ENUM : Enum
         {
-            return manager.AddManualPlayer(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig);
+            return manager.AddManualPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig);
         }
         /// <summary>
         /// Removes a manual player input user.

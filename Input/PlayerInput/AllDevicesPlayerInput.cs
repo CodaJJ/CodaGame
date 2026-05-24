@@ -22,9 +22,8 @@ namespace CodaGame
         where T_ACTION_ENUM : Enum
     {
         internal AllDevicesPlayerInput(string _playerName, [NotNull] InputActionAsset _actionAsset,
-            [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            [NotNull] _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
-            : base(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig)
+            [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig)
+            : base(_playerName, _actionAsset, _actionPathMappingConfig)
         {
         }
         

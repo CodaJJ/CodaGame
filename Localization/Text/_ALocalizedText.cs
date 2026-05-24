@@ -11,8 +11,7 @@ namespace CodaGame
     /// <summary>
     /// Automatically updates TMP_Text content and font when language changes.
     /// </summary>
-    [RequireComponent(typeof(TMP_Text))]
-    public class LocalizedText : LocalizedMonoBehaviour
+    public abstract class _ALocalizedText : LocalizedMonoBehaviour
     {
         [SerializeField] private string _m_textKey;
         [SerializeField] private string _m_fontKey;

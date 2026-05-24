@@ -49,12 +49,15 @@ namespace CodaGame.Base
         /// </summary>
         /// <param name="_playerName">Player's name</param>
         /// <param name="_actionAsset">Action asset resource</param>
-        /// <param name="_devices">Devices used by the player</param>
         /// <param name="_actionPathMappingConfig">Mapping from action enum to action path</param>
-        /// <param name="_actionMapPathMappingConfig">Mapping from action map enum to action map path</param>
-        internal _APlayerInput(string _playerName, [NotNull] InputActionAsset _actionAsset, 
-            [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            [NotNull] _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
+        /// <remarks>
+        /// Action maps are resolved by enum name — each <typeparamref name="T_ACTION_MAP_ENUM"/> value
+        /// is looked up via <c>InputActionAsset.FindActionMap(enumValue.ToString())</c>. Action maps
+        /// in the Unity Input System are flat (no nested paths), so the enum name is sufficient and
+        /// no path config is required.
+        /// </remarks>
+        internal _APlayerInput(string _playerName, [NotNull] InputActionAsset _actionAsset,
+            [NotNull] _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig)
         {
             _m_enum2ActionDict = new Dictionary<T_ACTION_ENUM, InputActionInternal>();
             _m_enum2ActionMapDict = new Dictionary<T_ACTION_MAP_ENUM, InputActionMapInternal>();
@@ -89,28 +92,20 @@ namespace CodaGame.Base
                 _m_enum2ActionDict.Add(configItem.actionEnum, new InputActionInternal(this, action));
             }
             
-            foreach (InputActionMapPathConfigItem<T_ACTION_MAP_ENUM> configItem in _actionMapPathMappingConfig.notNullDataList)
+            foreach (T_ACTION_MAP_ENUM actionMapEnum in (T_ACTION_MAP_ENUM[])Enum.GetValues(typeof(T_ACTION_MAP_ENUM)))
             {
-                if (string.IsNullOrEmpty(configItem.actionMapPath))
-                {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map path for enum {configItem.actionMapEnum} is null or empty, it will be ignored.");
-                    continue;
-                }
-
-                InputActionMap actionMap = _m_actionAsset.FindActionMap(configItem.actionMapPath);
+                string actionMapName = actionMapEnum.ToString();
+                InputActionMap actionMap = _m_actionAsset.FindActionMap(actionMapName);
                 if (actionMap == null)
                 {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {configItem.actionMapEnum} with path {configItem.actionMapPath} is not found, it will be ignored.");
+                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {actionMapEnum} (name '{actionMapName}') is not found in the action asset, it will be ignored.");
                     continue;
                 }
 
-                if (_m_enum2ActionMapDict.ContainsKey(configItem.actionMapEnum))
-                {
-                    Console.LogWarning(SystemNames.Input, name, $"The action map for enum {configItem.actionMapEnum} with path {configItem.actionMapPath} is already mapped, it will be ignored.");
+                if (_m_enum2ActionMapDict.ContainsKey(actionMapEnum))
                     continue;
-                }
 
-                _m_enum2ActionMapDict.Add(configItem.actionMapEnum, new InputActionMapInternal(actionMap));
+                _m_enum2ActionMapDict.Add(actionMapEnum, new InputActionMapInternal(actionMap));
             }
             
             Initialize();

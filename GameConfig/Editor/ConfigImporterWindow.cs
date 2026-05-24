@@ -263,7 +263,7 @@ namespace CodaGame.Editor
                 // at runtime — saves having to drag every imported asset into a group manually.
                 if (_setting.autoRegisterAddressables && configAsset != null)
                 {
-                    string address = _setting.addressPrefix + _m_type.Name;
+                    string address = _setting.addressPrefix + _m_type.FullName;
                     AddressableEditorUtility.RegisterAddressable(configAsset, _setting.addressablesGroupName, address);
                 }
 

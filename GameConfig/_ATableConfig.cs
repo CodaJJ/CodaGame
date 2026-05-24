@@ -3,6 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -16,7 +17,7 @@ namespace CodaGame
     public abstract class _ATableConfig<T> : ScriptableObject
     {
         [SerializeField, RuntimeReadOnly] 
-        private List<T> _m_dataList;
+        private InspectorList<T> _m_dataList;
         private List<T> _m_notNullDataList;
         
         
@@ -42,5 +43,18 @@ namespace CodaGame
         }
         
         internal List<T> dataList { get { return _m_dataList; } set { _m_dataList = value; } }
+
+
+        /// <summary>
+        /// Returns the element type <typeparamref name="T"/> of the data list.
+        /// </summary>
+        /// <remarks>
+        /// Used by the Config Importer (Editor) to resolve the generic argument via reflection
+        /// without having to walk the base type chain.
+        /// </remarks>
+        public Type GetDataType()
+        {
+            return typeof(T);
+        }
     }
 }

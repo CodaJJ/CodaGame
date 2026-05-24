@@ -41,7 +41,7 @@ namespace CodaGame.Base
             GameObject go = AssetLoader.InstantiateSync(_panelAsset);
             if (go == null)
             {
-                Console.LogError(SystemNames.UI, "Failed to instantiate panel prefab.");
+                Console.LogError(SystemNames.UI, $"Failed to instantiate panel prefab. check Addressables for {_panelAsset.ToAddressableKey()}");
                 return null;
             }
 

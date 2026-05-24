@@ -204,7 +204,12 @@ namespace CodaGame
         [HideInCallstack]
         private void Log(ELogType _logType, string _system, string _contextName, string _message, Object _contextObj = null)
         {
-            if ((int)_logType < (int)_AGameMain.instance.logLevel) 
+            // Editor tooling can log before/without a GameMain instance (e.g. ConfigImporterWindow).
+            // Treat "no instance" as "no filtering" rather than crashing — and never re-enter the
+            // instance getter from inside Console.
+            _AGameMain gameMain = _AGameMain.instanceOrNull;
+            ELogLevel level = gameMain != null ? gameMain.logLevel : ELogLevel.Verbose;
+            if ((int)_logType < (int)level)
                 return;
             
             string logString = MakeLogString(_logType, _system, _contextName, _message);

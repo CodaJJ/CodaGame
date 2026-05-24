@@ -157,14 +157,12 @@ namespace CodaGame.Base
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
         /// <returns>The created all-devices player input, or null if creation fails.</returns>
         public AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> AddAllDevicesPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(
             string _playerName, InputActionAsset _actionAsset,
-            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig, 
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig)
+            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig)
             where T_ACTION_ENUM : Enum
             where T_ACTION_MAP_ENUM : Enum
         {
@@ -183,13 +181,8 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, "Action path mapping config cannot be null.");
                 return null;
             }
-            if (_actionMapPathMappingConfig == null)
-            {
-                Console.LogWarning(SystemNames.Input, "Action map path mapping config cannot be null.");
-                return null;
-            }
-            
-            AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig);
+
+            AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new AllDevicesPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig);
             _m_allDeviceUsers.Add(playerInput);
             foreach (InputDevice device in _m_deviceOccupancyForAllUserDic.Keys)
                 AddDeviceTo(playerInput, device);
@@ -236,7 +229,6 @@ namespace CodaGame.Base
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <param name="_preferredTypes">The list of preferred device types in priority order (first = highest priority). If null or empty, will use all types.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
@@ -245,7 +237,6 @@ namespace CodaGame.Base
             string _playerName,
             InputActionAsset _actionAsset,
             _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig,
             List<PreferInputDeviceType> _preferredTypes = null)
             where T_ACTION_ENUM : Enum
             where T_ACTION_MAP_ENUM : Enum
@@ -265,11 +256,6 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, "Action path mapping config cannot be null.");
                 return null;
             }
-            if (_actionMapPathMappingConfig == null)
-            {
-                Console.LogWarning(SystemNames.Input, "Action map path mapping config cannot be null.");
-                return null;
-            }
 
             // If no preferred types specified, use all types in default order
             if (_preferredTypes == null || _preferredTypes.Count == 0)
@@ -279,7 +265,7 @@ namespace CodaGame.Base
                     _preferredTypes.Add((PreferInputDeviceType)i);
             }
 
-            PreferredDevicePlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new PreferredDevicePlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig, _preferredTypes);
+            PreferredDevicePlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new PreferredDevicePlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig, _preferredTypes);
             _m_preferredUsers.Add(playerInput);
             TryAssignPreferredDevices();
             return playerInput;
@@ -330,15 +316,13 @@ namespace CodaGame.Base
         /// <param name="_playerName">The name of the player.</param>
         /// <param name="_actionAsset">The InputActionAsset for the player.</param>
         /// <param name="_actionPathMappingConfig">The action path mapping configuration.</param>
-        /// <param name="_actionMapPathMappingConfig">The action map path mapping configuration.</param>
         /// <param name="_devices">The list of input devices to assign to the player. Can be null or empty.</param>
         /// <typeparam name="T_ACTION_MAP_ENUM">The action map enum type.</typeparam>
         /// <typeparam name="T_ACTION_ENUM">The action enum type.</typeparam>
         /// <returns>The created manual player input, or null if creation fails.</returns>
         public ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> AddManualPlayer<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(
             string _playerName, InputActionAsset _actionAsset,
-            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig, 
-            _AInputActionMapPathConfig<T_ACTION_MAP_ENUM> _actionMapPathMappingConfig,
+            _AInputActionPathConfig<T_ACTION_ENUM> _actionPathMappingConfig,
             List<InputDevice> _devices = null)
             where T_ACTION_ENUM : Enum
             where T_ACTION_MAP_ENUM : Enum
@@ -358,13 +342,8 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, "Action path mapping config cannot be null.");
                 return null;
             }
-            if (_actionMapPathMappingConfig == null)
-            {
-                Console.LogWarning(SystemNames.Input, "Action map path mapping config cannot be null.");
-                return null;
-            }
-            
-            ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig, _actionMapPathMappingConfig);
+
+            ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> playerInput = new ManualPlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM>(_playerName, _actionAsset, _actionPathMappingConfig);
             _m_manualUsers.Add(playerInput);
             if (_devices != null)
             {

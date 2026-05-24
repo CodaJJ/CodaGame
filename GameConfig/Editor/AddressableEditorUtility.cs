@@ -19,8 +19,8 @@ namespace CodaGame.Editor
         /// <summary>
         /// Register an asset into the Addressables system under the given group and address.
         /// Idempotent: if the asset is already in another group, it is moved; if it is already in the
-        /// target group, only its address is updated. Creates the group if it does not exist (copying
-        /// the schemas from the project's default group).
+        /// target group, only its address is updated. If the target group does not exist, the asset
+        /// falls back to the project's default group (with a warning).
         /// </summary>
         /// <param name="_asset">The asset to register.</param>
         /// <param name="_groupName">Name of the Addressables group to place the asset into.</param>
@@ -59,14 +59,13 @@ namespace CodaGame.Editor
             AddressableAssetGroup group = settings.FindGroup(_groupName);
             if (group == null)
             {
-                AddressableAssetGroup defaultGroup = settings.DefaultGroup;
-                group = settings.CreateGroup(
-                    _groupName,
-                    setAsDefaultGroup: false,
-                    readOnly: false,
-                    postEvent: true,
-                    schemasToCopy: defaultGroup != null ? defaultGroup.Schemas : null);
-                Console.LogSystem(SystemNames.Config, $"Addressables: created group '{_groupName}'.");
+                group = settings.DefaultGroup;
+                if (group == null)
+                {
+                    Console.LogError(SystemNames.Config, $"RegisterAddressable: group '{_groupName}' not found and no default group is set.");
+                    return false;
+                }
+                Console.LogWarning(SystemNames.Config, $"RegisterAddressable: group '{_groupName}' not found, falling back to default group '{group.Name}'.");
             }
 
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
