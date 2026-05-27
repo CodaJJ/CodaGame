@@ -100,7 +100,7 @@ namespace CodaGame
 
             if (string.IsNullOrEmpty(_assetPath))
             {
-                _complete.Invoke(default);
+                Task.RunActionTask(() => _complete.Invoke(default));
                 return;
             }
 
@@ -112,16 +112,17 @@ namespace CodaGame
                     {
                         Console.LogError(SystemNames.Assets, "Unity Addressables load failed.");
                         Addressables.Release(_handle);
-                        _complete.Invoke(default);
+                        Task.RunActionTask(() => _complete.Invoke(default));
                         return;
                     }
-                    _complete.Invoke(_handle.Result);
+                    T_ASSET result = _handle.Result;
+                    Task.RunActionTask(() => _complete.Invoke(result));
                 };
             }
             catch
             {
                 Console.LogError(SystemNames.Assets, "Unity Addressables load failed.");
-                _complete.Invoke(default);
+                Task.RunActionTask(() => _complete.Invoke(default));
             }
         }
         /// <summary>
@@ -176,7 +177,7 @@ namespace CodaGame
 
             if (string.IsNullOrEmpty(_assetPath))
             {
-                _complete.Invoke(null);
+                Task.RunActionTask(() => _complete.Invoke(null));
                 return;
             }
 
@@ -188,16 +189,17 @@ namespace CodaGame
                     {
                         Console.LogError(SystemNames.Assets, "Unity Addressables instantiate failed.");
                         Addressables.Release(_handle);
-                        _complete.Invoke(null);
+                        Task.RunActionTask(() => _complete.Invoke(null));
                         return;
                     }
-                    _complete.Invoke(_handle.Result);
+                    GameObject result = _handle.Result;
+                    Task.RunActionTask(() => _complete.Invoke(result));
                 };
             }
             catch
             {
                 Console.LogError(SystemNames.Assets, "Unity Addressables instantiate failed.");
-                _complete.Invoke(null);
+                Task.RunActionTask(() => _complete.Invoke(null));
             }
         }
         /// <summary>
@@ -276,7 +278,7 @@ namespace CodaGame
 
             if (string.IsNullOrEmpty(_assetPath))
             {
-                _complete.Invoke(default);
+                Task.RunActionTask(() => _complete.Invoke(default));
                 return;
             }
 
@@ -288,16 +290,17 @@ namespace CodaGame
                     {
                         Console.LogError(SystemNames.Assets, "Unity Addressables scene load failed.");
                         Addressables.Release(_handle);
-                        _complete.Invoke(default);
+                        Task.RunActionTask(() => _complete.Invoke(default));
                         return;
                     }
-                    _complete.Invoke(_handle.Result);
+                    SceneInstance result = _handle.Result;
+                    Task.RunActionTask(() => _complete.Invoke(result));
                 };
             }
             catch
             {
                 Console.LogError(SystemNames.Assets, "Unity Addressables scene load failed.");
-                _complete.Invoke(default);
+                Task.RunActionTask(() => _complete.Invoke(default));
             }
         }
         /// <summary>
@@ -329,7 +332,8 @@ namespace CodaGame
             if (!_sceneInstance.Scene.IsValid())
             {
                 Console.LogWarning(SystemNames.Assets, "UnloadSceneAsync called with invalid SceneInstance.");
-                _complete?.Invoke();
+                if (_complete != null)
+                    Task.RunActionTask(_complete);
                 return;
             }
 
@@ -339,13 +343,15 @@ namespace CodaGame
                 {
                     if (_handle.Status != AsyncOperationStatus.Succeeded)
                         Console.LogError(SystemNames.Assets, "Unity Addressables scene unload failed.");
-                    _complete?.Invoke();
+                    if (_complete != null)
+                        Task.RunActionTask(_complete);
                 };
             }
             catch
             {
                 Console.LogError(SystemNames.Assets, "Unity Addressables scene unload failed.");
-                _complete?.Invoke();
+                if (_complete != null)
+                    Task.RunActionTask(_complete);
             }
         }
         /// <summary>
