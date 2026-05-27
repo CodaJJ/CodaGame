@@ -117,6 +117,23 @@ namespace CodaGame.Base
 
             ProcessExit();
         }
+        /// <summary>
+        /// Exit the topmost active flow with type validation.
+        /// </summary>
+        public void Exit([NotNull] Type _type)
+        {
+            if (_m_isProcessing)
+            {
+                Console.LogVerbose(SystemNames.Flow, "Transition in progress. Queuing Exit operation.");
+                _m_operationQueue.Enqueue(new ExitWithTypeOperation(_type));
+                return;
+            }
+
+            if (!ValidateExitType(_type))
+                return;
+
+            ProcessExit();
+        }
 
 
         /// <summary>
@@ -134,13 +151,38 @@ namespace CodaGame.Base
 
             if (_name != null && top.flowName != _name)
             {
-                Console.LogError(SystemNames.Flow, $"Cannot exit '{_name}': topmost flow is '{top.flowName}'.");
+                Console.LogVerbose(SystemNames.Flow, $"Cannot exit '{_name}': topmost flow is '{top.flowName}'.");
                 return false;
             }
 
             if (_flow != null && top != _flow)
             {
-                Console.LogError(SystemNames.Flow, _flow.flowName, $"Cannot exit: flow is not the topmost. Topmost is '{top.flowName}'.");
+                Console.LogVerbose(SystemNames.Flow, _flow.flowName, $"Cannot exit: flow is not the topmost. Topmost is '{top.flowName}'.");
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Validate that an exit-by-type operation is valid. Returns true if exit can proceed.
+        /// </summary>
+        /// <remarks>
+        /// Compares runtime type with reference equality (==), not <see cref="Type.IsAssignableFrom"/>.
+        /// A derived flow does NOT match a base class type — callers must specify the exact concrete type.
+        /// </remarks>
+        private bool ValidateExitType([NotNull] Type _type)
+        {
+            if (_m_activeStack.Count == 0)
+            {
+                Console.LogError(SystemNames.Flow, $"Cannot exit type '{_type.Name}': active stack is empty.");
+                return false;
+            }
+
+            _AFlow top = current;
+
+            if (top.GetType() != _type)
+            {
+                Console.LogVerbose(SystemNames.Flow, $"Cannot exit type '{_type.Name}': topmost flow is type '{top.GetType().Name}'.");
                 return false;
             }
 

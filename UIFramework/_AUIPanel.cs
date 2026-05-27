@@ -307,7 +307,7 @@ namespace CodaGame
                 ActionUtility.InvokeAndClear(ref target._m_hideComplete);
 
                 // Re-evaluate in case state changed during callbacks
-                target._m_stateMachine?.Update(0);
+                target?._m_stateMachine?.Update(0);
             }
             protected override void OnExit()
             {
@@ -370,7 +370,7 @@ namespace CodaGame
                 ActionUtility.InvokeAndClear(ref target._m_openComplete);
 
                 // Re-evaluate in case state changed during callbacks
-                target._m_stateMachine?.Update(0);
+                target?._m_stateMachine?.Update(0);
             }
             protected override void OnExit()
             {

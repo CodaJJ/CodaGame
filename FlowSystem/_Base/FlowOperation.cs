@@ -3,6 +3,7 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
 using JetBrains.Annotations;
 
 namespace CodaGame.Base
@@ -109,6 +110,31 @@ namespace CodaGame.Base
             public override void Execute(FlowManager _manager)
             {
                 if (!_manager.ValidateExit(null, _m_flow))
+                {
+                    _manager.ProcessNextOperation();
+                    return;
+                }
+
+                _manager.ProcessExit();
+            }
+        }
+        /// <summary>
+        /// Queued Exit operation with type validation.
+        /// </summary>
+        private class ExitWithTypeOperation : _AFlowOperation
+        {
+            [NotNull] private readonly Type _m_type;
+
+
+            public ExitWithTypeOperation([NotNull] Type _type)
+            {
+                _m_type = _type;
+            }
+
+
+            public override void Execute(FlowManager _manager)
+            {
+                if (!_manager.ValidateExitType(_m_type))
                 {
                     _manager.ProcessNextOperation();
                     return;

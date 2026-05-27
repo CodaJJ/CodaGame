@@ -145,9 +145,11 @@ namespace CodaGame
         }
         private void Start()
         {
-            // Called by Unity after every component in the Base scene has finished Awake. This is the project's
-            // game-logic entry point — concrete subclasses kick off their first Flow / Stage / save load here.
-            OnStartGame();
+            // Defer OnStartGame by one frame. The very first frame can have anomalous Time readings —
+            // unscaledTime may include pre-Awake startup time and the first deltaTime can be large — which
+            // throws off delay-based scheduling kicked off by downstream gameplay code. By yielding one
+            // frame here, every Flow / Stage / Task scheduled from OnStartGame onward sees canonical Time.
+            Task.RunNextFrameActionTask(OnStartGame);
         }
         private void OnDestroy()
         {

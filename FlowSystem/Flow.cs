@@ -93,5 +93,25 @@ namespace CodaGame
             }
             manager.Exit(_flow);
         }
+        /// <summary>
+        /// Exit the topmost active flow with type validation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If the topmost flow's runtime type is not exactly <typeparamref name="T"/>, no exit occurs.
+        /// This is refactor-safe and bypasses <see cref="_AFlow.flowName"/> entirely — prefer this over
+        /// <see cref="Exit(string)"/> when the concrete flow type is known at the call site.
+        /// </para>
+        /// <para>
+        /// Matching is strict reference equality on <see cref="System.Type"/>. A flow whose runtime type
+        /// derives from <typeparamref name="T"/> will NOT match.
+        /// </para>
+        /// <para>If a transition is in progress, the operation is queued.</para>
+        /// </remarks>
+        /// <typeparam name="T">The expected concrete type of the topmost flow.</typeparam>
+        public static void Exit<T>() where T : _AFlow
+        {
+            manager.Exit(typeof(T));
+        }
     }
 }
