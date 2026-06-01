@@ -303,7 +303,9 @@ namespace CodaGame
             {
                 target.gameObject.SetActive(false);
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now hidden.");
-
+            }
+            protected override void OnEntered()
+            {
                 ActionUtility.InvokeAndClear(ref target._m_hideComplete);
 
                 // Re-evaluate in case state changed during callbacks
@@ -339,7 +341,9 @@ namespace CodaGame
             protected override void OnEnter()
             {
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Showing panel...");
-
+            }
+            protected override void OnEntered()
+            {
                 uint serialize = enterSerialize;
                 target.OnShow(() =>
                 {
@@ -362,10 +366,12 @@ namespace CodaGame
 
             protected override void OnEnter()
             {
+                Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now active.");
+            }
+            protected override void OnEntered()
+            {
                 target.OnActiveEnter();
                 target.PropagateShowToChildren();
-
-                Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now active.");
 
                 ActionUtility.InvokeAndClear(ref target._m_openComplete);
 
@@ -394,7 +400,9 @@ namespace CodaGame
             protected override void OnEnter()
             {
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Hiding panel...");
-
+            }
+            protected override void OnEntered()
+            {
                 uint serialize = enterSerialize;
                 target.OnHide(() =>
                 {

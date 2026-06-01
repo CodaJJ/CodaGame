@@ -103,6 +103,11 @@ namespace CodaGame.Base
             protected override void OnEnter()
             {
             }
+            protected override void OnEntered()
+            {
+                // Re-evaluate on entry: either start the next load round, or finish and invoke the show-end callback.
+                OnUpdate(0);
+            }
             protected override void OnExit()
             {
             }
@@ -144,12 +149,15 @@ namespace CodaGame.Base
 
             protected override void OnEnter()
             {
+            }
+            protected override void OnEntered()
+            {
                 if (target == null)
                 {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");    
+                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
                     return;
                 }
-                
+
                 if (target._m_loadingShow == null)
                 {
                     ChangeState(new LoadingState());
@@ -161,7 +169,7 @@ namespace CodaGame.Base
                 {
                     if (serialize != enterSerialize)
                         return;
-                    
+
                     ChangeState(new LoadingState());
                 });
             }
@@ -184,31 +192,34 @@ namespace CodaGame.Base
 
             protected override void OnEnter()
             {
+            }
+            protected override void OnEntered()
+            {
                 if (target == null)
                 {
                     Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
                     return;
                 }
-                
+
                 if (target._m_loadFunctions.Count == 0)
                 {
                     ChangeState(new LoadingShowEndState());
                     return;
                 }
-                
+
                 List<AsyncFunction> loadFunctions = new List<AsyncFunction>(target._m_loadFunctions);
                 target._m_loadFunctions.Clear();
-                
+
                 _m_parallelOperation = new Parallel("LoadingProcess");
                 foreach (AsyncFunction loadFunction in loadFunctions)
                     _m_parallelOperation.RunFunction(loadFunction);
-                
+
                 uint serialize = enterSerialize;
                 _m_parallelOperation.AddCompleteCallback(() =>
                 {
                     if (serialize != enterSerialize)
                         return;
-                    
+
                     ChangeState(new LoadingShowEndState());
                 });
             }
@@ -244,28 +255,31 @@ namespace CodaGame.Base
         {
             public override ELoadingProcessStep type { get { return ELoadingProcessStep.LoadingShowEnd; } }
             public override string name { get { return "LoadingShowEndState"; } }
-            
+
 
             protected override void OnEnter()
+            {
+            }
+            protected override void OnEntered()
             {
                 if (target == null)
                 {
                     Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
                     return;
                 }
-                
+
                 if (target._m_loadingShow == null)
                 {
                     ChangeState(new IdleState());
                     return;
                 }
-                
+
                 uint serialize = enterSerialize;
                 target._m_loadingShow.Hide(() =>
                 {
                     if (serialize != enterSerialize)
                         return;
-                    
+
                     ChangeState(new IdleState());
                 });
             }

@@ -130,8 +130,12 @@ namespace CodaGame.StateMachine.Lite
         {
             OnUpdate(_deltaTime);
         }
+        internal void EnterDone()
+        {
+            OnEntered();
+        }
 
-        
+
         /// <summary>
         /// When exiting this state.
         /// </summary>
@@ -140,6 +144,16 @@ namespace CodaGame.StateMachine.Lite
         /// When updating this state.
         /// </summary>
         protected abstract void OnUpdate(float _deltaTime);
+
+        /// <summary>
+        /// When this state has finished entering and is now the settled current state.
+        /// </summary>
+        /// <remarks>
+        /// <para>Runs right after OnEnter and the OnStateChg notification. Unlike OnEnter, changing
+        /// state here is allowed — this is where transitions decided as a consequence of entering
+        /// (e.g. immediately routing onward, or re-evaluating after invoking callbacks) belong.</para>
+        /// </remarks>
+        protected abstract void OnEntered();
     }
     /// <summary>
     /// A state for state machine.
