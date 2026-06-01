@@ -22,7 +22,7 @@ namespace CodaGame
     public abstract class _ALocalizedAssetConfig : _ATableConfig<LocalizedAssetEntry>
     {
         [NotNull] private readonly Dictionary<string, AssetIndex> _m_indexDictionary;
-        private bool _m_dictionaryBuilt;
+        [NonSerialized] private bool _m_dictionaryBuilt;
 
 
         public _ALocalizedAssetConfig()

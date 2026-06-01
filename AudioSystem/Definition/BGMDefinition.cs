@@ -17,7 +17,7 @@ namespace CodaGame
     public class BGMDefinition : _AAudioDefinition
     {
         [SerializeField] private AssetIndex _m_clipIndex;
-        private SoundClipOperation _m_clipOperation;
+        [NonSerialized] private SoundClipOperation _m_clipOperation;
 
 
         public AssetIndex clipIndex { get { return _m_clipIndex; } }

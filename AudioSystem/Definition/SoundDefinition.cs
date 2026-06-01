@@ -32,7 +32,7 @@ namespace CodaGame
         [SerializeField, ShowIf(nameof(_m_is3D))] private float _m_maxDistance = 50f;
         [SerializeField, ShowIf(nameof(_m_is3D))] private AudioRolloffMode _m_rolloffMode = AudioRolloffMode.Logarithmic;
 
-        private SoundClipOperation _m_clipOperation;
+        [NonSerialized] private SoundClipOperation _m_clipOperation;
 
 
         public List<AssetIndex> clips { get { return _m_clips; } }

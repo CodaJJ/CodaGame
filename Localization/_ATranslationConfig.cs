@@ -18,7 +18,7 @@ namespace CodaGame
     public abstract class _ATranslationConfig : _ATableConfig<TranslationEntry>
     {
         [NotNull] private readonly Dictionary<string, string> _m_translationDictionary;
-        private bool _m_dictionaryBuilt;
+        [NonSerialized] private bool _m_dictionaryBuilt;
 
 
         public _ATranslationConfig()

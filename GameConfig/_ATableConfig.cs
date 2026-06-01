@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -18,6 +17,7 @@ namespace CodaGame
     {
         [SerializeField, RuntimeReadOnly] 
         private InspectorList<T> _m_dataList;
+        [NonSerialized]
         private List<T> _m_notNullDataList;
         
         
