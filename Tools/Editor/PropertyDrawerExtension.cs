@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
@@ -33,6 +34,14 @@ namespace CodaGame.Editor
     [CustomPropertyDrawer(typeof(InspectorList<>), true)]
     public class PropertyDrawerExtension : PropertyDrawer
     {
+        // This drawer is registered for typeof(object) with useForChildren, so PropertyAttribute
+        // subclasses match it too — Unity builds a drawer chain with one instance per attribute
+        // plus one for the field type, re-entering through EditorGUI.PropertyField /
+        // GetPropertyHeight. Only the outermost instance of a property may apply the wrapping
+        // behaviors (ReadOnly, Required), otherwise they stack once per chain link.
+        private static readonly HashSet<string> _g_wrappingPropertyPaths = new HashSet<string>();
+
+
         public sealed override float GetPropertyHeight([NotNull] SerializedProperty _property, GUIContent _label)
         {
             if (!ShouldShow(_property))
@@ -41,7 +50,22 @@ namespace CodaGame.Editor
             if (shouldFlatten)
                 TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
-            return GetPropertyHeightInternal(_property, _label);
+
+            if (!_g_wrappingPropertyPaths.Add(_property.propertyPath))
+                return GetPropertyHeightInternal(_property, _label);
+
+            try
+            {
+                float height = GetPropertyHeightInternal(_property, _label);
+                string requiredMessage = GetRequiredErrorMessage(_property);
+                if (requiredMessage != null)
+                    height += EditorUtility.GetHelpBoxHeight(requiredMessage, true);
+                return height;
+            }
+            finally
+            {
+                _g_wrappingPropertyPaths.Remove(_property.propertyPath);
+            }
         }
         public sealed override void OnGUI(Rect _position, [NotNull] SerializedProperty _property, GUIContent _label)
         {
@@ -51,7 +75,38 @@ namespace CodaGame.Editor
             if (shouldFlatten)
                 TryFlattenProperty(_property);
             TryCuttingTheLabel(_label);
-            OnGUIInternal(_position, _property, _label);
+
+            if (!_g_wrappingPropertyPaths.Add(_property.propertyPath))
+            {
+                OnGUIInternal(_position, _property, _label);
+                return;
+            }
+
+            try
+            {
+                string requiredMessage = GetRequiredErrorMessage(_property);
+                Rect fieldPosition = _position;
+                if (requiredMessage != null)
+                    fieldPosition.height -= EditorUtility.GetHelpBoxHeight(requiredMessage, true);
+
+                bool previousGUIState = GUI.enabled;
+                if (Application.isPlaying && IsRuntimeReadOnly())
+                    GUI.enabled = false;
+                OnGUIInternal(fieldPosition, _property, _label);
+                GUI.enabled = previousGUIState;
+
+                if (requiredMessage == null)
+                    return;
+
+                Rect helpBoxPosition = _position;
+                helpBoxPosition.y += fieldPosition.height;
+                helpBoxPosition.height = EditorUtility.GetHelpBoxHeight(requiredMessage, true);
+                EditorUtility.DrawHelpBox(helpBoxPosition, requiredMessage, MessageType.Error, true);
+            }
+            finally
+            {
+                _g_wrappingPropertyPaths.Remove(_property.propertyPath);
+            }
         }
 
 
@@ -75,6 +130,30 @@ namespace CodaGame.Editor
         }
         
         
+        /// <summary>
+        /// Whether the field is marked with <see cref="RuntimeReadOnlyAttribute"/>.
+        /// </summary>
+        private bool IsRuntimeReadOnly()
+        {
+            return fieldInfo != null && Attribute.GetCustomAttribute(fieldInfo, typeof(RuntimeReadOnlyAttribute)) != null;
+        }
+        /// <summary>
+        /// Returns the error message to show when a <see cref="RequiredAttribute"/> field is not wired,
+        /// or null when the field is not required / not an object reference / already wired.
+        /// </summary>
+        private string GetRequiredErrorMessage([NotNull] SerializedProperty _property)
+        {
+            if (fieldInfo == null)
+                return null;
+
+            RequiredAttribute required = (RequiredAttribute)Attribute.GetCustomAttribute(fieldInfo, typeof(RequiredAttribute));
+            if (required == null)
+                return null;
+            if (_property.propertyType != SerializedPropertyType.ObjectReference || _property.objectReferenceValue != null)
+                return null;
+
+            return string.IsNullOrEmpty(required.message) ? $"'{fieldInfo.Name}' is required. Wire it in the Inspector." : required.message;
+        }
         private bool ShouldShow([NotNull] SerializedProperty _property)
         {
             if (fieldInfo == null)
