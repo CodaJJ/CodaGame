@@ -31,25 +31,32 @@ namespace CodaGame.Base
 
 
             /// <summary>
-            /// Enable the action map, increment count by 1
+            /// Enable the action map, increment count by 1.
             /// </summary>
+            /// <remarks>
+            /// The count is a net count and may be negative (more outstanding Disables than Enables,
+            /// e.g. a blanket input block over a map that was already disabled). The map is active
+            /// only while the count is positive, so Enable/Disable pairs from independent callers
+            /// interleave safely and restore the map's prior state.
+            /// </remarks>
             public void Enable()
             {
-                if (_m_enabledCount == 0)
-                    _m_actionMap.Enable();
                 _m_enabledCount++;
+                if (_m_enabledCount == 1)
+                    _m_actionMap.Enable();
             }
             /// <summary>
-            /// Disable the action map, decrement count by 1
+            /// Disable the action map, decrement count by 1.
             /// </summary>
+            /// <remarks>
+            /// Must be paired one-to-one with <see cref="Enable"/> calls; see Enable for the
+            /// net-count semantics.
+            /// </remarks>
             public void Disable()
             {
                 _m_enabledCount--;
-                if (_m_enabledCount <= 0)
-                {
-                    _m_enabledCount = 0;
+                if (_m_enabledCount == 0)
                     _m_actionMap.Disable();
-                }
             }
 
             public void Dispose() 

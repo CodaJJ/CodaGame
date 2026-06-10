@@ -70,20 +70,19 @@ namespace CodaGame.Base
                 _m_action.canceled -= OnCanceled;
             }
 
+            // Net count, may be negative; the action is active only while the count is positive.
+            // See InputActionMapInternal.Enable for the semantics.
             public void Enable()
             {
-                if (_m_enabledCount == 0)
-                    _m_action.Enable();
                 _m_enabledCount++;
+                if (_m_enabledCount == 1)
+                    _m_action.Enable();
             }
             public void Disable()
             {
                 _m_enabledCount--;
-                if (_m_enabledCount <= 0)
-                {
-                    _m_enabledCount = 0;
+                if (_m_enabledCount == 0)
                     _m_action.Disable();
-                }
             }
 
             public void OnStarted(InputAction.CallbackContext _ctx)
