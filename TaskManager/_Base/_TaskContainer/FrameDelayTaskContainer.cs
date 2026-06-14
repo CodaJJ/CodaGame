@@ -64,9 +64,20 @@ namespace CodaGame.Base
             while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
                 _AFrameDelayTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
-                task.Execute();
-                if (task.isRunning)
-                    task.StopBySystem();
+                try
+                {
+                    task.Execute();
+                }
+                catch (System.Exception _exception)
+                {
+                    Console.LogError(SystemNames.Task, task.name, "An exception was thrown while executing the task.");
+                    UnityEngine.Debug.LogException(_exception);
+                }
+                finally
+                {
+                    if (task.isRunning)
+                        task.StopBySystem();
+                }
             }
             
             _m_readyForExecuteTasks.Clear();

@@ -57,7 +57,15 @@ namespace CodaGame.Base
             while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
                 _AContinuousTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
-                task.Tick(GetDeltaTime());
+                try
+                {
+                    task.Tick(GetDeltaTime());
+                }
+                catch (System.Exception _exception)
+                {
+                    Console.LogError(SystemNames.Task, task.name, "An exception was thrown while ticking the task.");
+                    UnityEngine.Debug.LogException(_exception);
+                }
             }
             
             return true;
