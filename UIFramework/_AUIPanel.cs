@@ -154,12 +154,46 @@ namespace CodaGame
 
 
         /// <summary>
+        /// Trigger a presentation refresh of this panel.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Calls <see cref="OnRefresh"/>. Calls made before the panel is initialized are silently ignored —
+        /// the framework invokes this automatically once initialization completes, so subclasses do not need
+        /// a first paint of their own.
+        /// </para>
+        /// <para>
+        /// For panels that refresh from caller-supplied data, add a typed overload (e.g. <c>Refresh(data)</c>)
+        /// that stores the data into fields and then calls this method.
+        /// </para>
+        /// </remarks>
+        public void Refresh()
+        {
+            if (!_m_isInitialized)
+                return;
+
+            OnRefresh();
+        }
+
+
+        /// <summary>
         /// Called once after the panel is instantiated, before the first show.
         /// </summary>
         /// <remarks>
         /// <para>Use this for one-time initialization such as caching component references.</para>
         /// </remarks>
         protected virtual void OnInit() { }
+        /// <summary>
+        /// Called to refresh the panel's visual presentation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Invoked automatically once after initialization, and again on every <see cref="Refresh"/> call.
+        /// At this point initialization is complete, so child widgets and cached data are ready to read.
+        /// </para>
+        /// <para>Write only presentation updates here — one-time setup belongs in <see cref="OnInit"/>.</para>
+        /// </remarks>
+        protected virtual void OnRefresh() { }
         /// <summary>
         /// Called when the panel should become visible. Implement show animation here.
         /// </summary>
@@ -215,14 +249,14 @@ namespace CodaGame
         {
             _m_panelAssetIndex = _assetIndex;
 
-            InitChildWidgets();
-
             _m_stateMachine = new StateMachine<EUIPanelState, _AUIPanel>(this, panelName);
             _m_stateMachine.ChangeState(new HiddenState());
 
             OnInit();
-            
+            InitChildWidgets();
+
             _m_isInitialized = true;
+            Refresh();
         }
         /// <summary>
         /// Destroy this panel immediately, skipping any hide animation.

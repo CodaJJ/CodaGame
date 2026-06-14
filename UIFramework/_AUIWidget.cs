@@ -37,9 +37,43 @@ namespace CodaGame
 
 
         /// <summary>
+        /// Trigger a presentation refresh of this widget.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Calls <see cref="OnRefresh"/>. Calls made before the widget is initialized are silently ignored —
+        /// the framework invokes this automatically once initialization completes, so subclasses do not need
+        /// a first paint of their own.
+        /// </para>
+        /// <para>
+        /// For widgets that refresh from caller-supplied data, add a typed overload (e.g. <c>Refresh(data)</c>)
+        /// that stores the data into fields and then calls this method.
+        /// </para>
+        /// </remarks>
+        public void Refresh()
+        {
+            if (!_m_isInitialized)
+                return;
+
+            OnRefresh();
+        }
+
+
+        /// <summary>
         /// Called once when the widget is initialized. Use for one-time setup.
         /// </summary>
         protected virtual void OnInit() { }
+        /// <summary>
+        /// Called to refresh the widget's visual presentation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Invoked automatically once after initialization, and again on every <see cref="Refresh"/> call.
+        /// At this point initialization is complete, so child widgets and cached data are ready to read.
+        /// </para>
+        /// <para>Write only presentation updates here — one-time setup belongs in <see cref="OnInit"/>.</para>
+        /// </remarks>
+        protected virtual void OnRefresh() { }
         /// <summary>
         /// Called when the owning panel enters the Active state.
         /// </summary>
@@ -62,12 +96,12 @@ namespace CodaGame
             if (_m_isInitialized)
                 return;
 
+            OnInit();
             InitChildWidgets();
 
-            OnInit();
-            
             _m_isInitialized = true;
-            
+            Refresh();
+
             Console.LogVerbose(SystemNames.UI, widgetName, "Widget initialized.");
         }
         /// <summary>
