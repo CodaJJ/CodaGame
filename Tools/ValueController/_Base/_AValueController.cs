@@ -82,7 +82,7 @@ namespace CodaGame.Base
         /// <remarks>
         /// <para>The base value is a lowest priority behaviour that is always present.</para>
         /// </remarks>
-        public T_VALUE baseValue { get { return _m_baseValue; } set { _m_baseValue = value; } }
+        public T_VALUE baseValue { get { return _m_baseValue; } set { _m_baseValue = value; _m_value = Evaluate(); } }
 
 
         /// <summary>
