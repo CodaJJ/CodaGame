@@ -22,10 +22,6 @@ namespace CodaGame.Base
         where T_ACTION_MAP_ENUM : Enum
         where T_ACTION_ENUM : Enum
     {
-        // How long actions will be buffered
-        private const float _k_actionBufferTime = 2f;
-
-
         // Current player's input action asset
         [NotNull] private readonly InputActionAsset _m_actionAsset;
         // Current player's name
@@ -417,7 +413,34 @@ namespace CodaGame.Base
             action.RemoveCallback(_callbackType, _callback);
         }
         /// <summary>
-        /// Check if the action was started in the specified frame
+        /// Whether input is inactive on the specified logic frame. Complement of WasActionPerformed for a valid action.
+        /// </summary>
+        /// <remarks>
+        /// Frame queries use framework semantics, not Unity InputActionPhase. Assets must use Value or Button
+        /// actions without Interactions on actions or bindings; PassThrough is unsupported. Button bindings must
+        /// be digital (0/1); analog inputs use Value with the default value meaning inactive.
+        /// Business code handles timing and thresholds. Other asset configurations are outside this contract.
+        /// Snapshots cover the current logic frame and the preceding buffer frames, starting at player creation.
+        /// Queries outside that range return default values: false for Started/Canceled/Performed, true for Waiting.
+        /// The window advances with logic frames, so pausing freezes it and gameSpeed changes its wallclock duration.
+        /// </remarks>
+        public bool WasActionWaiting(T_ACTION_ENUM _action, int _logicFrame)
+        {
+            if (LogIfInvalid())
+                return false;
+
+            InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
+            if (action == null)
+            {
+                Console.LogWarning(SystemNames.Input, name, $"WasActionWaiting check failed, action {_action} not found.");
+                return false;
+            }
+
+            return action.WasActionWaiting(_logicFrame);
+        }
+        /// <summary>
+        /// Whether input started on the specified logic frame. An event query: remains true even if input
+        /// also ended on that frame, and does not carry forward to later frames.
         /// </summary>
         public bool WasActionStarted(T_ACTION_ENUM _action, int _logicFrame)
         {
@@ -434,7 +457,8 @@ namespace CodaGame.Base
             return action.WasActionStarted(_logicFrame);
         }
         /// <summary>
-        /// Check if the action was performed in the specified frame
+        /// Whether input is active at the end of the specified logic frame's recorded events. Started/performed
+        /// activate input and canceled deactivates it; the state carries forward until another event arrives.
         /// </summary>
         public bool WasActionPerformed(T_ACTION_ENUM _action, int _logicFrame)
         {
@@ -451,7 +475,8 @@ namespace CodaGame.Base
             return action.WasActionPerformed(_logicFrame);
         }
         /// <summary>
-        /// Check if the action was canceled in the specified frame
+        /// Whether the action's release (canceled) transition occurred on the specified logic frame. An edge
+        /// query: remains true even if input starts again on that frame, and does not carry forward.
         /// </summary>
         public bool WasActionCanceled(T_ACTION_ENUM _action, int _logicFrame)
         {
@@ -470,6 +495,7 @@ namespace CodaGame.Base
         /// <summary>
         /// Read the action value at the specified frame
         /// </summary>
+        /// <remarks>Returns default outside the retained logic-frame snapshots; future frames are not predicted.</remarks>
         public T_VALUE ReadActionValue<T_VALUE>(T_ACTION_ENUM _action, int _logicFrame)
             where T_VALUE : struct
         {
@@ -569,6 +595,15 @@ namespace CodaGame.Base
         }
 
         
+        /// <summary>
+        /// Advance all action snapshots without invoking business callbacks.
+        /// </summary>
+        void _IInputDeviceUser.AdvanceLogicFrame(int _logicFrame)
+        {
+            foreach (InputActionInternal action in _m_enum2ActionDict.Values)
+                action.AdvanceLogicFrame(_logicFrame);
+        }
+
         /// <summary>
         /// Add a new input device
         /// </summary>
