@@ -31,6 +31,14 @@ namespace CodaGame.Base
             [NotNull] private readonly InputAction _m_action;
             // Enable count
             private int _m_enabledCount;
+            // Carry-forward state, updated on every event and persisted beyond the buffer window so holds
+            // longer than _k_actionBufferTime still reconstruct. _m_lastValue is the latest event's value
+            // (boxed once per event); _m_phase is the action's current resting phase (Waiting / Started /
+            // Performed), driven by the event stream. _m_lastEventFrame is the logic frame of the most recent
+            // event; -1 means no event has occurred yet.
+            private object _m_lastValue;
+            private InputActionPhase _m_phase = InputActionPhase.Waiting;
+            private int _m_lastEventFrame = -1;
 
             private event Action _m_started;
             private event Action _m_performed;
@@ -167,16 +175,49 @@ namespace CodaGame.Base
                         _m_specificTypeEvents.Remove(type);
                 }
             }
+            // Reconstructs the action's resting phase (Waiting / Started / Performed) on the given logic frame
+            // by carrying the phase forward from the most recent event — the same scheme ReadValue uses for
+            // values, so it holds across frames where no callback fired and across holds that outlive the
+            // buffer. Canceled is not a resting phase (Unity resolves it to Waiting immediately); the release
+            // edge is exposed by WasActionCanceled instead.
+            private InputActionPhase ReconstructPhase(int _logicFrame)
+            {
+                if (_logicFrame >= _m_lastEventFrame)
+                    return _m_phase;
+                for (int frame = _logicFrame; frame > _logicFrame - _m_actionCtxBuffer.Length && frame >= 0; frame--)
+                {
+                    FrameRecord record = _m_actionCtxBuffer[frame % _m_actionCtxBuffer.Length];
+                    if (record.frameIndex != frame)
+                        continue;
+                    if (record.canceled)
+                        return InputActionPhase.Waiting;
+                    if (record.performed)
+                        return InputActionPhase.Performed;
+                    if (record.started)
+                        return InputActionPhase.Started;
+                }
+                return InputActionPhase.Waiting;
+            }
+            // STATE queries: "is the action in phase X on this frame". Mutually exclusive — exactly one of
+            // Waiting / Started / Performed is true per frame. A held action reports Performed on every frame
+            // between its performed and canceled events. Note Started only has duration under interactions like
+            // Hold (charging); for a plain action started→performed is instantaneous, so WasActionStarted is
+            // essentially never true. Callers wanting an edge ("pressed this frame") derive it from a phase
+            // transition or a callback.
+            public bool WasActionWaiting(int _logicFrame)
+            {
+                return ReconstructPhase(_logicFrame) == InputActionPhase.Waiting;
+            }
             public bool WasActionStarted(int _logicFrame)
             {
-                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
-                return record.frameIndex == _logicFrame && record.started;
+                return ReconstructPhase(_logicFrame) == InputActionPhase.Started;
             }
             public bool WasActionPerformed(int _logicFrame)
             {
-                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
-                return record.frameIndex == _logicFrame && record.performed;
+                return ReconstructPhase(_logicFrame) == InputActionPhase.Performed;
             }
+            // EDGE, not a phase: the release transition on this frame. Canceled has no resting phase (Unity
+            // resolves it to Waiting immediately), so it stays a per-frame event query.
             public bool WasActionCanceled(int _logicFrame)
             {
                 FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
@@ -185,10 +226,27 @@ namespace CodaGame.Base
             public T_VALUE ReadValue<T_VALUE>(int _logicFrame)
                 where T_VALUE : struct
             {
-                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
-                if (record.frameIndex != _logicFrame)
-                    return default;
-                return record.lastCtx.ReadValue<T_VALUE>();
+                // A continuous value is not an event: between events it stays constant, so the value at
+                // _logicFrame is the value of the most recent event at or before it. Held input therefore
+                // reconstructs by carrying forward the last event's value, rather than reading the buffer slot
+                // directly (which is empty on any frame where no callback fired).
+
+                // Fast path — reading the current (or a later) frame: the latest event's value still holds.
+                // This also covers holds longer than the buffer window, since _m_lastValue persists after the
+                // event ages out of the ring.
+                if (_logicFrame >= _m_lastEventFrame)
+                    return _m_lastValue is T_VALUE latest ? latest : default;
+
+                // Catch-up path — reading a past frame while a newer event already exists (the logic loop is
+                // replaying frames behind wall-clock): walk back to the most recent recorded event at or before
+                // _logicFrame, which skips the future events sitting at frames > _logicFrame.
+                for (int frame = _logicFrame; frame > _logicFrame - _m_actionCtxBuffer.Length && frame >= 0; frame--)
+                {
+                    FrameRecord record = _m_actionCtxBuffer[frame % _m_actionCtxBuffer.Length];
+                    if (record.frameIndex == frame && record.value != null)
+                        return record.value is T_VALUE past ? past : default;
+                }
+                return default;
             }
             public InputActionRebindingExtensions.RebindingOperation StartRebinding(int _bindingIndex)
             {
@@ -250,7 +308,20 @@ namespace CodaGame.Base
                     record.performed = true;
                 if (_ctx.canceled)
                     record.canceled = true;
-                record.lastCtx = _ctx;
+
+                // Capture the value at event time (boxed once per event — events are infrequent) and carry it
+                // forward, together with the performed-phase state, so ReadValue / WasActionPerformed can
+                // reconstruct held state between events — including holds that outlive the buffer window.
+                object value = _ctx.ReadValueAsObject();
+                record.value = value;
+                _m_lastValue = value;
+                if (_ctx.started)
+                    _m_phase = InputActionPhase.Started;
+                if (_ctx.performed)
+                    _m_phase = InputActionPhase.Performed;
+                if (_ctx.canceled)
+                    _m_phase = InputActionPhase.Waiting;
+                _m_lastEventFrame = frameIndex;
             }
 
 
@@ -261,7 +332,9 @@ namespace CodaGame.Base
                 public bool started;
                 public bool performed;
                 public bool canceled;
-                public InputAction.CallbackContext lastCtx;
+                // Boxed action value captured at event time (null if this slot only ever recorded edge flags,
+                // which never happens in practice — every event carries a value).
+                public object value;
             }
 
 

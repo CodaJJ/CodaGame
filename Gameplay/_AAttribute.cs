@@ -9,7 +9,7 @@ namespace CodaGame
 {
     /// <summary>
     /// Base class for all Attribute (pure data) modules on an Actor.
-    /// Type-unique per Actor. Lifecycle: OnInit (Actor Awake or runtime add) -> OnDiscard (Actor OnDestroy or runtime remove).
+    /// Type-unique per Actor. Lifecycle: OnInit (Actor Awake) -> OnResetFrameValues each LogicTick -> OnDiscard (Actor OnDestroy).
     /// </summary>
     public abstract class _AAttribute
     {
@@ -26,6 +26,15 @@ namespace CodaGame
         
 
         protected internal virtual void OnInit() { }
+
+        /// <summary>
+        /// Resets only this attribute's frame-local contributions to their neutral values.
+        /// Called after show snapshots and before capability activation resolution each LogicTick.
+        /// Preserve persistent state (velocity, contacts, profiles, health, etc.). Do not read or
+        /// mutate other attributes or trigger capabilities: reset order is not a dependency contract.
+        /// </summary>
+        protected internal virtual void OnResetFrameValues() { }
+
         protected internal virtual void OnDiscard() { }
     }
 }

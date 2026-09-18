@@ -238,7 +238,8 @@ namespace CodaGame
         // ---------- Tick (called by ActorManager) ----------
         /// <summary>
         /// Per-actor LogicTick body: flush pending capability ops, snapshot show-sync `last`,
-        /// resolve activations (priority desc), then run OnLogicTick on active capabilities.
+        /// reset frame-local attribute values, resolve activations (priority desc), then run
+        /// OnLogicTick on active capabilities.
         /// </summary>
         internal void LogicTick()
         {
@@ -248,7 +249,11 @@ namespace CodaGame
             foreach (_AShowSyncAttribute attr in _m_showSyncAttrs)
                 attr.OnCaptureLast();
 
-            // Pass 2: activation resolution in priority desc order.
+            // Pass 2: clear last frame's contributions even when their capabilities are inactive.
+            foreach (_AAttribute attr in _m_attributes.Values)
+                attr.OnResetFrameValues();
+
+            // Pass 3: activation resolution in priority desc order.
             foreach (_ACapability cap in _m_capabilities)
             {
                 bool wantsActive = cap.ShouldActivate();
@@ -261,7 +266,7 @@ namespace CodaGame
                     cap.Deactivate();
             }
 
-            // Pass 3: OnLogicTick for active capabilities in priority desc order.
+            // Pass 4: OnLogicTick for active capabilities in priority desc order.
             foreach (_ACapability cap in _m_capabilities)
             {
                 if (cap.isActive)

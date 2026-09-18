@@ -417,7 +417,25 @@ namespace CodaGame.Base
             action.RemoveCallback(_callbackType, _callback);
         }
         /// <summary>
-        /// Check if the action was started in the specified frame
+        /// Whether the action is in the Waiting phase (not actuated) on the specified logic frame.
+        /// </summary>
+        public bool WasActionWaiting(T_ACTION_ENUM _action, int _logicFrame)
+        {
+            if (LogIfInvalid())
+                return false;
+
+            InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
+            if (action == null)
+            {
+                Console.LogWarning(SystemNames.Input, name, $"WasActionWaiting check failed, action {_action} not found.");
+                return false;
+            }
+
+            return action.WasActionWaiting(_logicFrame);
+        }
+        /// <summary>
+        /// Whether the action is in the Started phase (actuated, not yet performed — e.g. a Hold interaction
+        /// charging) on the specified logic frame. A state query, not an edge.
         /// </summary>
         public bool WasActionStarted(T_ACTION_ENUM _action, int _logicFrame)
         {
@@ -434,7 +452,8 @@ namespace CodaGame.Base
             return action.WasActionStarted(_logicFrame);
         }
         /// <summary>
-        /// Check if the action was performed in the specified frame
+        /// Whether the action is in the Performed phase on the specified logic frame. A state query: a held
+        /// action reports true on every frame between its performed and canceled events.
         /// </summary>
         public bool WasActionPerformed(T_ACTION_ENUM _action, int _logicFrame)
         {
@@ -451,7 +470,8 @@ namespace CodaGame.Base
             return action.WasActionPerformed(_logicFrame);
         }
         /// <summary>
-        /// Check if the action was canceled in the specified frame
+        /// Whether the action's release (canceled) transition occurred on the specified logic frame. An edge
+        /// query — Canceled has no resting phase, so unlike the others it is true only on the release frame.
         /// </summary>
         public bool WasActionCanceled(T_ACTION_ENUM _action, int _logicFrame)
         {
