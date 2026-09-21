@@ -1,10 +1,11 @@
 // Copyright (c) 2025 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine.InputSystem;
 
 namespace CodaGame.Base
@@ -16,19 +17,34 @@ namespace CodaGame.Base
         // Internal action map management class
         private class InputActionMapInternal
         {
-            // Action map object
-            [NotNull] private readonly InputActionMap _m_actionMap;
+            // Owns every action in this map, including actions without an enum mapping.
+            [NotNull] private readonly Dictionary<InputAction, InputActionInternal> _m_actions;
             // Enable count
             private int _m_enabledCount;
-            
-            
-            public InputActionMapInternal([NotNull] InputActionMap _actionMap)
+
+
+            public InputActionMapInternal([NotNull] _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _playerInput,
+                [NotNull] InputActionMap _actionMap)
             {
-                _m_actionMap = _actionMap;
-                _m_actionMap.Enable();
+                _m_actions = new Dictionary<InputAction, InputActionInternal>();
                 _m_enabledCount = 1;
+                foreach (InputAction action in _actionMap.actions)
+                    _m_actions.Add(action, new InputActionInternal(_playerInput, this, action));
             }
 
+
+            public bool isEnabled { get { return _m_enabledCount > 0; } }
+
+
+            public InputActionInternal GetAction([NotNull] InputAction _action)
+            {
+                return _m_actions.GetValueOrDefault(_action);
+            }
+            public void AdvanceLogicFrame(int _logicFrame)
+            {
+                foreach (InputActionInternal action in _m_actions.Values)
+                    action.AdvanceLogicFrame(_logicFrame);
+            }
 
             /// <summary>
             /// Enable the action map, increment count by 1.
@@ -43,7 +59,7 @@ namespace CodaGame.Base
             {
                 _m_enabledCount++;
                 if (_m_enabledCount == 1)
-                    _m_actionMap.Enable();
+                    RefreshActions();
             }
             /// <summary>
             /// Disable the action map, decrement count by 1.
@@ -56,12 +72,21 @@ namespace CodaGame.Base
             {
                 _m_enabledCount--;
                 if (_m_enabledCount == 0)
-                    _m_actionMap.Disable();
+                    RefreshActions();
             }
 
-            public void Dispose() 
+            public void Dispose()
             {
-                // Nothing to do
+                foreach (InputActionInternal action in _m_actions.Values)
+                    action.Dispose();
+                _m_actions.Clear();
+            }
+
+
+            private void RefreshActions()
+            {
+                foreach (InputActionInternal action in _m_actions.Values)
+                    action.RefreshEnabled();
             }
         }
     }

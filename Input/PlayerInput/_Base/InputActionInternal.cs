@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
@@ -28,9 +28,38 @@ namespace CodaGame.Base
             [NotNull] private readonly Dictionary<Type, _ASpecificTypeEvent> _m_specificTypeEvents;
             // Action object
             [NotNull] private readonly InputAction _m_action;
+            [NotNull] private readonly InputActionMapInternal _m_actionMap;
             // Enable count
             private int _m_enabledCount;
             private int _m_snapshotFrame;
+            private bool _m_isRebinding;
+
+
+            public InputActionInternal([NotNull] _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _playerInput,
+                [NotNull] InputActionMapInternal _actionMap, [NotNull] InputAction _action)
+            {
+                _m_playerInput = _playerInput;
+                _m_actionMap = _actionMap;
+                _m_specificTypeEvents = new Dictionary<Type, _ASpecificTypeEvent>();
+                _m_actionCtxBuffer = new FrameRecord[_AGameMain.instance.inputHistoryFrameCount];
+                for (int i = 0; i < _m_actionCtxBuffer.Length; i++)
+                    _m_actionCtxBuffer[i].frameIndex = -1;
+                _m_snapshotFrame = _AGameMain.instance.logicFrameCount;
+                _m_actionCtxBuffer[_m_snapshotFrame % _m_actionCtxBuffer.Length].frameIndex = _m_snapshotFrame;
+
+                _m_action = _action;
+                _m_enabledCount = 1;
+                _m_action.started += OnStarted;
+                _m_action.performed += OnPerformed;
+                _m_action.canceled += OnCanceled;
+                RefreshEnabled();
+            }
+
+
+            public event Action<InputAction.CallbackContext> started { add { _m_startedWithCtx += value; } remove { _m_startedWithCtx -= value; } }
+            public event Action<InputAction.CallbackContext> performed { add { _m_performedWithCtx += value; } remove { _m_performedWithCtx -= value; } }
+            public event Action<InputAction.CallbackContext> canceled { add { _m_canceledWithCtx += value; } remove { _m_canceledWithCtx -= value; } }
+
 
             private event Action _m_started;
             private event Action _m_performed;
@@ -41,30 +70,6 @@ namespace CodaGame.Base
             private event Action<InputAction.CallbackContext> _m_canceledWithCtx;
 
 
-            public InputActionInternal([NotNull] _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _playerInput, [NotNull] InputAction _action)
-            {
-                _m_playerInput = _playerInput;
-                _m_specificTypeEvents = new Dictionary<Type, _ASpecificTypeEvent>();
-                _m_actionCtxBuffer = new FrameRecord[_AGameMain.instance.inputHistoryFrameCount];
-                for (int i = 0; i < _m_actionCtxBuffer.Length; i++)
-                    _m_actionCtxBuffer[i].frameIndex = -1;
-                _m_snapshotFrame = _AGameMain.instance.logicFrameCount;
-                _m_actionCtxBuffer[_m_snapshotFrame % _m_actionCtxBuffer.Length].frameIndex = _m_snapshotFrame;
-
-                _m_action = _action;
-                _m_action.Enable();
-                _m_enabledCount = 1;
-                _m_action.started += OnStarted;
-                _m_action.performed += OnPerformed;
-                _m_action.canceled += OnCanceled;
-            }
-
-
-            public event Action<InputAction.CallbackContext> started { add { _m_startedWithCtx += value; } remove { _m_startedWithCtx -= value; } }
-            public event Action<InputAction.CallbackContext> performed { add { _m_performedWithCtx += value; } remove { _m_performedWithCtx -= value; } }
-            public event Action<InputAction.CallbackContext> canceled { add { _m_canceledWithCtx += value; } remove { _m_canceledWithCtx -= value; } }
-
-
             public void Dispose()
             {
                 _m_action.started -= OnStarted;
@@ -72,18 +77,33 @@ namespace CodaGame.Base
                 _m_action.canceled -= OnCanceled;
             }
 
-            // Net count, may be negative; the action is active only while the count is positive.
+            // Net count, may be negative; both action and map counts must be positive to receive input.
             // See InputActionMapInternal.Enable for the semantics.
             public void Enable()
             {
                 _m_enabledCount++;
                 if (_m_enabledCount == 1)
-                    _m_action.Enable();
+                    RefreshEnabled();
             }
             public void Disable()
             {
                 _m_enabledCount--;
                 if (_m_enabledCount == 0)
+                    RefreshEnabled();
+            }
+            public void RefreshEnabled()
+            {
+                // Contract: do not synchronously re-enable this action or its map from the canceled
+                // callback triggered by Disable(). Unity finishes disabling after that callback returns,
+                // which can leave the native state out of sync with our counts. Defer re-enabling instead.
+                bool enabled = _m_enabledCount > 0 && _m_actionMap.isEnabled
+                    && !_m_isRebinding && _m_playerInput.isEnabled;
+                if (_m_action.enabled == enabled)
+                    return;
+
+                if (enabled)
+                    _m_action.Enable();
+                else
                     _m_action.Disable();
             }
 
@@ -100,6 +120,8 @@ namespace CodaGame.Base
             public void OnPerformed(InputAction.CallbackContext _ctx)
             {
                 InsertContextToBuffer(_ctx);
+                // A different device can take over an active Value action without another started event.
+                _m_playerInput.ChangeControlScheme(_ctx.control.device.ToControlSchemeType());
                 _m_performedWithCtx?.Invoke(_ctx);
                 _m_performed?.Invoke();
                 foreach (_ASpecificTypeEvent typeEvent in _m_specificTypeEvents.Values)
@@ -167,6 +189,7 @@ namespace CodaGame.Base
                         _m_specificTypeEvents.Remove(type);
                 }
             }
+
             // Called whenever the logic loop enters a new frame. Copy the state, never the previous edges.
             public void AdvanceLogicFrame(int _logicFrame)
             {
@@ -186,15 +209,7 @@ namespace CodaGame.Base
                 }
                 _m_snapshotFrame = _logicFrame;
             }
-            private FrameRecord GetSnapshot(int _logicFrame)
-            {
-                if (_logicFrame < 0 || _logicFrame > _m_snapshotFrame ||
-                    _logicFrame <= _m_snapshotFrame - _m_actionCtxBuffer.Length)
-                    return default;
 
-                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
-                return record.frameIndex == _logicFrame ? record : default;
-            }
             // Waiting/Performed are complementary states; Started/Canceled are independent per-frame events.
             public bool WasActionWaiting(int _logicFrame)
             {
@@ -218,10 +233,26 @@ namespace CodaGame.Base
             {
                 return GetSnapshot(_logicFrame).value is T_VALUE value ? value : default;
             }
+
             public InputActionRebindingExtensions.RebindingOperation StartRebinding(int _bindingIndex)
             {
+                ReadOnlyArray<InputBinding> bindings = _m_action.bindings;
+                if (_bindingIndex < 0 || _bindingIndex >= bindings.Count || bindings[_bindingIndex].isComposite)
+                {
+                    Console.LogError(SystemNames.Input, "StartRebinding requires a valid non-composite binding index.");
+                    return null;
+                }
+
+                _m_isRebinding = true;
+                RefreshEnabled();
                 return _m_action.PerformInteractiveRebinding(_bindingIndex);
             }
+            public void EndRebinding()
+            {
+                _m_isRebinding = false;
+                RefreshEnabled();
+            }
+
             public InputControl GetBindingControl(int _bindingIndex)
             {
                 ReadOnlyArray<InputBinding> bindings = _m_action.bindings;
@@ -248,6 +279,15 @@ namespace CodaGame.Base
             }
 
 
+            private FrameRecord GetSnapshot(int _logicFrame)
+            {
+                if (_logicFrame < 0 || _logicFrame > _m_snapshotFrame ||
+                    _logicFrame <= _m_snapshotFrame - _m_actionCtxBuffer.Length)
+                    return default;
+
+                FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
+                return record.frameIndex == _logicFrame ? record : default;
+            }
             private void InsertContextToBuffer(InputAction.CallbackContext _ctx)
             {
                 if (!_AGameMain.instance.TryCalculateLogicFrameIndex(_ctx.time, out int frameIndex))
@@ -328,12 +368,12 @@ namespace CodaGame.Base
             private class SpecificTypeEvent<T_VALUE> : _ASpecificTypeEvent
                 where T_VALUE : struct
             {
+                public override bool hasCallback { get { return _m_started != null || _m_performed != null || _m_canceled != null; } }
+
+
                 private event Action<T_VALUE> _m_started;
                 private event Action<T_VALUE> _m_performed;
                 private event Action<T_VALUE> _m_canceled;
-
-
-                public override bool hasCallback { get { return _m_started != null || _m_performed != null || _m_canceled != null; } }
 
 
                 public override void OnStarted(InputAction.CallbackContext _ctx)
@@ -360,7 +400,6 @@ namespace CodaGame.Base
                     T_VALUE value = _ctx.ReadValue<T_VALUE>();
                     _m_canceled.Invoke(value);
                 }
-
 
                 public void AddCallback(InputCallbackType _callbackType, Action<T_VALUE> _callback)
                 {

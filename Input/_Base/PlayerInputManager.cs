@@ -421,7 +421,11 @@ namespace CodaGame.Base
                 return false;
             }
             
-            _playerInput.AddDevice(_device);
+            if (!_playerInput.AddDevice(_device))
+            {
+                users.Remove(_playerInput);
+                return false;
+            }
             return true;
         }
         /// <summary>

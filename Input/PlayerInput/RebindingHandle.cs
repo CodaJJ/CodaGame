@@ -55,10 +55,23 @@ namespace CodaGame
             _m_devices = _devices;
             _m_endCallback = _endCallback;
 
+            // Capture candidates without applying them: only this handle decides when to finish.
+            // PerformInteractiveRebinding enables a match delay and, for non-buttons, Escape cancellation.
+            _m_startRebinding.OnMatchWaitForAnother(0f);
+            _m_startRebinding.WithTimeout(0f);
+            _m_startRebinding.WithCancelingThrough((string)null);
+            // Exclusions run before Unity suppresses events. Adding include paths would broaden
+            // the control-scheme paths already configured by WithTargetBinding (they are ORed).
+            foreach (InputDevice device in InputSystem.devices)
+            {
+                if (!_m_devices.Contains(device))
+                    _m_startRebinding.WithControlsExcluding(device.path);
+            }
             _m_startRebinding.OnPotentialMatch(OnPotentialMatch);
             _m_startRebinding.Start();
 
             _m_timeOutTask = Task.RunDelayActionTask(TimeOut, _timeOut, UpdateType.Update, true);
+            InputSystem.onDeviceChange += OnDeviceChange;
         }
 
 
@@ -67,9 +80,10 @@ namespace CodaGame
         /// </summary>
         public event Action onInputCaptured;
         /// <summary>
-        /// Event triggered when the rebinding operation times out
+        /// Event triggered after cancellation, timeout, or device changes abort the operation.
+        /// Cleanup and player state restoration finish before this event fires.
         /// </summary>
-        public event Action onTimeOut;
+        public event Action onAbort;
 
         /// <summary>
         /// Type of the captured input button
@@ -98,6 +112,7 @@ namespace CodaGame
             _m_startRebinding.Complete();
             _m_startRebinding.Dispose();
             _m_startRebinding = null;
+            InputSystem.onDeviceChange -= OnDeviceChange;
             _m_timeOutTask.StopTask();
             _m_endCallback?.Invoke(true);
         }
@@ -119,8 +134,10 @@ namespace CodaGame
             _m_startRebinding.Cancel();
             _m_startRebinding.Dispose();
             _m_startRebinding = null;
+            InputSystem.onDeviceChange -= OnDeviceChange;
             _m_timeOutTask.StopTask();
             _m_endCallback?.Invoke(false);
+            onAbort?.Invoke();
         }
 
 
@@ -178,10 +195,16 @@ namespace CodaGame
                 _op.RemoveCandidate(control);
             _m_tempCandidates.Clear();
         }
+        // Device paths are fixed while running. Restart with a fresh filter after topology changes.
+        private void OnDeviceChange(InputDevice _device, InputDeviceChange _change)
+        {
+            if (_m_startRebinding != null &&
+                (_change == InputDeviceChange.Added || _change == InputDeviceChange.Removed))
+                Cancel();
+        }
         // Handle timeout event
         private void TimeOut()
         {
-            onTimeOut?.Invoke();
             Cancel();
         }
     }
