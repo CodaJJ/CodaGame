@@ -3,6 +3,8 @@
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
+using System;
+
 namespace CodaGame.Base
 {
     /// <summary>
@@ -14,10 +16,15 @@ namespace CodaGame.Base
     /// </remarks>
     public abstract class _ATimeIntervalContinuousTask : _AContinuousTask
     {
+        private const double _k_relativeTimeTolerance = 1e-6;
+        private const double _k_maxIntervalTolerance = 1e-4;
+
+
         private readonly float _m_timeInterval;
         private readonly bool _m_executeOnceImmediately;
         
-        private float _m_intervalTimeCounter;
+        private double _m_intervalTimeCounter;
+        private double _m_totalDeltaTime;
         
         
         /// <summary>
@@ -27,8 +34,8 @@ namespace CodaGame.Base
         /// <para>Makes sure the <see cref="_timeInterval"/>> is greater than 0, otherwise it will throw an exception.</para>
         /// <para>The <see cref="_executeOnceImmediately"/>> parameter is used to determine whether the task should execute once immediately.</para>
         /// </remarks>
-        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime)
-            : base(_name, _runType, _useUnscaledTime)
+        protected _ATimeIntervalContinuousTask(string _name, float _timeInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime, float _duration = -1)
+            : base(_name, _runType, _useUnscaledTime, _duration)
         {
             if (_timeInterval <= 0)
                 Console.LogCrush(SystemNames.Task, _name, "Time interval must be greater than 0.");
@@ -57,19 +64,32 @@ namespace CodaGame.Base
         protected abstract void OnTick();
 
 
-        internal override void Tick(float _deltaTime)
+        protected override void TickInternal(float _deltaTime)
         {
             // Defensive guard: a non-positive interval would cause an infinite loop below.
             // The constructor already rejects this, but keep the guard in case LogCrush did not terminate execution.
             if (_m_timeInterval <= 0)
                 return;
 
+            uint capturedStopVersion = stopVersion;
             _m_intervalTimeCounter += _deltaTime;
+            _m_totalDeltaTime += _deltaTime;
 
-            while (_m_intervalTimeCounter >= _m_timeInterval)
+            // Float inputs can accumulate rounding error across many intervals.
+            // Bound the allowance to 0.01% of an interval to limit early execution.
+            double tolerance = Math.Min(_m_timeInterval * _k_maxIntervalTolerance,
+                Math.Max(_m_timeInterval, _m_totalDeltaTime) * _k_relativeTimeTolerance);
+
+            while (_m_intervalTimeCounter + tolerance >= _m_timeInterval)
             {
                 OnTick();
 
+                // Stop ends this catch-up loop. A new Run owns its own counter,
+                // even if the callback stopped and restarted this same task.
+                if (stopVersion != capturedStopVersion)
+                    return;
+
+                // Keep a small negative remainder: later elapsed time must repay it.
                 _m_intervalTimeCounter -= _m_timeInterval;
             }
         }
@@ -77,7 +97,9 @@ namespace CodaGame.Base
 
         private protected override void OnInternalRun()
         {
+            base.OnInternalRun();
             _m_intervalTimeCounter = _m_executeOnceImmediately ? _m_timeInterval : 0;
+            _m_totalDeltaTime = 0;
         }
         private protected override void OnInternalStop()
         {

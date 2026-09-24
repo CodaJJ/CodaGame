@@ -30,6 +30,7 @@ namespace CodaGame.Base
         
         public override void AddTask(_AContinuousTask _task)
         {
+            _task.SetStartTime(GetNowTime());
             _m_readyForExecuteTasks.Add(_task);
         }
         public override void RemoveTask(_AContinuousTask _task)
@@ -59,7 +60,7 @@ namespace CodaGame.Base
                 _AContinuousTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
                 try
                 {
-                    task.Tick(GetDeltaTime());
+                    task.Tick(GetDeltaTime(), GetNowTime());
                 }
                 catch (System.Exception _exception)
                 {
@@ -78,6 +79,7 @@ namespace CodaGame.Base
         
         
         private protected abstract float GetDeltaTime();
+        private protected abstract float GetNowTime();
     }
     /// <summary>
     /// A continuous task container that uses Time.deltaTime.
@@ -87,6 +89,10 @@ namespace CodaGame.Base
         private protected override float GetDeltaTime()
         {
             return Time.deltaTime;
+        }
+        private protected override float GetNowTime()
+        {
+            return Time.time;
         }
     }
     /// <summary>
@@ -98,6 +104,10 @@ namespace CodaGame.Base
         {
             return Time.unscaledDeltaTime;
         }
+        private protected override float GetNowTime()
+        {
+            return Time.unscaledTime;
+        }
     }
     /// <summary>
     /// A continuous task container that uses Time.fixedDeltaTime.
@@ -108,6 +118,10 @@ namespace CodaGame.Base
         {
             return Time.fixedDeltaTime;
         }
+        private protected override float GetNowTime()
+        {
+            return Time.fixedTime;
+        }
     }
     /// <summary>
     /// A continuous task container that uses Time.fixedUnscaledDeltaTime.
@@ -117,6 +131,10 @@ namespace CodaGame.Base
         private protected override float GetDeltaTime()
         {
             return Time.fixedUnscaledDeltaTime;
+        }
+        private protected override float GetNowTime()
+        {
+            return Time.fixedUnscaledTime;
         }
     }
 }

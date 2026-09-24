@@ -16,6 +16,7 @@ namespace CodaGame.Base
         private readonly UpdateType _m_runType;
         // Is task running?
         private volatile bool _m_isRunning;
+        private uint _m_stopVersion = Serialize.Next();
         
         
         internal _ABaseTask(string _name, UpdateType _runType)
@@ -37,6 +38,10 @@ namespace CodaGame.Base
         /// Usually displayed for debug.
         /// </remarks>
         public string name { get { return _m_name; } }
+
+
+        // Invalidates in-flight execution when this task stops, including a subsequent restart.
+        internal uint stopVersion { get { return _m_stopVersion; } }
         
 
         /// <summary>
@@ -82,27 +87,44 @@ namespace CodaGame.Base
                 return;
             }
 
+            _m_stopVersion = Serialize.Next();
             _m_isRunning = false;
 
-            OnStop();
-            OnInternalStop();
-
-            switch (_m_runType)
+            try
             {
-                case UpdateType.Update:
-                    RemoveFromUpdateTaskSystem();
-                    break;
-                case UpdateType.FixedUpdate:
-                    RemoveFromFixedUpdateTaskSystem();
-                    break;
-                case UpdateType.LateUpdate:
-                    RemoveFromLateUpdateTaskSystem();
-                    break;
-                default:
-                    Console.LogError(SystemNames.Task, _m_name, $"Unsupported task run type {_m_runType}.");
-                    break;
+                InvokeStopHooks();
+            }
+            finally
+            {
+                switch (_m_runType)
+                {
+                    case UpdateType.Update:
+                        RemoveFromUpdateTaskSystem();
+                        break;
+                    case UpdateType.FixedUpdate:
+                        RemoveFromFixedUpdateTaskSystem();
+                        break;
+                    case UpdateType.LateUpdate:
+                        RemoveFromLateUpdateTaskSystem();
+                        break;
+                    default:
+                        Console.LogError(SystemNames.Task, _m_name, $"Unsupported task run type {_m_runType}.");
+                        break;
+                }
             }
         }
+
+
+        /// <summary>
+        /// Do something on task run.
+        /// </summary>
+        protected abstract void OnRun();
+        /// <summary>
+        /// Do something on task stop.
+        /// </summary>
+        protected abstract void OnStop();
+
+
         /// <summary>
         /// Stop this task by system.
         /// </summary>
@@ -121,23 +143,13 @@ namespace CodaGame.Base
                 return;
             }
 
+            _m_stopVersion = Serialize.Next();
             _m_isRunning = false;
 
-            OnStop();
-            OnInternalStop();
+            InvokeStopHooks();
         }
 
 
-        /// <summary>
-        /// Do something on task run.
-        /// </summary>
-        protected abstract void OnRun();
-        /// <summary>
-        /// Do something on task stop.
-        /// </summary>
-        protected abstract void OnStop();
-
-        
         private protected abstract void AddToUpdateTaskSystem();
         private protected abstract void AddToFixedUpdateTaskSystem();
         private protected abstract void AddToLateUpdateTaskSystem();
@@ -147,5 +159,19 @@ namespace CodaGame.Base
 
         private protected abstract void OnInternalRun();
         private protected abstract void OnInternalStop();
+
+
+        // Internal cleanup must run even when a user-defined stop hook throws.
+        private void InvokeStopHooks()
+        {
+            try
+            {
+                OnStop();
+            }
+            finally
+            {
+                OnInternalStop();
+            }
+        }
     }
 }

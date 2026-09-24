@@ -11,7 +11,7 @@ namespace CodaGame.Base
 {
     internal abstract class _ATimeDelayTaskContainer : _ATaskContainer<_ATimeDelayTask>
     {
-        [ItemNotNull, NotNull] private readonly List<_ATimeDelayTask> _m_readyForExecuteTasks;
+        [NotNull] private readonly List<_ATimeDelayTask> _m_readyForExecuteTasks;
         [ItemNotNull, NotNull] private readonly List<_ATimeDelayTask> _m_delayTasks;
         private int _m_nextExecuteIndex;
         
@@ -53,12 +53,27 @@ namespace CodaGame.Base
         /// <inheritdoc />
         public override bool ExecuteTasks()
         {
+            float nowTime = GetNowTime();
+
+            int movedCount = 0;
+            foreach (_ATimeDelayTask task in _m_delayTasks)
+            {
+                if (task.ExecuteTime > nowTime)
+                    break;
+
+                _m_readyForExecuteTasks.Add(task);
+                movedCount++;
+            }
+
+            _m_delayTasks.RemoveRange(0, movedCount);
+
             if (_m_readyForExecuteTasks.Count == 0)
                 return false;
             
             while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
                 _ATimeDelayTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
+                uint stopVersion = task.stopVersion;
                 try
                 {
                     task.Execute();
@@ -70,8 +85,21 @@ namespace CodaGame.Base
                 }
                 finally
                 {
-                    if (task.isRunning)
-                        task.StopBySystem();
+                    try
+                    {
+                        // Only stop the execution we started, not a restarted task.
+                        if (task.stopVersion == stopVersion)
+                        {
+                            // Release the consumed entry before stop hooks can restart the task.
+                            _m_readyForExecuteTasks[_m_nextExecuteIndex - 1] = null;
+                            task.StopBySystem();
+                        }
+                    }
+                    catch (System.Exception _exception)
+                    {
+                        Console.LogError(SystemNames.Task, task.name, "An exception was thrown while stopping the task.");
+                        UnityEngine.Debug.LogException(_exception);
+                    }
                 }
             }
             
@@ -82,17 +110,6 @@ namespace CodaGame.Base
         /// <inheritdoc />
         public override void NextFrame()
         {
-            float nowTime = GetNowTime();
-
-            foreach (_ATimeDelayTask task in _m_delayTasks)
-            {
-                if (task.ExecuteTime > nowTime)
-                    break;
-                
-                _m_readyForExecuteTasks.Add(task);
-            }
-            
-            _m_delayTasks.RemoveRange(0, _m_readyForExecuteTasks.Count);
         }
 
 

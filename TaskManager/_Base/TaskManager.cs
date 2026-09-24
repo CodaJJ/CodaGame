@@ -547,30 +547,31 @@ namespace CodaGame.Base
             }
             finally
             {
-                if (unscaledTimeDelayTaken)
+                try
                 {
-                    _m_unscaledTimeUpdateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeUpdateTimeDelayTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        _m_unscaledTimeUpdateTimeDelayTaskContainer.NextFrame();
+                    if (timeDelayTaken)
+                        _m_updateTimeDelayTaskContainer.NextFrame();
+                    if (frameDelayTaken)
+                        _m_updateFrameDelayTaskContainer.NextFrame();
+                    if (unscaledContinuousTaken)
+                        _m_unscaledTimeUpdateContinuousTaskContainer.NextFrame();
+                    if (continuousTaken)
+                        _m_updateContinuousTaskContainer.NextFrame();
                 }
-                if (timeDelayTaken)
+                finally
                 {
-                    _m_updateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_updateTimeDelayTaskContainer);
-                }
-                if (frameDelayTaken)
-                {
-                    _m_updateFrameDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_updateFrameDelayTaskContainer);
-                }
-                if (unscaledContinuousTaken)
-                {
-                    _m_unscaledTimeUpdateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeUpdateContinuousTaskContainer);
-                }
-                if (continuousTaken)
-                {
-                    _m_updateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_updateContinuousTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        Monitor.Exit(_m_unscaledTimeUpdateTimeDelayTaskContainer);
+                    if (timeDelayTaken)
+                        Monitor.Exit(_m_updateTimeDelayTaskContainer);
+                    if (frameDelayTaken)
+                        Monitor.Exit(_m_updateFrameDelayTaskContainer);
+                    if (unscaledContinuousTaken)
+                        Monitor.Exit(_m_unscaledTimeUpdateContinuousTaskContainer);
+                    if (continuousTaken)
+                        Monitor.Exit(_m_updateContinuousTaskContainer);
                 }
             }
         }
@@ -602,30 +603,31 @@ namespace CodaGame.Base
             }
             finally
             {
-                if (unscaledTimeDelayTaken)
+                try
                 {
-                    _m_unscaledTimeFixedUpdateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeFixedUpdateTimeDelayTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        _m_unscaledTimeFixedUpdateTimeDelayTaskContainer.NextFrame();
+                    if (timeDelayTaken)
+                        _m_fixedUpdateTimeDelayTaskContainer.NextFrame();
+                    if (frameDelayTaken)
+                        _m_fixedUpdateFrameDelayTaskContainer.NextFrame();
+                    if (unscaledContinuousTaken)
+                        _m_unscaledTimeFixedUpdateContinuousTaskContainer.NextFrame();
+                    if (continuousTaken)
+                        _m_fixedUpdateContinuousTaskContainer.NextFrame();
                 }
-                if (timeDelayTaken)
+                finally
                 {
-                    _m_fixedUpdateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_fixedUpdateTimeDelayTaskContainer);
-                }
-                if (frameDelayTaken)
-                {
-                    _m_fixedUpdateFrameDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_fixedUpdateFrameDelayTaskContainer);
-                }
-                if (unscaledContinuousTaken)
-                {
-                    _m_unscaledTimeFixedUpdateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeFixedUpdateContinuousTaskContainer);
-                }
-                if (continuousTaken)
-                {
-                    _m_fixedUpdateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_fixedUpdateContinuousTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        Monitor.Exit(_m_unscaledTimeFixedUpdateTimeDelayTaskContainer);
+                    if (timeDelayTaken)
+                        Monitor.Exit(_m_fixedUpdateTimeDelayTaskContainer);
+                    if (frameDelayTaken)
+                        Monitor.Exit(_m_fixedUpdateFrameDelayTaskContainer);
+                    if (unscaledContinuousTaken)
+                        Monitor.Exit(_m_unscaledTimeFixedUpdateContinuousTaskContainer);
+                    if (continuousTaken)
+                        Monitor.Exit(_m_fixedUpdateContinuousTaskContainer);
                 }
             }
         }
@@ -657,30 +659,31 @@ namespace CodaGame.Base
             }
             finally
             {
-                if (unscaledTimeDelayTaken)
+                try
                 {
-                    _m_unscaledTimeLateUpdateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeLateUpdateTimeDelayTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        _m_unscaledTimeLateUpdateTimeDelayTaskContainer.NextFrame();
+                    if (timeDelayTaken)
+                        _m_lateUpdateTimeDelayTaskContainer.NextFrame();
+                    if (frameDelayTaken)
+                        _m_lateUpdateFrameDelayTaskContainer.NextFrame();
+                    if (unscaledContinuousTaken)
+                        _m_unscaledTimeLateUpdateContinuousTaskContainer.NextFrame();
+                    if (continuousTaken)
+                        _m_lateUpdateContinuousTaskContainer.NextFrame();
                 }
-                if (timeDelayTaken)
+                finally
                 {
-                    _m_lateUpdateTimeDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_lateUpdateTimeDelayTaskContainer);
-                }
-                if (frameDelayTaken)
-                {
-                    _m_lateUpdateFrameDelayTaskContainer.NextFrame();
-                    Monitor.Exit(_m_lateUpdateFrameDelayTaskContainer);
-                }
-                if (unscaledContinuousTaken)
-                {
-                    _m_unscaledTimeLateUpdateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_unscaledTimeLateUpdateContinuousTaskContainer);
-                }
-                if (continuousTaken)
-                {
-                    _m_lateUpdateContinuousTaskContainer.NextFrame();
-                    Monitor.Exit(_m_lateUpdateContinuousTaskContainer);
+                    if (unscaledTimeDelayTaken)
+                        Monitor.Exit(_m_unscaledTimeLateUpdateTimeDelayTaskContainer);
+                    if (timeDelayTaken)
+                        Monitor.Exit(_m_lateUpdateTimeDelayTaskContainer);
+                    if (frameDelayTaken)
+                        Monitor.Exit(_m_lateUpdateFrameDelayTaskContainer);
+                    if (unscaledContinuousTaken)
+                        Monitor.Exit(_m_unscaledTimeLateUpdateContinuousTaskContainer);
+                    if (continuousTaken)
+                        Monitor.Exit(_m_lateUpdateContinuousTaskContainer);
                 }
             }
         }
