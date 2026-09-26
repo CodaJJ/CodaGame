@@ -14,6 +14,7 @@ namespace CodaGame
     /// </summary>
     public readonly struct ReadOnlyList<T> : IReadOnlyList<T>
     {
+        private static readonly List<T> _g_emptyList = new List<T>();
         private readonly List<T> _m_list;
         
 
@@ -48,7 +49,8 @@ namespace CodaGame
         }
         public List<T>.Enumerator GetEnumerator()
         {
-            return _m_list?.GetEnumerator() ?? default;
+            // A default List<T>.Enumerator cannot be advanced; enumerate a real empty list instead.
+            return (_m_list ?? _g_emptyList).GetEnumerator();
         }
 
 

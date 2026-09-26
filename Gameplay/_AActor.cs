@@ -32,7 +32,9 @@ namespace CodaGame
         [NotNull] private readonly Dictionary<int, int> _m_blockTagRefCount = new Dictionary<int, int>();
 
         // Pending Capability add/remove ops (flushed at the start of LogicTick, processed in call order).
-        [NotNull] private readonly List<PendingCapOp> _m_pendingCapOps = new List<PendingCapOp>();
+        [NotNull] private List<PendingCapOp> _m_pendingCapOps = new List<PendingCapOp>();
+        [NotNull] private List<PendingCapOp> _m_processingCapOps = new List<PendingCapOp>();
+        private int _m_processingCapOpIndex;
 
         [NotNull] private PositionAttribute _m_positionAttr;
         [NotNull] private RotationAttribute _m_rotationAttr;
@@ -121,6 +123,14 @@ namespace CodaGame
         /// </summary>
         public void RemoveCapability<T>() where T : _ACapability
         {
+            // Lifecycle callbacks must also see Adds still being applied in the current batch.
+            for (int i = _m_processingCapOpIndex; i < _m_processingCapOps.Count; ++i)
+            {
+                PendingCapOp op = _m_processingCapOps[i];
+                if (op is { type: PendingCapOpType.Add, cap: T })
+                    _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Remove, op.cap));
+            }
+
             // Match every pending Add of T (so an Add+RemoveCapability<T> sequence cancels out).
             int pendingCount = _m_pendingCapOps.Count;   // snapshot before append
             for (int i = 0; i < pendingCount; ++i)
@@ -158,27 +168,25 @@ namespace CodaGame
                 }
             }
 
+            // During lifecycle callbacks, finish projecting the current batch before next-frame ops.
+            // Include the current op: a Remove is still in the live list during its callbacks.
+            for (int i = _m_processingCapOpIndex; i < _m_processingCapOps.Count; ++i)
+                current = ApplyCapabilityLookupOp<T>(current, _m_processingCapOps[i]);
+
             // Apply pending ops in call order to converge on the post-flush logical state.
             for (int i = 0; i < _m_pendingCapOps.Count; ++i)
-            {
-                var op = _m_pendingCapOps[i];
-                if (op.cap is not T)
-                    continue;
-
-                if (op.type == PendingCapOpType.Add)
-                {
-                    if (current == null)
-                        current = op.cap;
-                    // else: this pending Add will be rejected at flush (type-unique violation) — do not adopt.
-                }
-                else // Remove
-                {
-                    if (current == op.cap)
-                        current = null;
-                    // else: Remove of a cap not currently considered "the T" is a no-op here.
-                }
-            }
+                current = ApplyCapabilityLookupOp<T>(current, _m_pendingCapOps[i]);
             return (T)current;
+        }
+        private static _ACapability ApplyCapabilityLookupOp<T>(_ACapability _current, PendingCapOp _op) where T : _ACapability
+        {
+            if (_op.cap is not T)
+                return _current;
+
+            if (_op.type == PendingCapOpType.Add)
+                return _current ?? _op.cap;
+
+            return _current == _op.cap ? null : _current;
         }
         /// <summary>
         /// Tries to get the Capability of type T. Same post-flush semantics as GetCapability&lt;T&gt;.
@@ -290,19 +298,39 @@ namespace CodaGame
         
         internal void FlushPendingCapabilityOps()
         {
-            if (_m_pendingCapOps.Count == 0)
+            if (_m_pendingCapOps.Count == 0 || _m_processingCapOps.Count != 0)
                 return;
+
+            // Reuse two buffers. Lifecycle callbacks append to next frame's queue, never this batch.
+            List<PendingCapOp> batch = _m_pendingCapOps;
+            _m_pendingCapOps = _m_processingCapOps;
+            _m_processingCapOps = batch;
 
             // Process in call order: Add(cap) followed by Remove(cap) cancels out (cap goes through
             // OnInit then OnDiscard); Remove(old) then Add(new) of same type swaps cleanly.
-            foreach (PendingCapOp op in _m_pendingCapOps)
+            try
             {
-                if (op.type == PendingCapOpType.Remove)
-                    ApplyRemoveCapability(op.cap);
-                else
-                    ApplyAddCapability(op.cap);
+                for (_m_processingCapOpIndex = 0; _m_processingCapOpIndex < batch.Count; ++_m_processingCapOpIndex)
+                {
+                    PendingCapOp op = batch[_m_processingCapOpIndex];
+                    if (op.type == PendingCapOpType.Remove)
+                        ApplyRemoveCapability(op.cap);
+                    else
+                        ApplyAddCapability(op.cap);
+                }
             }
-            _m_pendingCapOps.Clear();
+            finally
+            {
+                // If a callback throws, do not replay attempted operations. Keep the untouched tail
+                // ahead of callback-generated operations, preserving their original call order.
+                if (_m_processingCapOpIndex < batch.Count)
+                {
+                    batch.RemoveRange(0, _m_processingCapOpIndex + 1);
+                    _m_pendingCapOps.InsertRange(0, batch);
+                }
+                batch.Clear();
+                _m_processingCapOpIndex = 0;
+            }
         }
         internal bool IsBlocked(int _tag)
         {
