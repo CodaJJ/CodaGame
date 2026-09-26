@@ -13,7 +13,7 @@ namespace CodaGame
 {
     /// <summary>
     /// Base MonoBehaviour for all gameplay actors. Owns Attributes (pure data, type-unique)
-    /// and Capabilities (pure logic, type-unique), plus a refcounted block-tag set.
+    /// and Capabilities (pure logic, type-unique), with per-frame priority-based tag arbitration.
     /// Registered with ActorManager while enabled. Transform is driven by built-in
     /// PositionAttribute / RotationAttribute / ScaleAttribute (CodaGame.Base) unless replaced.
     /// Common transform state is exposed directly via `position` / `rotation` / `scale` properties
@@ -29,7 +29,9 @@ namespace CodaGame
         [NotNull] private readonly Dictionary<Type, _AAttribute> _m_attributes = new Dictionary<Type, _AAttribute>();
         [ItemNotNull, NotNull] private readonly List<_AShowSyncAttribute> _m_showSyncAttrs = new List<_AShowSyncAttribute>();
         [ItemNotNull, NotNull] private readonly List<_ACapability> _m_capabilities = new List<_ACapability>();
-        [NotNull] private readonly Dictionary<int, int> _m_blockTagRefCount = new Dictionary<int, int>();
+        // Reused scratch buffers: arbitration only sees this frame's accepted higher-priority capabilities.
+        [NotNull] private readonly HashSet<int> _m_resolutionBlockTags = new HashSet<int>();
+        [NotNull] private readonly List<bool> _m_capabilityActivationResults = new List<bool>();
 
         // Pending Capability add/remove ops (flushed at the start of LogicTick, processed in call order).
         [NotNull] private List<PendingCapOp> _m_pendingCapOps = new List<PendingCapOp>();
@@ -261,20 +263,47 @@ namespace CodaGame
             foreach (_AAttribute attr in _m_attributes.Values)
                 attr.OnResetFrameValues();
 
-            // Pass 3: activation resolution in priority desc order.
+            // Pass 3: decide all activations before invoking lifecycle callbacks, using only
+            // this frame's accepted higher-priority capabilities to build the blocked-tag set.
+            _m_resolutionBlockTags.Clear();
+            _m_capabilityActivationResults.Clear();
             foreach (_ACapability cap in _m_capabilities)
             {
                 bool wantsActive = cap.ShouldActivate();
-                bool blocked = IsCapabilityBlocked(cap);
+                bool blocked = false;
+                foreach (int tag in cap.ownedTags)
+                {
+                    if (_m_resolutionBlockTags.Contains(tag))
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
                 bool shouldBeActive = wantsActive && !blocked;
+                _m_capabilityActivationResults.Add(shouldBeActive);
 
-                if (shouldBeActive && !cap.isActive)
-                    cap.Activate();
-                else if (!shouldBeActive && cap.isActive)
-                    cap.Deactivate();
+                // Only accepted capabilities block later ones. Add after checking to avoid self-blocking.
+                if (shouldBeActive)
+                    foreach (int tag in cap.blockTags)
+                        _m_resolutionBlockTags.Add(tag);
             }
 
-            // Pass 4: OnLogicTick for active capabilities in priority desc order.
+            // Pass 4: apply only state changes. Release outgoing capabilities before activating
+            // their replacements; persistent capabilities keep their activation cycle.
+            for (int i = _m_capabilities.Count - 1; i >= 0; --i)
+            {
+                _ACapability cap = _m_capabilities[i];
+                if (!_m_capabilityActivationResults[i] && cap.isActive)
+                    cap.Deactivate();
+            }
+            for (int i = 0; i < _m_capabilities.Count; ++i)
+            {
+                _ACapability cap = _m_capabilities[i];
+                if (_m_capabilityActivationResults[i] && !cap.isActive)
+                    cap.Activate();
+            }
+
+            // Pass 5: OnLogicTick for active capabilities in priority desc order.
             foreach (_ACapability cap in _m_capabilities)
             {
                 if (cap.isActive)
@@ -332,42 +361,6 @@ namespace CodaGame
                 _m_processingCapOpIndex = 0;
             }
         }
-        internal bool IsBlocked(int _tag)
-        {
-            return _m_blockTagRefCount.TryGetValue(_tag, out int c) && c > 0;
-        }
-        internal void PushBlockTags(ReadOnlyList<int> _tags)
-        {
-            foreach (int t in _tags)
-            {
-                _m_blockTagRefCount.TryGetValue(t, out int c);
-                _m_blockTagRefCount[t] = c + 1;
-            }
-        }
-        internal void PopBlockTags(ReadOnlyList<int> _tags)
-        {
-            foreach (int t in _tags)
-            {
-                if (!_m_blockTagRefCount.TryGetValue(t, out int c) || c <= 0)
-                {
-                    Console.LogCrush(SystemNames.Gameplay, $"PopBlockTags underflow: tag {t} on Actor {name}.");
-                    continue;
-                }
-
-                if (c == 1)
-                    _m_blockTagRefCount.Remove(t);
-                else
-                    _m_blockTagRefCount[t] = c - 1;
-            }
-        }
-        internal bool IsCapabilityBlocked([NotNull] _ACapability _cap)
-        {
-            ReadOnlyList<int> owned = _cap.ownedTags;
-            foreach (int t in owned)
-                if (IsBlocked(t))
-                    return true;
-            return false;
-        }
 
 
         // ---------- Unity lifecycle ----------
@@ -399,7 +392,7 @@ namespace CodaGame
         {
             if (_m_isRegistered)
             {
-                // Deactivate everything (framework-managed pop of block tags).
+                // Deactivate all capabilities before unregistering.
                 DeactivateAllCapabilities();
                 ActorManager.instance.Unregister(this);
                 _m_isRegistered = false;
@@ -479,8 +472,7 @@ namespace CodaGame
         private void DeactivateAllCapabilities()
         {
             // Iterate in reverse priority order (low priority first out) for symmetry with the
-            // activation pass. Each Deactivate() pops its own blockTags, so the refcount dict
-            // naturally drains to empty after this — no manual clear needed.
+            // activation pass.
             for (int i = _m_capabilities.Count - 1; i >= 0; --i)
             {
                 _ACapability cap = _m_capabilities[i];

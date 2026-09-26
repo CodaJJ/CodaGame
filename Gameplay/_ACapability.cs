@@ -11,7 +11,7 @@ namespace CodaGame
     /// Base class for Capability (pure logic) modules on an Actor.
     /// Type-unique per Actor. `ownedTags` / `blockTags` are immutable (set at construction).
     /// Lifecycle: OnInit -> N * (ShouldActivate true -> OnActivate -> N * OnLogicTick/OnShowTick -> OnDeactivate) -> OnDiscard.
-    /// Framework auto-pushes blockTags into owner's blocked set on Activate and pops on Deactivate.
+    /// Each LogicTick, the Actor resolves blockTags in priority order before applying lifecycle changes.
     /// </summary>
     public abstract class _ACapability
     {
@@ -40,7 +40,6 @@ namespace CodaGame
 
         internal void Activate()
         {
-            _m_owner.PushBlockTags(_m_blockTags);
             _m_isActive = true;
             OnActivate();
         }
@@ -48,14 +47,16 @@ namespace CodaGame
         {
             OnDeactivate();
             _m_isActive = false;
-            _m_owner.PopBlockTags(_m_blockTags);
         }
 
 
         protected internal virtual void OnInit() { }
         protected internal virtual void OnDiscard() { }
 
-        /// <summary>Must read only Attributes (never tags). Called every LogicTick while the Capability is registered.</summary>
+        /// <summary>
+        /// Must read only Attributes (never tags). Called every LogicTick while registered,
+        /// before any activation/deactivation callbacks for this frame's arbitration are applied.
+        /// </summary>
         protected internal abstract bool ShouldActivate();
 
         protected virtual void OnActivate() { }
