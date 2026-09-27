@@ -304,15 +304,19 @@ namespace CodaGame
             }
 
             // Pass 5: OnLogicTick for active capabilities in priority desc order.
+            // Only these callbacks may disable or destroy Actors; stop before advancing the iterator.
             foreach (_ACapability cap in _m_capabilities)
             {
                 if (cap.isActive)
                     cap.OnLogicTick();
+                if (this == null || !isActiveAndEnabled)
+                    return;
             }
         }
         /// <summary>
         /// Per-actor ShowTick body: run OnShowTick on active capabilities, then OnShowSync on
         /// show-sync attributes (interpolation to view layer).
+        /// Presentation callbacks must not disable or destroy Actors.
         /// </summary>
         internal void ShowTick(float _alpha)
         {
@@ -350,7 +354,7 @@ namespace CodaGame
             }
             finally
             {
-                // If a callback throws, do not replay attempted operations. Keep the untouched tail
+                // On exception, do not replay attempted operations. Keep the untouched tail
                 // ahead of callback-generated operations, preserving their original call order.
                 if (_m_processingCapOpIndex < batch.Count)
                 {
@@ -384,18 +388,18 @@ namespace CodaGame
         {
             if (!_m_isRegistered)
             {
-                ActorManager.instance.Register(this);
                 _m_isRegistered = true;
+                ActorManager.instance.Register(this);
             }
         }
         private void OnDisable()
         {
             if (_m_isRegistered)
             {
-                // Deactivate all capabilities before unregistering.
-                DeactivateAllCapabilities();
-                ActorManager.instance.Unregister(this);
+                // Unregister before invoking any user cleanup callbacks.
                 _m_isRegistered = false;
+                ActorManager.instance.Unregister(this);
+                DeactivateAllCapabilities();
             }
         }
         private void OnDestroy()
@@ -403,9 +407,9 @@ namespace CodaGame
             // Safety: ensure unregistered (OnDisable may not have fired if destroyed while disabled).
             if (_m_isRegistered)
             {
-                DeactivateAllCapabilities();
-                ActorManager.instance.Unregister(this);
                 _m_isRegistered = false;
+                ActorManager.instance.Unregister(this);
+                DeactivateAllCapabilities();
             }
 
             // Discard capabilities then attributes in reverse registration order.
@@ -417,6 +421,7 @@ namespace CodaGame
                 attr.OnDiscard();
             _m_attributes.Clear();
             _m_showSyncAttrs.Clear();
+            _m_pendingCapOps.Clear();
         }
 
         private void AddAttributeInternal([NotNull] _AAttribute _attr)
@@ -466,8 +471,8 @@ namespace CodaGame
 
             if (_cap.isActive)
                 _cap.Deactivate();
-            _cap.OnDiscard();
             _m_capabilities.RemoveAt(idx);
+            _cap.OnDiscard();
         }
         private void DeactivateAllCapabilities()
         {

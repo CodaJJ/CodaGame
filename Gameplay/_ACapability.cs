@@ -12,6 +12,7 @@ namespace CodaGame
     /// Type-unique per Actor. `ownedTags` / `blockTags` are immutable (set at construction).
     /// Lifecycle: OnInit -> N * (ShouldActivate true -> OnActivate -> N * OnLogicTick/OnShowTick -> OnDeactivate) -> OnDiscard.
     /// Each LogicTick, the Actor resolves blockTags in priority order before applying lifecycle changes.
+    /// Only OnLogicTick may disable or destroy Actors. Other callbacks must not change Actor lifetime.
     /// </summary>
     public abstract class _ACapability
     {
@@ -62,6 +63,7 @@ namespace CodaGame
         protected virtual void OnActivate() { }
         protected virtual void OnDeactivate() { }
         protected internal virtual void OnLogicTick() { }
+        /// <summary>Presentation only. Must not disable or destroy Actors.</summary>
         protected internal virtual void OnShowTick(float _alpha) { }
     }
 }

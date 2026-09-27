@@ -28,7 +28,9 @@ namespace CodaGame
         public virtual void CollapseShow() { OnCaptureLast(); }
 
 
+        /// <summary>Snapshot display data only. Must not disable or destroy Actors.</summary>
         protected internal abstract void OnCaptureLast();
+        /// <summary>Update presentation only. Must not disable or destroy Actors.</summary>
         protected internal abstract void OnShowSync(float _alpha);
     }
 }

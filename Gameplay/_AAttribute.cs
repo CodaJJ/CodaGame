@@ -10,6 +10,7 @@ namespace CodaGame
     /// <summary>
     /// Base class for all Attribute (pure data) modules on an Actor.
     /// Type-unique per Actor. Lifecycle: OnInit (Actor Awake) -> OnResetFrameValues each LogicTick -> OnDiscard (Actor OnDestroy).
+    /// Attribute callbacks must not disable or destroy Actors; lifetime changes belong in Capability.OnLogicTick.
     /// </summary>
     public abstract class _AAttribute
     {
