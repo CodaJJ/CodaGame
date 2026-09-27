@@ -16,7 +16,7 @@ namespace CodaGame.Base
     /// </remarks>
     internal class FrameDelayTaskContainer : _ATaskContainer<_AFrameDelayTask>
     {
-        [ItemNotNull, NotNull] private readonly List<_AFrameDelayTask> _m_readyForExecuteTasks;
+        [NotNull] private readonly List<_AFrameDelayTask> _m_readyForExecuteTasks;
         [ItemNotNull, NotNull] private readonly List<_AFrameDelayTask> _m_delayTasks;
         private int _m_frame;
         private int _m_nextExecuteIndex;
@@ -64,6 +64,7 @@ namespace CodaGame.Base
             while (_m_nextExecuteIndex < _m_readyForExecuteTasks.Count)
             {
                 _AFrameDelayTask task = _m_readyForExecuteTasks[_m_nextExecuteIndex++];
+                uint stopVersion = task.stopVersion;
                 try
                 {
                     task.Execute();
@@ -75,8 +76,21 @@ namespace CodaGame.Base
                 }
                 finally
                 {
-                    if (task.isRunning)
-                        task.StopBySystem();
+                    try
+                    {
+                        // Only stop the execution we started, not a restarted task.
+                        if (task.stopVersion == stopVersion)
+                        {
+                            // Release the consumed entry before stop hooks can restart the task.
+                            _m_readyForExecuteTasks[_m_nextExecuteIndex - 1] = null;
+                            task.StopBySystem();
+                        }
+                    }
+                    catch (System.Exception _exception)
+                    {
+                        Console.LogError(SystemNames.Task, task.name, "An exception was thrown while stopping the task.");
+                        UnityEngine.Debug.LogException(_exception);
+                    }
                 }
             }
             
@@ -89,15 +103,17 @@ namespace CodaGame.Base
         {
             _m_frame++;
 
+            int movedCount = 0;
             foreach (_AFrameDelayTask task in _m_delayTasks)
             {
                 if (task.ExecuteFrame > _m_frame)
                     break;
                 
                 _m_readyForExecuteTasks.Add(task);
+                movedCount++;
             }
             
-            _m_delayTasks.RemoveRange(0, _m_readyForExecuteTasks.Count);
+            _m_delayTasks.RemoveRange(0, movedCount);
         }
     }
 }

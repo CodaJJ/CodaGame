@@ -31,8 +31,8 @@ namespace CodaGame.Base
         /// <para>If the <see cref="_frameInterval"/>> is 0 or negative, the task will execute every frame.</para>
         /// <para>The <see cref="_executeOnceImmediately"/> parameter is used to determine whether the task should execute once immediately.</para>
         /// </remarks>
-        protected _AFrameIntervalContinuousTask(string _name, int _frameInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime) 
-            : base(_name, _runType, _useUnscaledTime)
+        protected _AFrameIntervalContinuousTask(string _name, int _frameInterval, bool _executeOnceImmediately, UpdateType _runType, bool _useUnscaledTime, float _duration = -1)
+            : base(_name, _runType, _useUnscaledTime, _duration)
         {
             _m_frameInterval = _frameInterval;
             _m_executeOnceImmediately = _executeOnceImmediately;
@@ -56,9 +56,9 @@ namespace CodaGame.Base
         /// <para>The "_deltaTime" value is determined by the running type of the task, the frame interval and whether using unscaled time.</para>
         /// </remarks>
         protected abstract void OnTick(float _deltaTime);
-        
-        
-        internal override void Tick(float _deltaTime)
+
+
+        protected override void TickInternal(float _deltaTime)
         {
             if (_m_frameInterval <= 0)
                 OnTick(_deltaTime);
@@ -81,7 +81,9 @@ namespace CodaGame.Base
 
         private protected override void OnInternalRun()
         {
+            base.OnInternalRun();
             _m_frameIntervalCounter = _m_executeOnceImmediately ? 0 : _m_frameInterval;
+            _m_intervalDeltaTime = 0;
         }
         private protected override void OnInternalStop()
         {

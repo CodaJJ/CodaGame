@@ -53,6 +53,9 @@ namespace CodaGame
         
         [SerializeField, RuntimeReadOnly]
         private int _m_logicFps = 60;
+        // Both input snapshots and timestamp boundaries retain this much logic time, including the current frame.
+        private const float _k_inputHistorySeconds = 2f;
+        private int _m_inputHistoryFrameCount;
         [SerializeField, RuntimeReadOnly]
         private string _m_gameVersion = "1.0.0";
         [SerializeField, RuntimeReadOnly]
@@ -96,20 +99,22 @@ namespace CodaGame
         /// the Stage system).
         /// </summary>
         public Scene baseScene { get { return _m_baseScene; } }
+        
+        
+        internal int inputHistoryFrameCount { get { return _m_inputHistoryFrameCount; } }
 
 
         /// <summary>
-        /// Returns the logic frame index that contained the given wallclock time. History-based:
-        /// supports variable gameSpeed and pause. If the time is older than the recorded history
-        /// can cover (~256 ticks), returns 0 as a conservative fallback.
+        /// Finds the logic frame containing the given wallclock time, supporting variable gameSpeed and pause.
+        /// Returns false when the time predates the oldest retained boundary or history is not initialized.
         ///
         /// Internal: the result is only meaningful for "recent" wallclock times (within the history
         /// window) and depends on framework-internal state. Outside the framework, use logicFrameCount
         /// for the current frame.
         /// </summary>
-        internal int CalculateLogicFrameIndex(double _timeSinceStartup)
+        internal bool TryCalculateLogicFrameIndex(double _timeSinceStartup, out int _frame)
         {
-            return _m_logicLoopTask.CalculateLogicFrameIndex(_timeSinceStartup);
+            return _m_logicLoopTask.TryCalculateLogicFrameIndex(_timeSinceStartup, out _frame);
         }
 
 
@@ -130,6 +135,7 @@ namespace CodaGame
                 Console.LogWarning(SystemNames.Main, "Logic FPS must be greater than 0. Setting to default value of 60.");
                 _m_logicFps = 60;
             }
+            _m_inputHistoryFrameCount = Mathf.CeilToInt(_k_inputHistorySeconds * _m_logicFps);
 
             if (InputSystem.settings.updateMode != InputSettings.UpdateMode.ProcessEventsInDynamicUpdate)
             {
@@ -171,18 +177,15 @@ namespace CodaGame
 
         private class LogicLoop : _AEveryFrameContinuousTask
         {
-            // History ring buffer: ~4.27s at 60Hz. Inputs older than this can't be precisely
-            // attributed; the lookup falls back to frame 0.
-            private const int _k_historySize = 256;
-
             [NotNull] private readonly _AGameMain _m_gameMain;
-            [NotNull] private readonly TickRecord[] _m_history = new TickRecord[_k_historySize];
+            [NotNull] private TickRecord[] _m_history = System.Array.Empty<TickRecord>();
 
             private double _m_lastRealTime;
             private double _m_accumulator;   // wallclock leftover since last tick (gameSpeed enters via interval, not addition)
             private int _m_frameCount;
             private float _m_currentAlpha;
             private int _m_historyHead;      // index of the most recent record
+            private int _m_historyCount;     // only initialized boundaries may participate in lookup
 
 
             private struct TickRecord
@@ -206,18 +209,22 @@ namespace CodaGame
             /// <summary>
             /// Maps a wallclock time to the logic frame whose window contains it. Walks the history
             /// ring buffer backward and returns the most recent recorded frame whose start wallclock
-            /// is &lt;= the query time. Out-of-history queries return 0.
+            /// is &lt;= the query time. Out-of-history queries fail; frame 0 is a valid frame, not a fallback.
             /// </summary>
-            public int CalculateLogicFrameIndex(double _wallTime)
+            public bool TryCalculateLogicFrameIndex(double _wallTime, out int _frame)
             {
-                for (int i = 0; i < _k_historySize; ++i)
+                for (int i = 0; i < _m_historyCount; ++i)
                 {
-                    int idx = (_m_historyHead - i + _k_historySize) % _k_historySize;
+                    int idx = (_m_historyHead - i + _m_history.Length) % _m_history.Length;
                     TickRecord rec = _m_history[idx];
                     if (rec.wallTime <= _wallTime)
-                        return rec.frame;
+                    {
+                        _frame = rec.frame;
+                        return true;
+                    }
                 }
-                return 0;
+                _frame = default;
+                return false;
             }
 
 
@@ -230,7 +237,9 @@ namespace CodaGame
                 _m_currentAlpha = 0f;
 
                 // Seed history with frame 0 starting at startup wallclock.
+                _m_history = new TickRecord[_m_gameMain.inputHistoryFrameCount];
                 _m_historyHead = 0;
+                _m_historyCount = 1;
                 _m_history[0] = new TickRecord { wallTime = now, frame = 0 };
             }
             protected override void OnStop()
@@ -281,8 +290,12 @@ namespace CodaGame
                     // where logicFrameCount inside LogicTick is "ticks completed so far".
                     _m_frameCount++;
                     double boundaryWallTime = now - _m_accumulator;   // accumulator is wallclock
-                    _m_historyHead = (_m_historyHead + 1) % _k_historySize;
+                    _m_historyHead = (_m_historyHead + 1) % _m_history.Length;
                     _m_history[_m_historyHead] = new TickRecord { wallTime = boundaryWallTime, frame = _m_frameCount };
+                    if (_m_historyCount < _m_history.Length)
+                        _m_historyCount++;
+                    // Open the new frame before the next catch-up tick or ShowTick can query input.
+                    CodaGame.Base.PlayerInputManager.instance.AdvanceLogicFrame(_m_frameCount);
                 }
 
                 // Alpha: under variable speed, interval depends on current speed. When paused, freeze at 1

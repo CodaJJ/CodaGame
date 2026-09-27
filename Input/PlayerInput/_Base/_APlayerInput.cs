@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
@@ -22,33 +22,31 @@ namespace CodaGame.Base
         where T_ACTION_MAP_ENUM : Enum
         where T_ACTION_ENUM : Enum
     {
-        // How long actions will be buffered
-        private const float _k_actionBufferTime = 2f;
-
-
-        // Current player's input action asset
+        // Runtime asset owned by this player; maps, actions, and binding overrides are isolated.
         [NotNull] private readonly InputActionAsset _m_actionAsset;
         // Current player's name
         private readonly string _m_playerName;
         // Devices used by this player
         [ItemNotNull, NotNull] private readonly List<InputDevice> _m_devices;
-        // Dictionary mapping enum values to input action maps
+        // Ownership tree: PlayerInput -> maps -> actions. Includes maps without an enum mapping.
+        [NotNull] private readonly Dictionary<InputActionMap, InputActionMapInternal> _m_actionMaps;
+        // Non-owning enum lookup indexes into the tree.
         [NotNull] private readonly Dictionary<T_ACTION_MAP_ENUM, InputActionMapInternal> _m_enum2ActionMapDict;
-        // Dictionary mapping enum values to input actions
         [NotNull] private readonly Dictionary<T_ACTION_ENUM, InputActionInternal> _m_enum2ActionDict;
         // Rebinding operation control handle
         private RebindingHandle _m_rebindingHandle;
+        private InputActionInternal _m_rebindingAction;
         // Whether this class is still enabled
         private bool _m_isEnable;
         // Current control scheme
         private ControlSchemeType _m_currentScheme;
-        
-        
+
+
         /// <summary>
         /// Construct a player input manager
         /// </summary>
         /// <param name="_playerName">Player's name</param>
-        /// <param name="_actionAsset">Action asset resource</param>
+        /// <param name="_actionAsset">Action asset template; this player owns a runtime copy.</param>
         /// <param name="_actionPathMappingConfig">Mapping from action enum to action path</param>
         /// <remarks>
         /// Action maps are resolved by enum name — each <typeparamref name="T_ACTION_MAP_ENUM"/> value
@@ -61,13 +59,18 @@ namespace CodaGame.Base
         {
             _m_enum2ActionDict = new Dictionary<T_ACTION_ENUM, InputActionInternal>();
             _m_enum2ActionMapDict = new Dictionary<T_ACTION_MAP_ENUM, InputActionMapInternal>();
+            _m_actionMaps = new Dictionary<InputActionMap, InputActionMapInternal>();
             _m_devices = new List<InputDevice>();
-            
+
             _m_playerName = _playerName;
-            _m_actionAsset = _actionAsset;
+            _m_actionAsset = UnityEngine.Object.Instantiate(_actionAsset);
             _m_isEnable = true;
             _m_currentScheme = ControlSchemeType.Unknown;
-            
+
+            // Construct each map and its children exactly once; enum mappings only reference these instances.
+            foreach (InputActionMap actionMap in _m_actionAsset.actionMaps)
+                _m_actionMaps.Add(actionMap, new InputActionMapInternal(this, actionMap));
+
             foreach (InputActionPathConfigItem<T_ACTION_ENUM> configItem in _actionPathMappingConfig.notNullDataList)
             {
                 if (string.IsNullOrEmpty(configItem.actionPath))
@@ -89,9 +92,9 @@ namespace CodaGame.Base
                     continue;
                 }
 
-                _m_enum2ActionDict.Add(configItem.actionEnum, new InputActionInternal(this, action));
+                _m_enum2ActionDict.Add(configItem.actionEnum, _m_actionMaps[action.actionMap].GetAction(action));
             }
-            
+
             foreach (T_ACTION_MAP_ENUM actionMapEnum in (T_ACTION_MAP_ENUM[])Enum.GetValues(typeof(T_ACTION_MAP_ENUM)))
             {
                 string actionMapName = actionMapEnum.ToString();
@@ -105,9 +108,9 @@ namespace CodaGame.Base
                 if (_m_enum2ActionMapDict.ContainsKey(actionMapEnum))
                     continue;
 
-                _m_enum2ActionMapDict.Add(actionMapEnum, new InputActionMapInternal(actionMap));
+                _m_enum2ActionMapDict.Add(actionMapEnum, _m_actionMaps[actionMap]);
             }
-            
+
             Initialize();
         }
 
@@ -131,7 +134,7 @@ namespace CodaGame.Base
         /// For example, when switching between keyboard/mouse and gamepad
         /// </remarks>
         public event Action<ControlSchemeType> onSchemeChanged;
-        
+
         /// <summary>
         /// Name of this player input
         /// </summary>
@@ -158,19 +161,20 @@ namespace CodaGame.Base
         /// How the input devices are managed for this player
         /// </summary>
         public abstract PlayerInputDeviceManagementType deviceManagementType { get; }
-        
-        
+
+
         /// <summary>
         /// Enable an action map
         /// </summary>
         /// <remarks>
         /// By default, action maps are enabled with a count of 1. Calling this method increments the enable count. The action map is only active when the count is greater than 0.
+        /// Each action also requires its own count to be positive; enabling the map preserves individual disables.
         /// </remarks>
         public void EnableActionMap(T_ACTION_MAP_ENUM _actionMap)
         {
             if (LogIfInvalid())
                 return;
-            
+
             InputActionMapInternal actionMap = _m_enum2ActionMapDict.GetValueOrDefault(_actionMap);
             if (actionMap == null)
             {
@@ -190,7 +194,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             InputActionMapInternal actionMap = _m_enum2ActionMapDict.GetValueOrDefault(_actionMap);
             if (actionMap == null)
             {
@@ -200,17 +204,19 @@ namespace CodaGame.Base
 
             actionMap.Disable();
         }
+
         /// <summary>
         /// Enable an action
         /// </summary>
         /// <remarks>
         /// By default, actions are enabled with a count of 1. Calling this method increments the enable count. The action is only active when the count is greater than 0.
+        /// Its parent map's count must also be positive.
         /// </remarks>
         public void EnableAction(T_ACTION_ENUM _action)
         {
             if (LogIfInvalid())
                 return;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
@@ -230,7 +236,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
@@ -240,6 +246,7 @@ namespace CodaGame.Base
 
             action.Disable();
         }
+
         /// <summary>
         /// Register an action event callback
         /// </summary>
@@ -250,7 +257,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             if (_callback == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Action callback register failed, callback is null.");
@@ -288,7 +295,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             if (_callback == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Action callback register failed, callback is null.");
@@ -300,7 +307,7 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, name, $"Action callback register failed, action {_action} not found.");
                 return;
             }
-            
+
             action.AddCallback<T_VALUE>(_callbackType, _callback);
         }
         /// <summary>
@@ -313,7 +320,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             if (_callback == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Action callback register failed, callback is null.");
@@ -325,9 +332,10 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, name, $"Action callback register failed, action {_action} not found.");
                 return;
             }
-            
+
             action.AddCallback(_callbackType, _callback);
         }
+
         /// <summary>
         /// Unregister an action event callback
         /// </summary>
@@ -338,7 +346,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             if (_callback == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Action callback unregister failed, callback is null.");
@@ -376,7 +384,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return;
-            
+
             if (_callback == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Action callback unregister failed, callback is null.");
@@ -413,12 +421,22 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, name, $"Action callback unregister failed, action {_action} not found.");
                 return;
             }
-            
+
             action.RemoveCallback(_callbackType, _callback);
         }
+
         /// <summary>
-        /// Whether the action is in the Waiting phase (not actuated) on the specified logic frame.
+        /// Whether input is inactive on the specified logic frame. Complement of WasActionPerformed for a valid action.
         /// </summary>
+        /// <remarks>
+        /// Frame queries use framework semantics, not Unity InputActionPhase. Assets must use Value or Button
+        /// actions without Interactions on actions or bindings; PassThrough is unsupported. Button bindings must
+        /// be digital (0/1); analog inputs use Value with the default value meaning inactive.
+        /// Business code handles timing and thresholds. Other asset configurations are outside this contract.
+        /// Snapshots cover the current logic frame and the preceding buffer frames, starting at player creation.
+        /// Queries outside that range return default values: false for Started/Canceled/Performed, true for Waiting.
+        /// The window advances with logic frames, so pausing freezes it and gameSpeed changes its wallclock duration.
+        /// </remarks>
         public bool WasActionWaiting(T_ACTION_ENUM _action, int _logicFrame)
         {
             if (LogIfInvalid())
@@ -434,94 +452,103 @@ namespace CodaGame.Base
             return action.WasActionWaiting(_logicFrame);
         }
         /// <summary>
-        /// Whether the action is in the Started phase (actuated, not yet performed — e.g. a Hold interaction
-        /// charging) on the specified logic frame. A state query, not an edge.
+        /// Whether input started on the specified logic frame. An event query: remains true even if input
+        /// also ended on that frame, and does not carry forward to later frames.
         /// </summary>
         public bool WasActionStarted(T_ACTION_ENUM _action, int _logicFrame)
         {
             if (LogIfInvalid())
                 return false;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
                 Console.LogWarning(SystemNames.Input, name, $"WasActionStarted check failed, action {_action} not found.");
                 return false;
             }
-            
+
             return action.WasActionStarted(_logicFrame);
         }
         /// <summary>
-        /// Whether the action is in the Performed phase on the specified logic frame. A state query: a held
-        /// action reports true on every frame between its performed and canceled events.
+        /// Whether input is active at the end of the specified logic frame's recorded events. Started/performed
+        /// activate input and canceled deactivates it; the state carries forward until another event arrives.
         /// </summary>
         public bool WasActionPerformed(T_ACTION_ENUM _action, int _logicFrame)
         {
             if (LogIfInvalid())
                 return false;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
                 Console.LogWarning(SystemNames.Input, name, $"WasActionPerformed check failed, action {_action} not found.");
                 return false;
             }
-            
+
             return action.WasActionPerformed(_logicFrame);
         }
         /// <summary>
         /// Whether the action's release (canceled) transition occurred on the specified logic frame. An edge
-        /// query — Canceled has no resting phase, so unlike the others it is true only on the release frame.
+        /// query: remains true even if input starts again on that frame, and does not carry forward.
         /// </summary>
         public bool WasActionCanceled(T_ACTION_ENUM _action, int _logicFrame)
         {
             if (LogIfInvalid())
                 return false;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
                 Console.LogWarning(SystemNames.Input, name, $"WasActionCanceled check failed, action {_action} not found.");
                 return false;
             }
-            
+
             return action.WasActionCanceled(_logicFrame);
         }
         /// <summary>
         /// Read the action value at the specified frame
         /// </summary>
+        /// <remarks>Returns default outside the retained logic-frame snapshots; future frames are not predicted.</remarks>
         public T_VALUE ReadActionValue<T_VALUE>(T_ACTION_ENUM _action, int _logicFrame)
             where T_VALUE : struct
         {
             if (LogIfInvalid())
                 return default;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
                 Console.LogWarning(SystemNames.Input, name, $"ReadActionValue failed, action {_action} not found.");
                 return default;
             }
-            
+
             return action.ReadValue<T_VALUE>(_logicFrame);
         }
+
         /// <summary>
         /// Start rebinding an action's key binding
         /// </summary>
         /// <param name="_action">Action type</param>
         /// <param name="_bindingIndex">Binding index</param>
         /// <param name="_timeOut">Timeout duration</param>
+        /// <remarks>Requires an assigned device. Device connection or assignment changes cancel the operation.</remarks>
         public RebindingHandle StartRebinding(T_ACTION_ENUM _action, int _bindingIndex, float _timeOut = 10f)
         {
             if (LogIfInvalid())
                 return null;
-            
-            if (_m_rebindingHandle != null)
+
+            if (_m_rebindingAction != null)
             {
                 Console.LogWarning(SystemNames.Input, name, "StartRebinding failed, there is already a rebinding operation in progress.");
                 return null;
             }
-            
+
+            if (_m_devices.Count == 0)
+            {
+                Console.LogWarning(SystemNames.Input, name, "StartRebinding failed, no devices are assigned to the player.");
+                return null;
+            }
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
@@ -529,16 +556,33 @@ namespace CodaGame.Base
                 return null;
             }
 
-            RebindingOperation operation = action.StartRebinding(_bindingIndex);
-            if (operation == null)
+            // Reserve before disabling: Unity may invoke canceled callbacks synchronously.
+            _m_rebindingAction = action;
+            RebindingOperation operation = null;
+            try
             {
-                Console.LogWarning(SystemNames.Input, name, $"StartRebinding failed, binding index {_bindingIndex} not found for action {_action}.");
+                operation = action.StartRebinding(_bindingIndex);
+                if (operation == null || !_m_isEnable || _m_devices.Count == 0)
+                    return null;
+
+                _m_rebindingHandle = new RebindingHandle(operation, _m_devices, _timeOut, RebindingComplete);
+                return _m_rebindingHandle;
+            }
+            catch (Exception exception)
+            {
+                Console.LogError(SystemNames.Input, name, $"StartRebinding failed: {exception.Message}");
                 return null;
             }
-            
-            _m_rebindingHandle = new RebindingHandle(operation, _m_devices, _timeOut, RebindingComplete);
-            return _m_rebindingHandle;
+            finally
+            {
+                if (_m_rebindingHandle == null)
+                {
+                    operation?.Dispose();
+                    RebindingComplete(false);
+                }
+            }
         }
+
         /// <summary>
         /// Get the button type bound to the current action
         /// </summary>
@@ -546,7 +590,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return InputButtonType.Unknown;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
@@ -570,7 +614,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return null;
-            
+
             InputActionInternal action = _m_enum2ActionDict.GetValueOrDefault(_action);
             if (action == null)
             {
@@ -588,7 +632,45 @@ namespace CodaGame.Base
             return control;
         }
 
-        
+        /// <summary>
+
+
+        /// Dispose function called by PlayerInputManager
+        /// </summary>
+        /// <remarks>
+        /// <para>Once disposed, this class can no longer be used.</para>
+        /// </remarks>
+        internal void Dispose()
+        {
+            if (!_m_isEnable)
+                return;
+            _m_isEnable = false;
+
+            // Cancel in-progress rebinding so the native RebindingOperation and timeout task don't outlive this player.
+            _m_rebindingHandle?.Cancel();
+
+            foreach (InputActionMapInternal actionMap in _m_actionMaps.Values)
+                actionMap.Dispose();
+            _m_actionMaps.Clear();
+            _m_enum2ActionDict.Clear();
+            _m_enum2ActionMapDict.Clear();
+
+            // Unsubscribe first so disabling the owned asset cannot dispatch canceled callbacks to this player.
+            _m_actionAsset.Disable();
+            UnityEngine.Object.Destroy(_m_actionAsset);
+        }
+
+        /// <summary>
+
+
+        /// Advance all action snapshots without invoking business callbacks.
+        /// </summary>
+        void _IInputDeviceUser.AdvanceLogicFrame(int _logicFrame)
+        {
+            foreach (InputActionMapInternal actionMap in _m_actionMaps.Values)
+                actionMap.AdvanceLogicFrame(_logicFrame);
+        }
+
         /// <summary>
         /// Add a new input device
         /// </summary>
@@ -596,7 +678,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return false;
-            
+
             if (_device == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Add device failed, device is null.");
@@ -610,6 +692,8 @@ namespace CodaGame.Base
 
             _m_devices.Add(_device);
             _m_actionAsset.devices = _m_devices.ToArray();
+            // Publish the new device set before onAbort can start another rebind.
+            _m_rebindingHandle?.Cancel();
             onDeviceAdded?.Invoke(_device);
             return true;
         }
@@ -620,7 +704,7 @@ namespace CodaGame.Base
         {
             if (LogIfInvalid())
                 return false;
-            
+
             if (_device == null)
             {
                 Console.LogWarning(SystemNames.Input, name, "Remove device failed, device is null.");
@@ -634,34 +718,14 @@ namespace CodaGame.Base
 
             _m_devices.Remove(_device);
             _m_actionAsset.devices = _m_devices.ToArray();
+            // Publish the new device set before onAbort can start another rebind.
+            _m_rebindingHandle?.Cancel();
             onDeviceLost?.Invoke(_device);
             if (_m_devices.Count == 0)
                 onLostAllDevices?.Invoke();
             return true;
         }
-        
-        /// <summary>
-        /// Dispose function called by PlayerInputManager
-        /// </summary>
-        /// <remarks>
-        /// <para>Once disposed, this class can no longer be used.</para>
-        /// </remarks>
-        internal void Dispose()
-        {
-            // Cancel in-progress rebinding so the native RebindingOperation and timeout task don't outlive this player.
-            _m_rebindingHandle?.Cancel();
 
-            foreach (InputActionInternal action in _m_enum2ActionDict.Values)
-                action.Dispose();
-            _m_enum2ActionDict.Clear();
-            foreach (InputActionMapInternal actionMap in _m_enum2ActionMapDict.Values)
-                actionMap.Dispose();
-            _m_enum2ActionMapDict.Clear();
-
-            _m_isEnable = false;
-        }
-        
-        
         // Initialization, load saved bindings and set up device mask
         private void Initialize()
         {
@@ -680,7 +744,7 @@ namespace CodaGame.Base
                 Console.LogWarning(SystemNames.Input, name, "The PlayerInput is already disposed. You can't use it anymore.");
                 return true;
             }
-            
+
             return false;
         }
         // Change the current control scheme
@@ -698,13 +762,21 @@ namespace CodaGame.Base
         // Callback when rebinding is complete
         private void RebindingComplete(bool _success)
         {
-            if (_success)
+            try
             {
-                string bindingString = _m_actionAsset.SaveBindingOverridesAsJson();
-                PlayerPrefs.SetString(name + "_overrideBinding", bindingString);
+                if (_success)
+                {
+                    string bindingString = _m_actionAsset.SaveBindingOverridesAsJson();
+                    PlayerPrefs.SetString(name + "_overrideBinding", bindingString);
+                }
             }
-            
-            _m_rebindingHandle = null;
+            finally
+            {
+                // Restore using the current counts, including changes made while rebinding.
+                _m_rebindingAction?.EndRebinding();
+                _m_rebindingAction = null;
+                _m_rebindingHandle = null;
+            }
         }
     }
 }

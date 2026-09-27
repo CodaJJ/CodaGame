@@ -18,15 +18,12 @@ namespace CodaGame.Tasks
     public class ContinuousActionTask : _AEveryFrameContinuousTask
     {
         private readonly Action<float> _m_delegate;
-        private readonly DelayActionTask _m_durationTask;
 
 
         public ContinuousActionTask(string _name, Action<float> _delegate, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false) 
-            : base(_name, _runType, _useUnscaledTime)
+            : base(_name, _runType, _useUnscaledTime, _duration)
         {
             _m_delegate = _delegate;
-            if (_duration > 0)
-                _m_durationTask = new DelayActionTask(Stop, _duration, _runType, _useUnscaledTime);
         }
         public ContinuousActionTask(Action<float> _delegate, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
             : this($"ContinuousActionTask_{Serialize.NextContinuousTask()}", _delegate, _duration, _runType, _useUnscaledTime)
@@ -40,12 +37,9 @@ namespace CodaGame.Tasks
         }
         protected override void OnRun()
         {
-            _m_durationTask?.Run();
         }
         protected override void OnStop()
         {
-            if (_m_durationTask is { isRunning: true })
-                _m_durationTask.Stop();
         }
     }
 }

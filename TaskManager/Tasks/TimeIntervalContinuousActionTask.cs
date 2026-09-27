@@ -18,15 +18,12 @@ namespace CodaGame.Tasks
     public class TimeIntervalContinuousActionTask : _ATimeIntervalContinuousTask
     {
         private readonly Action<float> _m_delegate;
-        private readonly DelayActionTask _m_durationTask;
         
         
         public TimeIntervalContinuousActionTask(string _name, Action<float> _delegate, float _timeInterval, bool _executeOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
-            : base(_name, _timeInterval, _executeOnceImmediately, _runType, _useUnscaledTime)
+            : base(_name, _timeInterval, _executeOnceImmediately, _runType, _useUnscaledTime, _duration)
         {
             _m_delegate = _delegate;
-            if (_duration > 0)
-                _m_durationTask = new DelayActionTask(Stop, _duration, _runType, _useUnscaledTime);
         }
         public TimeIntervalContinuousActionTask(Action<float> _delegate, float _timeInterval, bool _dealOnceImmediately = true, float _duration = -1, UpdateType _runType = UpdateType.Update, bool _useUnscaledTime = false)
             : this($"TimeIntervalContinuousActionTask_{Serialize.NextTimeIntervalContinuousTask()}", _delegate, _timeInterval, _dealOnceImmediately, _duration, _runType, _useUnscaledTime)
@@ -40,12 +37,9 @@ namespace CodaGame.Tasks
         }
         protected override void OnRun()
         {
-            _m_durationTask?.Run();
         }
         protected override void OnStop()
         {
-            if (_m_durationTask is { isRunning: true })
-                _m_durationTask.Stop();
         }
     }
 }

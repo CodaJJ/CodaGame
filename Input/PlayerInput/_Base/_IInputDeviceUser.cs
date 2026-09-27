@@ -9,6 +9,7 @@ namespace CodaGame.Base
 {
     internal interface _IInputDeviceUser
     {
+        public void AdvanceLogicFrame(int _logicFrame);
         public bool AddDevice(InputDevice _device);
         public bool RemoveDevice(InputDevice _device);
         public ReadOnlyList<InputDevice> devices { get; }

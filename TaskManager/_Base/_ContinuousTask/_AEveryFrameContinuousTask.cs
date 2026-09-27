@@ -10,8 +10,8 @@ namespace CodaGame.Base
     /// </summary>
     public abstract class _AEveryFrameContinuousTask : _AContinuousTask
     {
-        protected _AEveryFrameContinuousTask(string _name, UpdateType _runType, bool _useUnscaledTime) 
-            : base(_name, _runType, _useUnscaledTime)
+        protected _AEveryFrameContinuousTask(string _name, UpdateType _runType, bool _useUnscaledTime, float _duration = -1)
+            : base(_name, _runType, _useUnscaledTime, _duration)
         {
         }
 
@@ -24,17 +24,14 @@ namespace CodaGame.Base
         /// <para>The "_deltaTime" value is determined by the running type of the task and whether using unscaled time.</para>
         /// </remarks>
         protected abstract void OnTick(float _deltaTime);
-        
-        
-        internal override void Tick(float _deltaTime)
+
+
+        protected override void TickInternal(float _deltaTime)
         {
             OnTick(_deltaTime);
         }
         
         
-        private protected override void OnInternalRun()
-        {
-        }
         private protected override void OnInternalStop()
         {
         }

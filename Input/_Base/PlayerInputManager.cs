@@ -385,6 +385,16 @@ namespace CodaGame.Base
         }
         
         
+        // Called by the logic loop, including every catch-up tick.
+        internal void AdvanceLogicFrame(int _logicFrame)
+        {
+            foreach (_IInputDeviceUser user in _m_allDeviceUsers)
+                user.AdvanceLogicFrame(_logicFrame);
+            foreach (_IInputDeviceUser user in _m_preferredUsers)
+                user.AdvanceLogicFrame(_logicFrame);
+            foreach (_IInputDeviceUser user in _m_manualUsers)
+                user.AdvanceLogicFrame(_logicFrame);
+        }
         /// <summary>
         /// Add device to player input user
         /// </summary>
@@ -411,7 +421,11 @@ namespace CodaGame.Base
                 return false;
             }
             
-            _playerInput.AddDevice(_device);
+            if (!_playerInput.AddDevice(_device))
+            {
+                users.Remove(_playerInput);
+                return false;
+            }
             return true;
         }
         /// <summary>
