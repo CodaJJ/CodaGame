@@ -13,12 +13,13 @@ namespace CodaGame
 {
     /// <summary>
     /// Base MonoBehaviour for all gameplay actors. Owns Attributes (pure data, type-unique)
-    /// and Capabilities (pure logic, type-unique), plus a refcounted block-tag set.
+    /// and Capabilities (pure logic, type-unique), with per-frame priority-based tag arbitration.
     /// Registered with ActorManager while enabled. Transform is driven by built-in
     /// PositionAttribute / RotationAttribute / ScaleAttribute (CodaGame.Base) unless replaced.
     /// Common transform state is exposed directly via `position` / `rotation` / `scale` properties
     /// and the `Snap(...)` method; the underlying attributes are still retrievable via
-    /// GetAttribute&lt;PositionAttribute&gt;() etc. when `last` or fancy access is needed.
+    /// GetAttribute&lt;T&gt;() using their exact concrete type when `last` or fancy access is needed.
+    /// For replaced built-ins, query the replacement type; position/rotation/scale still use the stored instance.
     /// </summary>
     [DisallowMultipleComponent]
     public abstract class _AActor : MonoBehaviour
@@ -29,10 +30,14 @@ namespace CodaGame
         [NotNull] private readonly Dictionary<Type, _AAttribute> _m_attributes = new Dictionary<Type, _AAttribute>();
         [ItemNotNull, NotNull] private readonly List<_AShowSyncAttribute> _m_showSyncAttrs = new List<_AShowSyncAttribute>();
         [ItemNotNull, NotNull] private readonly List<_ACapability> _m_capabilities = new List<_ACapability>();
-        [NotNull] private readonly Dictionary<int, int> _m_blockTagRefCount = new Dictionary<int, int>();
+        // Reused scratch buffers: arbitration only sees this frame's accepted higher-priority capabilities.
+        [NotNull] private readonly HashSet<int> _m_resolutionBlockTags = new HashSet<int>();
+        [NotNull] private readonly List<bool> _m_capabilityActivationResults = new List<bool>();
 
         // Pending Capability add/remove ops (flushed at the start of LogicTick, processed in call order).
-        [NotNull] private readonly List<PendingCapOp> _m_pendingCapOps = new List<PendingCapOp>();
+        [NotNull] private List<PendingCapOp> _m_pendingCapOps = new List<PendingCapOp>();
+        [NotNull] private List<PendingCapOp> _m_processingCapOps = new List<PendingCapOp>();
+        private int _m_processingCapOpIndex;
 
         [NotNull] private PositionAttribute _m_positionAttr;
         [NotNull] private RotationAttribute _m_rotationAttr;
@@ -73,10 +78,12 @@ namespace CodaGame
             if (_scale.HasValue)    _m_scaleAttr.Snap(_scale.Value);
         }
         
+        /// <summary>Returns the Attribute whose concrete type is exactly T, or null if absent.</summary>
         public T GetAttribute<T>() where T : _AAttribute
         {
             return _m_attributes.TryGetValue(typeof(T), out _AAttribute a) ? (T)a : null;
         }
+        /// <summary>Tries to get the Attribute whose concrete type is exactly T.</summary>
         public bool TryGetAttribute<T>(out T _attr) where T : _AAttribute
         {
             if (_m_attributes.TryGetValue(typeof(T), out _AAttribute a))
@@ -90,6 +97,8 @@ namespace CodaGame
 
         /// <summary>
         /// Queues a Capability for addition. Actually inserted at the start of the next LogicTick.
+        /// Uniqueness is by concrete type; different derived types may coexist.
+        /// The Capability must belong to this Actor; a mismatched owner is logged and rejected.
         /// Same-frame Add then Remove of the same instance cancels out as expected (call-order semantics).
         /// </summary>
         public void AddCapability(_ACapability _cap)
@@ -97,6 +106,11 @@ namespace CodaGame
             if (_cap == null)
             {
                 Console.LogError(SystemNames.Gameplay, $"Cannot add null Capability to Actor {name}.");
+                return;
+            }
+            if (!ReferenceEquals(_cap.owner, this))
+            {
+                Console.LogError(SystemNames.Gameplay, $"Cannot add Capability {_cap.GetType().Name} to Actor {name}: owner does not match this Actor.");
                 return;
             }
             _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Add, _cap));
@@ -114,26 +128,35 @@ namespace CodaGame
             _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Remove, _cap));
         }
         /// <summary>
-        /// Queues removal of all Capabilities of type T currently visible to the actor — both
-        /// the one in the flushed list (if any) and any pending Adds of T queued this frame.
+        /// Queues removal of Capabilities whose concrete type is exactly T — both
+        /// the one in the flushed list (if any) and matching Adds in the processing/pending queues.
+        /// Does not remove derived types.
         /// Each match gets its own Remove op appended; duplicate-Add error logs are preserved as
         /// learning signals.
         /// </summary>
         public void RemoveCapability<T>() where T : _ACapability
         {
+            // Lifecycle callbacks must also see Adds still being applied in the current batch.
+            for (int i = _m_processingCapOpIndex; i < _m_processingCapOps.Count; ++i)
+            {
+                PendingCapOp op = _m_processingCapOps[i];
+                if (op.type == PendingCapOpType.Add && op.cap.GetType() == typeof(T))
+                    _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Remove, op.cap));
+            }
+
             // Match every pending Add of T (so an Add+RemoveCapability<T> sequence cancels out).
             int pendingCount = _m_pendingCapOps.Count;   // snapshot before append
             for (int i = 0; i < pendingCount; ++i)
             {
                 PendingCapOp op = _m_pendingCapOps[i];
-                if (op is { type: PendingCapOpType.Add, cap: T })
+                if (op.type == PendingCapOpType.Add && op.cap.GetType() == typeof(T))
                     _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Remove, op.cap));
             }
 
             // And the existing flushed instance, if any.
             foreach (_ACapability capability in _m_capabilities)
             {
-                if (capability is T)
+                if (capability.GetType() == typeof(T))
                 {
                     _m_pendingCapOps.Add(new PendingCapOp(PendingCapOpType.Remove, capability));
                     return;
@@ -141,9 +164,9 @@ namespace CodaGame
             }
         }
         /// <summary>
-        /// Returns the Capability of type T that will exist after the next flush — i.e. it accounts
-        /// for pending Add/Remove ops queued this frame. Returns null if no T will be present.
-        /// (Type-unique invariant guarantees at most one matching T.)
+        /// Returns the Capability whose concrete type is exactly T after applying queued operations.
+        /// Accounts for the remaining processing batch and pending Add/Remove ops.
+        /// Returns null if no exact match will be present; does not match derived types.
         /// </summary>
         public T GetCapability<T>() where T : _ACapability
         {
@@ -151,37 +174,36 @@ namespace CodaGame
             _ACapability current = null;
             foreach (_ACapability capability in _m_capabilities)
             {
-                if (capability is T)
+                if (capability.GetType() == typeof(T))
                 {
                     current = capability;
                     break;
                 }
             }
 
+            // During lifecycle callbacks, finish projecting the current batch before next-frame ops.
+            // Include the current op: a Remove is still in the live list during its callbacks.
+            for (int i = _m_processingCapOpIndex; i < _m_processingCapOps.Count; ++i)
+                current = ApplyCapabilityLookupOp<T>(current, _m_processingCapOps[i]);
+
             // Apply pending ops in call order to converge on the post-flush logical state.
             for (int i = 0; i < _m_pendingCapOps.Count; ++i)
-            {
-                var op = _m_pendingCapOps[i];
-                if (op.cap is not T)
-                    continue;
-
-                if (op.type == PendingCapOpType.Add)
-                {
-                    if (current == null)
-                        current = op.cap;
-                    // else: this pending Add will be rejected at flush (type-unique violation) — do not adopt.
-                }
-                else // Remove
-                {
-                    if (current == op.cap)
-                        current = null;
-                    // else: Remove of a cap not currently considered "the T" is a no-op here.
-                }
-            }
+                current = ApplyCapabilityLookupOp<T>(current, _m_pendingCapOps[i]);
             return (T)current;
         }
+        private static _ACapability ApplyCapabilityLookupOp<T>(_ACapability _current, PendingCapOp _op) where T : _ACapability
+        {
+            if (_op.cap.GetType() != typeof(T))
+                return _current;
+
+            if (_op.type == PendingCapOpType.Add)
+                return _current ?? _op.cap;
+
+            return _current == _op.cap ? null : _current;
+        }
         /// <summary>
-        /// Tries to get the Capability of type T. Same post-flush semantics as GetCapability&lt;T&gt;.
+        /// Tries to get the Capability whose concrete type is exactly T.
+        /// Same queued-operation semantics as GetCapability&lt;T&gt;.
         /// </summary>
         public bool TryGetCapability<T>(out T _cap) where T : _ACapability
         {
@@ -217,6 +239,7 @@ namespace CodaGame
         /// (or from a built-in factory). Calling after Awake logs an error and is a no-op —
         /// Attributes are static for the lifetime of the Actor; Capability lookups via
         /// GetAttribute&lt;T&gt;() are cached at construction and won't see Attributes added later.
+        /// A mismatched owner is logged and rejected, returning null.
         /// </summary>
         protected T AddAttribute<T>(T _attr) where T : _AAttribute
         {
@@ -230,6 +253,8 @@ namespace CodaGame
                 Console.LogError(SystemNames.Gameplay, $"Cannot add Attribute {typeof(T).Name} after Awake. Register all Attributes in OnInitAttributes().");
                 return _attr;
             }
+            if (ValidateAttributeOwner(_attr) == null)
+                return null;
             AddAttributeInternal(_attr);
             return _attr;
         }
@@ -253,29 +278,60 @@ namespace CodaGame
             foreach (_AAttribute attr in _m_attributes.Values)
                 attr.OnResetFrameValues();
 
-            // Pass 3: activation resolution in priority desc order.
+            // Pass 3: decide all activations before invoking lifecycle callbacks, using only
+            // this frame's accepted higher-priority capabilities to build the blocked-tag set.
+            _m_resolutionBlockTags.Clear();
+            _m_capabilityActivationResults.Clear();
             foreach (_ACapability cap in _m_capabilities)
             {
                 bool wantsActive = cap.ShouldActivate();
-                bool blocked = IsCapabilityBlocked(cap);
+                bool blocked = false;
+                foreach (int tag in cap.ownedTags)
+                {
+                    if (_m_resolutionBlockTags.Contains(tag))
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
                 bool shouldBeActive = wantsActive && !blocked;
+                _m_capabilityActivationResults.Add(shouldBeActive);
 
-                if (shouldBeActive && !cap.isActive)
-                    cap.Activate();
-                else if (!shouldBeActive && cap.isActive)
-                    cap.Deactivate();
+                // Only accepted capabilities block later ones. Add after checking to avoid self-blocking.
+                if (shouldBeActive)
+                    foreach (int tag in cap.blockTags)
+                        _m_resolutionBlockTags.Add(tag);
             }
 
-            // Pass 4: OnLogicTick for active capabilities in priority desc order.
+            // Pass 4: apply only state changes. Release outgoing capabilities before activating
+            // their replacements; persistent capabilities keep their activation cycle.
+            for (int i = _m_capabilities.Count - 1; i >= 0; --i)
+            {
+                _ACapability cap = _m_capabilities[i];
+                if (!_m_capabilityActivationResults[i] && cap.isActive)
+                    cap.Deactivate();
+            }
+            for (int i = 0; i < _m_capabilities.Count; ++i)
+            {
+                _ACapability cap = _m_capabilities[i];
+                if (_m_capabilityActivationResults[i] && !cap.isActive)
+                    cap.Activate();
+            }
+
+            // Pass 5: OnLogicTick for active capabilities in priority desc order.
+            // Only these callbacks may disable or destroy Actors; stop before advancing the iterator.
             foreach (_ACapability cap in _m_capabilities)
             {
                 if (cap.isActive)
                     cap.OnLogicTick();
+                if (this == null || !isActiveAndEnabled)
+                    return;
             }
         }
         /// <summary>
         /// Per-actor ShowTick body: run OnShowTick on active capabilities, then OnShowSync on
         /// show-sync attributes (interpolation to view layer).
+        /// Presentation callbacks must not disable or destroy Actors.
         /// </summary>
         internal void ShowTick(float _alpha)
         {
@@ -290,55 +346,39 @@ namespace CodaGame
         
         internal void FlushPendingCapabilityOps()
         {
-            if (_m_pendingCapOps.Count == 0)
+            if (_m_pendingCapOps.Count == 0 || _m_processingCapOps.Count != 0)
                 return;
+
+            // Reuse two buffers. Lifecycle callbacks append to next frame's queue, never this batch.
+            List<PendingCapOp> batch = _m_pendingCapOps;
+            _m_pendingCapOps = _m_processingCapOps;
+            _m_processingCapOps = batch;
 
             // Process in call order: Add(cap) followed by Remove(cap) cancels out (cap goes through
             // OnInit then OnDiscard); Remove(old) then Add(new) of same type swaps cleanly.
-            foreach (PendingCapOp op in _m_pendingCapOps)
+            try
             {
-                if (op.type == PendingCapOpType.Remove)
-                    ApplyRemoveCapability(op.cap);
-                else
-                    ApplyAddCapability(op.cap);
-            }
-            _m_pendingCapOps.Clear();
-        }
-        internal bool IsBlocked(int _tag)
-        {
-            return _m_blockTagRefCount.TryGetValue(_tag, out int c) && c > 0;
-        }
-        internal void PushBlockTags(ReadOnlyList<int> _tags)
-        {
-            foreach (int t in _tags)
-            {
-                _m_blockTagRefCount.TryGetValue(t, out int c);
-                _m_blockTagRefCount[t] = c + 1;
-            }
-        }
-        internal void PopBlockTags(ReadOnlyList<int> _tags)
-        {
-            foreach (int t in _tags)
-            {
-                if (!_m_blockTagRefCount.TryGetValue(t, out int c) || c <= 0)
+                for (_m_processingCapOpIndex = 0; _m_processingCapOpIndex < batch.Count; ++_m_processingCapOpIndex)
                 {
-                    Console.LogCrush(SystemNames.Gameplay, $"PopBlockTags underflow: tag {t} on Actor {name}.");
-                    continue;
+                    PendingCapOp op = batch[_m_processingCapOpIndex];
+                    if (op.type == PendingCapOpType.Remove)
+                        ApplyRemoveCapability(op.cap);
+                    else
+                        ApplyAddCapability(op.cap);
                 }
-
-                if (c == 1)
-                    _m_blockTagRefCount.Remove(t);
-                else
-                    _m_blockTagRefCount[t] = c - 1;
             }
-        }
-        internal bool IsCapabilityBlocked([NotNull] _ACapability _cap)
-        {
-            ReadOnlyList<int> owned = _cap.ownedTags;
-            foreach (int t in owned)
-                if (IsBlocked(t))
-                    return true;
-            return false;
+            finally
+            {
+                // On exception, do not replay attempted operations. Keep the untouched tail
+                // ahead of callback-generated operations, preserving their original call order.
+                if (_m_processingCapOpIndex < batch.Count)
+                {
+                    batch.RemoveRange(0, _m_processingCapOpIndex + 1);
+                    _m_pendingCapOps.InsertRange(0, batch);
+                }
+                batch.Clear();
+                _m_processingCapOpIndex = 0;
+            }
         }
 
 
@@ -346,9 +386,9 @@ namespace CodaGame
         private void Awake()
         {
             // Built-in transform sync attributes.
-            _m_positionAttr = CreatePositionAttribute() ?? new PositionAttribute(this);
-            _m_rotationAttr = CreateRotationAttribute() ?? new RotationAttribute(this);
-            _m_scaleAttr    = CreateScaleAttribute()    ?? new ScaleAttribute(this);
+            _m_positionAttr = ValidateAttributeOwner(CreatePositionAttribute()) ?? new PositionAttribute(this);
+            _m_rotationAttr = ValidateAttributeOwner(CreateRotationAttribute()) ?? new RotationAttribute(this);
+            _m_scaleAttr    = ValidateAttributeOwner(CreateScaleAttribute())    ?? new ScaleAttribute(this);
             AddAttributeInternal(_m_positionAttr);
             AddAttributeInternal(_m_rotationAttr);
             AddAttributeInternal(_m_scaleAttr);
@@ -363,18 +403,18 @@ namespace CodaGame
         {
             if (!_m_isRegistered)
             {
-                ActorManager.instance.Register(this);
                 _m_isRegistered = true;
+                ActorManager.instance.Register(this);
             }
         }
         private void OnDisable()
         {
             if (_m_isRegistered)
             {
-                // Deactivate everything (framework-managed pop of block tags).
-                DeactivateAllCapabilities();
-                ActorManager.instance.Unregister(this);
+                // Unregister before invoking any user cleanup callbacks.
                 _m_isRegistered = false;
+                ActorManager.instance.Unregister(this);
+                DeactivateAllCapabilities();
             }
         }
         private void OnDestroy()
@@ -382,9 +422,9 @@ namespace CodaGame
             // Safety: ensure unregistered (OnDisable may not have fired if destroyed while disabled).
             if (_m_isRegistered)
             {
-                DeactivateAllCapabilities();
-                ActorManager.instance.Unregister(this);
                 _m_isRegistered = false;
+                ActorManager.instance.Unregister(this);
+                DeactivateAllCapabilities();
             }
 
             // Discard capabilities then attributes in reverse registration order.
@@ -396,6 +436,19 @@ namespace CodaGame
                 attr.OnDiscard();
             _m_attributes.Clear();
             _m_showSyncAttrs.Clear();
+            _m_pendingCapOps.Clear();
+        }
+
+        // Factories may return null to use the default. Foreign instances are rejected before
+        // they can be stored in the built-in fields or registered as user Attributes.
+        private T ValidateAttributeOwner<T>(T _attr) where T : _AAttribute
+        {
+            if (_attr == null)
+                return null;
+            if (ReferenceEquals(_attr.owner, this))
+                return _attr;
+            Console.LogError(SystemNames.Gameplay, $"Cannot add Attribute {_attr.GetType().Name} to Actor {name}: owner does not match this Actor.");
+            return null;
         }
 
         private void AddAttributeInternal([NotNull] _AAttribute _attr)
@@ -445,14 +498,13 @@ namespace CodaGame
 
             if (_cap.isActive)
                 _cap.Deactivate();
-            _cap.OnDiscard();
             _m_capabilities.RemoveAt(idx);
+            _cap.OnDiscard();
         }
         private void DeactivateAllCapabilities()
         {
             // Iterate in reverse priority order (low priority first out) for symmetry with the
-            // activation pass. Each Deactivate() pops its own blockTags, so the refcount dict
-            // naturally drains to empty after this — no manual clear needed.
+            // activation pass.
             for (int i = _m_capabilities.Count - 1; i >= 0; --i)
             {
                 _ACapability cap = _m_capabilities[i];
