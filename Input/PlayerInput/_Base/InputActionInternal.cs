@@ -24,6 +24,7 @@ namespace CodaGame.Base
             [NotNull] private readonly _APlayerInput<T_ACTION_MAP_ENUM, T_ACTION_ENUM> _m_playerInput;
             // Complete snapshots for every logic frame, including frames with no input events.
             [NotNull] private readonly FrameRecord[] _m_actionCtxBuffer;
+            [NotNull] private readonly List<PendingEvent> _m_pendingEvents = new List<PendingEvent>();
             // Specific type event management dictionary
             [NotNull] private readonly Dictionary<Type, _ASpecificTypeEvent> _m_specificTypeEvents;
             // Action object
@@ -75,6 +76,7 @@ namespace CodaGame.Base
                 _m_action.started -= OnStarted;
                 _m_action.performed -= OnPerformed;
                 _m_action.canceled -= OnCanceled;
+                _m_pendingEvents.Clear();
             }
 
             // Net count, may be negative; both action and map counts must be positive to receive input.
@@ -109,7 +111,7 @@ namespace CodaGame.Base
 
             public void OnStarted(InputAction.CallbackContext _ctx)
             {
-                InsertContextToBuffer(_ctx);
+                QueueContext(_ctx);
                 _m_startedWithCtx?.Invoke(_ctx);
                 _m_started?.Invoke();
                 foreach (_ASpecificTypeEvent typeEvent in _m_specificTypeEvents.Values)
@@ -119,7 +121,7 @@ namespace CodaGame.Base
             }
             public void OnPerformed(InputAction.CallbackContext _ctx)
             {
-                InsertContextToBuffer(_ctx);
+                QueueContext(_ctx);
                 // A different device can take over an active Value action without another started event.
                 _m_playerInput.ChangeControlScheme(_ctx.control.device.ToControlSchemeType());
                 _m_performedWithCtx?.Invoke(_ctx);
@@ -129,7 +131,7 @@ namespace CodaGame.Base
             }
             public void OnCanceled(InputAction.CallbackContext _ctx)
             {
-                InsertContextToBuffer(_ctx);
+                QueueContext(_ctx);
                 _m_canceledWithCtx?.Invoke(_ctx);
                 _m_canceled?.Invoke();
                 foreach (_ASpecificTypeEvent typeEvent in _m_specificTypeEvents.Values)
@@ -190,24 +192,34 @@ namespace CodaGame.Base
                 }
             }
 
-            // Called whenever the logic loop enters a new frame. Copy the state, never the previous edges.
+            // Open the snapshot, then consume only events whose frame interval is already known.
             public void AdvanceLogicFrame(int _logicFrame)
             {
-                if (_logicFrame <= _m_snapshotFrame)
-                    return;
-
-                FrameRecord previous = _m_actionCtxBuffer[_m_snapshotFrame % _m_actionCtxBuffer.Length];
-                int firstFrame = Math.Max(_m_snapshotFrame + 1, _logicFrame - _m_actionCtxBuffer.Length + 1);
-                for (int frame = firstFrame; frame <= _logicFrame; frame++)
+                if (_logicFrame > _m_snapshotFrame)
                 {
-                    _m_actionCtxBuffer[frame % _m_actionCtxBuffer.Length] = new FrameRecord
+                    FrameRecord previous = _m_actionCtxBuffer[_m_snapshotFrame % _m_actionCtxBuffer.Length];
+                    int firstFrame = Math.Max(_m_snapshotFrame + 1, _logicFrame - _m_actionCtxBuffer.Length + 1);
+                    for (int frame = firstFrame; frame <= _logicFrame; frame++)
                     {
-                        frameIndex = frame,
-                        performed = previous.performed,
-                        value = previous.value
-                    };
+                        _m_actionCtxBuffer[frame % _m_actionCtxBuffer.Length] = new FrameRecord
+                        {
+                            frameIndex = frame,
+                            performed = previous.performed,
+                            value = previous.value
+                        };
+                    }
+                    _m_snapshotFrame = _logicFrame;
                 }
-                _m_snapshotFrame = _logicFrame;
+
+                double inputTimeExclusive = _AGameMain.instance.inputTimeExclusive;
+                int consumed = 0;
+                while (consumed < _m_pendingEvents.Count && _m_pendingEvents[consumed].time < inputTimeExclusive)
+                {
+                    InsertEventToBuffer(_m_pendingEvents[consumed]);
+                    consumed++;
+                }
+                if (consumed > 0)
+                    _m_pendingEvents.RemoveRange(0, consumed);
             }
 
             // Waiting/Performed are complementary states; Started/Canceled are independent per-frame events.
@@ -288,18 +300,28 @@ namespace CodaGame.Base
                 FrameRecord record = _m_actionCtxBuffer[_logicFrame % _m_actionCtxBuffer.Length];
                 return record.frameIndex == _logicFrame ? record : default;
             }
-            private void InsertContextToBuffer(InputAction.CallbackContext _ctx)
+            private void QueueContext(InputAction.CallbackContext _ctx)
             {
-                if (!_AGameMain.instance.TryCalculateLogicFrameIndex(_ctx.time, out int frameIndex))
-                    return;
-                int frameCount = _AGameMain.instance.logicFrameCount;
-                AdvanceLogicFrame(frameCount);
-
-                if (frameIndex > frameCount)
+                // CallbackContext is only valid during the callback. Copy its data now, but do not
+                // assign a frame until LogicLoop has established the corresponding time interval.
+                PendingEvent inputEvent = new PendingEvent
                 {
-                    Console.LogWarning(SystemNames.Input, "Future frame context detected, adjusting to current frame.");
-                    frameIndex = frameCount;
-                }
+                    time = _ctx.time,
+                    started = _ctx.started,
+                    canceled = _ctx.canceled,
+                    value = _ctx.ReadValueAsObject()
+                };
+                // Preserve callback order for equal timestamps; tolerate delayed/out-of-order events.
+                int index = _m_pendingEvents.Count;
+                while (index > 0 && _m_pendingEvents[index - 1].time > inputEvent.time)
+                    index--;
+                _m_pendingEvents.Insert(index, inputEvent);
+            }
+            private void InsertEventToBuffer(PendingEvent _event)
+            {
+                if (!_AGameMain.instance.TryCalculateLogicFrameIndex(_event.time, out int frameIndex))
+                    return;
+                int frameCount = _m_snapshotFrame;
 
                 if (frameIndex < 0 || frameIndex <= frameCount - _m_actionCtxBuffer.Length)
                     return;
@@ -309,19 +331,19 @@ namespace CodaGame.Base
                 // Do not create history from before this action was constructed.
                 if (record.frameIndex != frameIndex)
                     return;
-                if (_ctx.started)
+                if (_event.started)
                     record.started = true;
-                if (_ctx.canceled)
+                if (_event.canceled)
                     record.canceled = true;
                 // Older events may arrive after a newer event in the same logic frame. Keep their edges,
                 // but only the latest timestamp determines the final state (equal timestamps use callback order).
-                if (record.hasEvent && _ctx.time < record.lastEventTime)
+                if (record.hasEvent && _event.time < record.lastEventTime)
                     return;
                 record.hasEvent = true;
-                record.lastEventTime = _ctx.time;
-                record.performed = !_ctx.canceled;
-                // Box once per event; later snapshots share this reference without allocating.
-                record.value = _ctx.ReadValueAsObject();
+                record.lastEventTime = _event.time;
+                record.performed = !_event.canceled;
+                // Snapshots share the value boxed when the callback arrived.
+                record.value = _event.value;
 
                 // A timestamped event may belong to an already-created historical frame. Update inherited
                 // state through the gap, stopping at the next event; do not propagate started/canceled edges.
@@ -333,6 +355,15 @@ namespace CodaGame.Base
                     next.performed = record.performed;
                     next.value = record.value;
                 }
+            }
+
+
+            private struct PendingEvent
+            {
+                public double time;
+                public bool started;
+                public bool canceled;
+                public object value;
             }
 
 

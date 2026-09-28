@@ -102,6 +102,8 @@ namespace CodaGame
         
         
         internal int inputHistoryFrameCount { get { return _m_inputHistoryFrameCount; } }
+        // Only input timestamps strictly before this boundary have a determined logic frame.
+        internal double inputTimeExclusive { get { return _m_logicLoopTask.inputTimeExclusive; } }
 
 
         /// <summary>
@@ -204,12 +206,15 @@ namespace CodaGame
 
             public int frameCount { get { return _m_frameCount; } }
             public float currentAlpha { get { return _m_currentAlpha; } }
+            public double inputTimeExclusive { get; private set; }
 
 
             /// <summary>
             /// Maps a wallclock time to the logic frame whose window contains it. Walks the history
             /// ring buffer backward and returns the most recent recorded frame whose start wallclock
             /// is &lt;= the query time. Out-of-history queries fail; frame 0 is a valid frame, not a fallback.
+            /// The caller must first bound the event time by the current frame's known end; timestamps
+            /// beyond that end cannot be mapped until catch-up has established their boundaries.
             /// </summary>
             public bool TryCalculateLogicFrameIndex(double _wallTime, out int _frame)
             {
@@ -232,6 +237,7 @@ namespace CodaGame
             {
                 double now = Time.realtimeSinceStartupAsDouble;
                 _m_lastRealTime = now;
+                inputTimeExclusive = now;
                 _m_accumulator = 0;
                 _m_frameCount = 0;
                 _m_currentAlpha = 0f;
@@ -260,6 +266,10 @@ namespace CodaGame
                 {
                     // Paused at entry: skip wallclock that would have been accumulated.
                     _m_lastRealTime = now;
+                    // The open frame spans the pause. Retain any pre-pause accumulator for catch-up;
+                    // only consume timestamps earlier than its earliest possible next boundary.
+                    inputTimeExclusive = now - _m_accumulator;
+                    CodaGame.Base.PlayerInputManager.instance.AdvanceLogicFrame(_m_frameCount);
                     return;
                 }
 
@@ -280,6 +290,11 @@ namespace CodaGame
                         break;
 
                     _m_accumulator -= interval;
+                    double boundaryWallTime = now - _m_accumulator;
+                    // [frame start, frame end): an event exactly at the end belongs to the next frame.
+                    // Resolve input before gameplay, while future events remain pending for catch-up.
+                    inputTimeExclusive = boundaryWallTime;
+                    CodaGame.Base.PlayerInputManager.instance.AdvanceLogicFrame(_m_frameCount);
 
                     Physics.SyncTransforms();
                     Physics2D.SyncTransforms();
@@ -289,7 +304,6 @@ namespace CodaGame
                     // Increment then record AFTER LogicTick: matches the original semantic
                     // where logicFrameCount inside LogicTick is "ticks completed so far".
                     _m_frameCount++;
-                    double boundaryWallTime = now - _m_accumulator;   // accumulator is wallclock
                     _m_historyHead = (_m_historyHead + 1) % _m_history.Length;
                     _m_history[_m_historyHead] = new TickRecord { wallTime = boundaryWallTime, frame = _m_frameCount };
                     if (_m_historyCount < _m_history.Length)
