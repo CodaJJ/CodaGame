@@ -127,7 +127,7 @@ namespace CodaGame.Base
         /// </summary>
         public void DestroyImmediate(_AUIPanel _panel)
         {
-            if (_panel == null || _panel.isDestroyed)
+            if (_panel == null)
                 return;
             
             _panel.DestroyImmediate();

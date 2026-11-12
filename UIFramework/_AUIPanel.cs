@@ -5,7 +5,7 @@
 
 using System;
 using CodaGame.Base;
-using CodaGame.StateMachine.TargetedLite;
+using CodaGame.StateMachine;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -29,8 +29,9 @@ namespace CodaGame
 
         private AssetIndex _m_panelAssetIndex;
         private bool _m_isInitialized;
-        // Destroy requested — flow may still be in progress
-        private bool _m_isDestroyed;
+        // Requests are separate from the terminal Destroyed state.
+        private bool _m_destroyRequested;
+        private bool _m_destroyImmediateRequested;
 
         // Active reference count
         private int _m_activeRef;
@@ -41,7 +42,14 @@ namespace CodaGame
         private Action _m_destroyComplete;
 
         // State machine
-        private StateMachine<EUIPanelState, _AUIPanel> _m_stateMachine;
+        [NotNull] private readonly StateMachine<EUIPanelState, _AUIPanel> _m_stateMachine;
+
+
+        protected _AUIPanel()
+        {
+            _m_stateMachine = new StateMachine<EUIPanelState, _AUIPanel>(this, GetType().Name);
+            _m_stateMachine.ChangeState(new EmptyState<EUIPanelState, _AUIPanel>(EUIPanelState.None));
+        }
 
 
         /// <summary>
@@ -58,19 +66,30 @@ namespace CodaGame
         /// <summary>
         /// The current lifecycle state of this panel.
         /// </summary>
-        public EUIPanelState panelState { get { return _m_stateMachine.curState.type; } }
+        public EUIPanelState panelState
+        {
+            get
+            {
+                if (_m_stateMachine.curTransition is ShowingTransition)
+                    return EUIPanelState.Showing;
+                if (_m_stateMachine.curTransition is HidingTransition)
+                    return EUIPanelState.Hiding;
+                return _m_stateMachine.curState.type;
+            }
+        }
         /// <summary>
-        /// Whether this panel has been destroyed.
+        /// Whether this panel has entered the terminal Destroyed state.
+        /// A pending destroy request that is still waiting for an animation does not count.
         /// </summary>
-        public bool isDestroyed { get { return _m_isDestroyed; } }
+        public bool isDestroyed { get { return panelState == EUIPanelState.Destroyed; } }
         /// <summary>
         /// Whether this widget has been initialized.
         /// </summary>
         public bool isInitialized { get { return _m_isInitialized; } }
         /// <summary>
-        /// The name of this panel, used for logging and debugging. Defaults to the class name, but can be overridden for more descriptive names.
+        /// The concrete class name of this panel, used for logging and debugging.
         /// </summary>
-        public virtual string panelName { get { return GetType().Name; } }
+        public string panelName { get { return _m_stateMachine.name; } }
 
 
         /// <summary>
@@ -90,12 +109,11 @@ namespace CodaGame
 
             _m_activeRef++;
             Console.LogVerbose(SystemNames.UI, panelName, $"Open: active ref={_m_activeRef}.");
-            _m_stateMachine.Update(0);
 
-            if (panelState == EUIPanelState.Active)
-                _complete?.Invoke();
-            else if (_complete != null)
+            if (_complete != null)
                 _m_openComplete += _complete;
+
+            _m_stateMachine.Update();
         }
         /// <summary>
         /// Hide this panel. Decrements the active reference count.
@@ -120,12 +138,10 @@ namespace CodaGame
             }
 
             Console.LogVerbose(SystemNames.UI, panelName, $"Hide: active ref={_m_activeRef}.");
-            _m_stateMachine?.Update(0);
-
-            if (panelState == EUIPanelState.Hidden)
-                _complete?.Invoke();
-            else if (_complete != null)
+            if (_complete != null)
                 _m_hideComplete += _complete;
+
+            _m_stateMachine.Update();
         }
         /// <summary>
         /// Destroy this panel and release assets.
@@ -143,13 +159,13 @@ namespace CodaGame
                 return;
             }
 
-            _m_isDestroyed = true;
+            _m_destroyRequested = true;
             _m_activeRef = 0;
             if (_complete != null)
                 _m_destroyComplete += _complete;
 
             Console.LogVerbose(SystemNames.UI, panelName, "Destroy requested.");
-            _m_stateMachine?.Update(0);
+            _m_stateMachine.Update();
         }
 
 
@@ -247,9 +263,11 @@ namespace CodaGame
         /// </summary>
         internal void Init(AssetIndex _assetIndex)
         {
+            if (panelState != EUIPanelState.None)
+                return;
+
             _m_panelAssetIndex = _assetIndex;
 
-            _m_stateMachine = new StateMachine<EUIPanelState, _AUIPanel>(this, panelName);
             _m_stateMachine.ChangeState(new HiddenState());
 
             OnInit();
@@ -264,28 +282,16 @@ namespace CodaGame
         /// </summary>
         internal void DestroyImmediate()
         {
-            if (_m_isDestroyed)
+            if (this == null || panelState == EUIPanelState.None || isDestroyed || _m_destroyImmediateRequested)
                 return;
 
             Console.LogVerbose(SystemNames.UI, panelName, "Destroying panel immediately.");
 
-            _m_isDestroyed = true;
+            _m_destroyRequested = true;
+            _m_destroyImmediateRequested = true;
             _m_activeRef = 0;
 
-            // Open callbacks are meaningless — the panel never finished opening
-            _m_openComplete = null;
-
-            // If active, notify exit and propagate hide to children
-            if (panelState == EUIPanelState.Active)
-            {
-                OnActiveExit();
-                PropagateHideToChildren();
-            }
-
-            DestroyInternal();
-
-            ActionUtility.InvokeAndClear(ref _m_hideComplete);
-            ActionUtility.InvokeAndClear(ref _m_destroyComplete);
+            _m_stateMachine.Update();
         }
 
 
@@ -293,7 +299,7 @@ namespace CodaGame
         /// Check if this panel is in a valid state. Returns true if the panel should not be used.
         /// </summary>
         /// <remarks>
-        /// <para>Detects two invalid cases: panel created via 'new' instead of <see cref="UI.Create"/>, and panel already destroyed.</para>
+        /// <para>Rejects invalid Unity objects, panels not yet initialized by <see cref="UI.Create"/>, and destroy requests.</para>
         /// </remarks>
         /// <returns>True if the panel is invalid and should not be used.</returns>
         [HideInCallstack]
@@ -306,9 +312,15 @@ namespace CodaGame
                 return true;
             }
 
-            if (_m_isDestroyed || _m_stateMachine == null)
+            if (panelState == EUIPanelState.None)
             {
-                Console.LogError(SystemNames.UI, panelName, "Panel has already been destroyed and should not be used.");
+                Console.LogError(SystemNames.UI, panelName, "Panel has not been initialized through UI.Create.");
+                return true;
+            }
+
+            if (_m_destroyRequested)
+            {
+                Console.LogError(SystemNames.UI, panelName, "Panel destruction has been requested and it should not be used.");
                 return true;
             }
 
@@ -316,17 +328,8 @@ namespace CodaGame
         }
 
 
-        private void DestroyInternal()
-        {
-            _m_stateMachine = null;
-            PropagateDestroyToChildren();
-            OnDiscard();
-            UIManager.instance.DestroyPanel(this);
-        }
-
-
         #region States
-        // Hidden: panel in memory but not visible.
+        // Hidden, Active and Destroyed are stable states. Animation belongs to transitions.
         private class HiddenState : _AState<EUIPanelState, _AUIPanel>
         {
             public override EUIPanelState type { get { return EUIPanelState.Hidden; } }
@@ -337,61 +340,26 @@ namespace CodaGame
             {
                 target.gameObject.SetActive(false);
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now hidden.");
-            }
-            protected override void OnEntered()
-            {
                 ActionUtility.InvokeAndClear(ref target._m_hideComplete);
-
-                // Re-evaluate in case state changed during callbacks
-                target?._m_stateMachine?.Update(0);
             }
-            protected override void OnExit()
+            protected override void OnExit() { }
+            protected override void OnUpdate()
             {
-                target.gameObject.SetActive(true);
-            }
-            protected override void OnUpdate(float _)
-            {
-                // Destroy takes priority
-                if (target._m_isDestroyed)
+                if (target._m_destroyRequested)
                 {
-                    target.DestroyInternal();
-                    Console.LogVerbose(SystemNames.UI, target.panelName, "Panel destroyed.");
-                    ActionUtility.InvokeAndClear(ref target._m_destroyComplete);
+                    ChangeState(new DestroyedState());
                     return;
                 }
 
-                // Check if should show
                 if (target._m_activeRef > 0)
-                    ChangeState(new ShowingState());
-            }
-        }
-        // Showing: playing show animation.
-        private class ShowingState : _AState<EUIPanelState, _AUIPanel>
-        {
-            public override EUIPanelState type { get { return EUIPanelState.Showing; } }
-            public override string name { get { return "ShowingState"; } }
-
-
-            protected override void OnEnter()
-            {
-                Console.LogVerbose(SystemNames.UI, target.panelName, "Showing panel...");
-            }
-            protected override void OnEntered()
-            {
-                uint serialize = enterSerialize;
-                target.OnShow(() =>
                 {
-                    if (serialize != enterSerialize)
-                        return;
+                    ChangeState(new ActiveState(), new ShowingTransition());
+                    return;
+                }
 
-                    ChangeState(new ActiveState());
-                });
+                ActionUtility.InvokeAndClear(ref target._m_hideComplete);
             }
-            protected override void OnExit() { }
-            protected override void OnUpdate(float _) { }
         }
-
-        // Active: panel fully visible.
         private class ActiveState : _AState<EUIPanelState, _AUIPanel>
         {
             public override EUIPanelState type { get { return EUIPanelState.Active; } }
@@ -401,53 +369,83 @@ namespace CodaGame
             protected override void OnEnter()
             {
                 Console.LogVerbose(SystemNames.UI, target.panelName, "Panel is now active.");
-            }
-            protected override void OnEntered()
-            {
                 target.OnActiveEnter();
                 target.PropagateShowToChildren();
-
-                ActionUtility.InvokeAndClear(ref target._m_openComplete);
-
-                // Re-evaluate in case state changed during callbacks
-                target?._m_stateMachine?.Update(0);
             }
             protected override void OnExit()
             {
                 target.OnActiveExit();
                 target.PropagateHideToChildren();
             }
-            protected override void OnUpdate(float _)
+            protected override void OnUpdate()
             {
-                // Destroy or activeRef dropped to 0
-                if (target._m_isDestroyed || target._m_activeRef <= 0)
-                    ChangeState(new HidingState());
+                if (target._m_destroyImmediateRequested)
+                {
+                    ChangeState(new DestroyedState());
+                    return;
+                }
+
+                if (target._m_destroyRequested || target._m_activeRef <= 0)
+                {
+                    ChangeState(new HiddenState(), new HidingTransition());
+                    return;
+                }
+
+                ActionUtility.InvokeAndClear(ref target._m_openComplete);
             }
         }
-        // Hiding: playing hide animation.
-        private class HidingState : _AState<EUIPanelState, _AUIPanel>
+        private class DestroyedState : _AState<EUIPanelState, _AUIPanel>
         {
-            public override EUIPanelState type { get { return EUIPanelState.Hiding; } }
-            public override string name { get { return "HidingState"; } }
+            public override EUIPanelState type { get { return EUIPanelState.Destroyed; } }
+            public override string name { get { return "DestroyedState"; } }
 
 
             protected override void OnEnter()
             {
-                Console.LogVerbose(SystemNames.UI, target.panelName, "Hiding panel...");
-            }
-            protected override void OnEntered()
-            {
-                uint serialize = enterSerialize;
-                target.OnHide(() =>
-                {
-                    if (serialize != enterSerialize)
-                        return;
+                target._m_openComplete = null;
+                target.PropagateDestroyToChildren();
+                target.OnDiscard();
+                UIManager.instance.DestroyPanel(target);
 
-                    ChangeState(new HiddenState());
-                });
+                Console.LogVerbose(SystemNames.UI, target.panelName, "Panel destroyed.");
+                ActionUtility.InvokeAndClear(ref target._m_hideComplete);
+                ActionUtility.InvokeAndClear(ref target._m_destroyComplete);
             }
             protected override void OnExit() { }
-            protected override void OnUpdate(float _) { }
+            protected override void OnUpdate() { }
+        }
+        #endregion
+
+
+        #region Transitions
+        private class ShowingTransition : _ATransition<EUIPanelState, _AUIPanel>
+        {
+            protected override void OnEnter(Action _complete)
+            {
+                target.gameObject.SetActive(true);
+                Console.LogVerbose(SystemNames.UI, target.panelName, "Showing panel...");
+                if (!target._m_destroyImmediateRequested)
+                    target.OnShow(_complete);
+            }
+            protected override void OnUpdate()
+            {
+                if (target._m_destroyImmediateRequested)
+                    stateMachine.ChangeState(new DestroyedState(), _interruptTransition: true);
+            }
+        }
+        private class HidingTransition : _ATransition<EUIPanelState, _AUIPanel>
+        {
+            protected override void OnEnter(Action _complete)
+            {
+                Console.LogVerbose(SystemNames.UI, target.panelName, "Hiding panel...");
+                if (!target._m_destroyImmediateRequested)
+                    target.OnHide(_complete);
+            }
+            protected override void OnUpdate()
+            {
+                if (target._m_destroyImmediateRequested)
+                    stateMachine.ChangeState(new DestroyedState(), _interruptTransition: true);
+            }
         }
         #endregion
     }
