@@ -27,7 +27,15 @@ namespace CodaGame
         /// <param name="_loadingShowEndCallback">The callback to be invoked when the loading show ends.</param>
         public static void Load(_ILoadingShow _loadingShow, AsyncFunction _loadFunction, Action _loadingShowEndCallback = null)
         {
-            LoadingManager.instance.Load(_loadingShow, _loadFunction, _loadingShowEndCallback);
+            LoadingManager.instance.GetOrCreateProcess(_loadingShow).AddLoadFunction(_loadFunction, _loadingShowEndCallback);
+        }
+        /// <summary>
+        /// Invoke the callback once when this show's process is Idle with no queued work.
+        /// If already idle, the callback may run before this method returns.
+        /// </summary>
+        public static void AddShowEndCallback(_ILoadingShow _loadingShow, Action _loadingShowEndCallback)
+        {
+            LoadingManager.instance.GetOrCreateProcess(_loadingShow).AddShowEndCallback(_loadingShowEndCallback);
         }
     }
 }

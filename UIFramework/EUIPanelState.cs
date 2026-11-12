@@ -11,6 +11,10 @@ namespace CodaGame
     public enum EUIPanelState
     {
         /// <summary>
+        /// Panel has been constructed but has not been initialized by UI.Create yet.
+        /// </summary>
+        None,
+        /// <summary>
         /// Panel is playing its show animation.
         /// </summary>
         Showing,
@@ -25,6 +29,10 @@ namespace CodaGame
         /// <summary>
         /// Panel is hidden but still in memory. Can be re-shown without loading.
         /// </summary>
-        Hidden
+        Hidden,
+        /// <summary>
+        /// Terminal state. The panel is being disposed and cannot be opened again.
+        /// </summary>
+        Destroyed
     }
 }

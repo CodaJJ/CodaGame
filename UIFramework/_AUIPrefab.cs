@@ -19,6 +19,11 @@ namespace CodaGame
     public abstract class _AUIPrefab : _AUIWidget
     {
         private _AUIComponent _m_owner;
+        private bool _m_destroyRequested;
+        private bool _m_createdByUIManager;
+
+
+        internal bool createdByUIManager { get { return _m_createdByUIManager; } }
 
 
         /// <summary>
@@ -26,9 +31,10 @@ namespace CodaGame
         /// </summary>
         public void Destroy()
         {
-            if (isDestroyed)
+            if (_m_destroyRequested || isDestroyed)
                 return;
 
+            _m_destroyRequested = true;
             Console.LogVerbose(SystemNames.UI, widgetName, "Destroy requested.");
 
             // Unregister from owner
@@ -56,6 +62,8 @@ namespace CodaGame
             // Release dynamically loaded asset
             AssetLoader.ReleaseInstance(gameObject);
         }
+
+        internal void MarkCreatedByUIManager() { _m_createdByUIManager = true; }
 
         /// <summary>
         /// Set the owner of this prefab widget.

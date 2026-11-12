@@ -30,7 +30,7 @@ namespace CodaGame
         /// </summary>
         /// <remarks>
         /// <para>Depth-first traversal stops at ownership boundaries (<see cref="_AUIComponent"/> nodes).</para>
-        /// <para>Only <see cref="_AUIWidget"/> children are collected; <see cref="_AUIPanel"/> children are skipped.</para>
+        /// <para>Only static widgets are collected. Dynamic prefab widgets register through UI.CreatePrefab.</para>
         /// </remarks>
         protected void InitChildWidgets()
         {
@@ -41,7 +41,12 @@ namespace CodaGame
                 if (component == null)
                     return ETraverseOp.Continue;
 
-                if (component is _AUIWidget widget)
+                if (component is _AUIPrefab prefab)
+                {
+                    if (!prefab.createdByUIManager)
+                        Console.LogError(SystemNames.UI, prefab.widgetName, "Create dynamic widgets via UI.CreatePrefab. Use _AUIWidget for preplaced children.", prefab);
+                }
+                else if (component is _AUIWidget widget)
                     _m_childWidgets.Add(widget);
 
                 return ETraverseOp.Skip;
