@@ -1,293 +1,152 @@
 // Copyright (c) 2024 Coda
-// 
+//
 // This file is part of CodaGame, licensed under the MIT License.
 // See the LICENSE file in the project root for license information.
 
 using System;
 using System.Collections.Generic;
-using CodaGame.StateMachine.TargetedLite;
+using CodaGame.StateMachine;
 using JetBrains.Annotations;
 
 namespace CodaGame.Base
 {
     /// <summary>
-    /// A class that manages the loading process.
+    /// Runs load functions while showing a loading screen. Show and Hide are explicit transitions.
     /// </summary>
     public class LoadingProcess
     {
-        // The loading show interface.
         private readonly _ILoadingShow _m_loadingShow;
-        // The list of load functions, they must be done to complete the loading process.
-        [ItemNotNull, NotNull] private readonly List<AsyncFunction> _m_loadFunctions;
-        // The delegate when loading show ends.
+        [NotNull] private readonly Queue<AsyncFunction> _m_loadFunctions;
         private Action _m_loadingShowEndDelegate;
-        // A state machine to manage the loading process.
         [NotNull] private readonly StateMachine<ELoadingProcessStep, LoadingProcess> _m_stateMachine;
-        // The name of this process.
         private readonly string _m_name;
-        // Is the loading process forced to hide.
-        private bool _m_forceHide;
 
 
-        public LoadingProcess(_ILoadingShow _loadingShow) 
+        public LoadingProcess(_ILoadingShow _loadingShow)
             : this(_loadingShow, _loadingShow == null ? "Empty show loading process" : $"{_loadingShow.name} loading process")
         {
         }
         public LoadingProcess(_ILoadingShow _loadingShow, string _name)
         {
             _m_loadingShow = _loadingShow;
+            _m_loadFunctions = new Queue<AsyncFunction>();
             _m_name = _name;
-            
-            _m_loadFunctions = new List<AsyncFunction>();
-            _m_loadingShowEndDelegate = null;
             _m_stateMachine = new StateMachine<ELoadingProcessStep, LoadingProcess>(this, $"{_m_name}'s state machine");
             _m_stateMachine.ChangeState(new IdleState());
-            _m_forceHide = false;
         }
-        
-            
+
+
         /// <summary>
-        /// How many load functions are there in this loading process.
+        /// The number of functions waiting to start, excluding running functions.
         /// </summary>
         public int loadFunctionCount { get { return _m_loadFunctions.Count; } }
         /// <summary>
-        /// The current state of the loading process.
+        /// The destination of the executing clip, including while its transition is running.
         /// </summary>
         public ELoadingProcessStep curState { get { return _m_stateMachine.curState.type; } }
-        /// <summary>
-        /// The name of the loading process.
-        /// </summary>
         public string name { get { return _m_name; } }
 
 
         /// <summary>
-        /// Add a load function to the loading process.
+        /// Submit work and optionally register a callback for the next stable Idle.
         /// </summary>
-        /// <remarks>
-        /// <para>The load function will run immediately after loading show shows.</para>
-        /// </remarks>
-        /// <param name="_loadFunction">The load function you want to run.</param>
-        /// <param name="_loadingShowEndCallback">The callback when loading show ends.</param>
-        public void AddLoadFunction(AsyncFunction _loadFunction, Action _loadingShowEndCallback)
+        public void AddLoadFunction(AsyncFunction _loadFunction, Action _loadingShowEndCallback = null)
         {
             if (_loadFunction != null)
-                _m_loadFunctions.Add(_loadFunction);
+                _m_loadFunctions.Enqueue(_loadFunction);
             _m_loadingShowEndDelegate += _loadingShowEndCallback;
-            
-            _m_stateMachine.Update(0);
+            _m_stateMachine.Update();
         }
         /// <summary>
-        /// Force to hide the loading show.
+        /// Invoke the callback once when Idle has no queued work. It may run before this method returns.
         /// </summary>
-        /// <remarks>
-        /// <para>Make the loading show hide immediately, no matter what the loading process is.</para>
-        /// <para>The remaining load functions will be invoked, and loadingShowEndCallback will be invoked after all load functions done.</para>
-        /// </remarks>
-        public void ForceToHide()
+        public void AddShowEndCallback(Action _loadingShowEndCallback)
         {
-            Console.LogVerbose(SystemNames.Loading, _m_name, "Forced to hide.");
-            
-            _m_forceHide = true;
-            _m_stateMachine.Update(0);
+            _m_loadingShowEndDelegate += _loadingShowEndCallback;
+            _m_stateMachine.Update();
         }
 
 
-        #region State
-        // Idle state of the loading process. Waiting for load functions.
+        #region States
         private class IdleState : _AState<ELoadingProcessStep, LoadingProcess>
         {
             public override ELoadingProcessStep type { get { return ELoadingProcessStep.Idle; } }
             public override string name { get { return "IdleState"; } }
 
 
-            protected override void OnEnter()
+            protected override void OnEnter() { stateMachine.Update(); }
+            protected override void OnExit() { }
+            protected override void OnUpdate()
             {
-            }
-            protected override void OnEntered()
-            {
-                // Re-evaluate on entry: either start the next load round, or finish and invoke the show-end callback.
-                OnUpdate(0);
-            }
-            protected override void OnExit()
-            {
-            }
-            protected override void OnUpdate(float _)
-            {
-                if (target == null)
-                {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
-                    return;
-                }
-
-                if (target._m_forceHide)
-                {
-                    target._m_forceHide = false;
-                    List<AsyncFunction> loadFunctions = new List<AsyncFunction>(target._m_loadFunctions);
-                    target._m_loadFunctions.Clear();
-                    Action showEndDelegate = target._m_loadingShowEndDelegate;
-                    target._m_loadingShowEndDelegate = null;
-                
-                    Async.Parallel(loadFunctions, showEndDelegate, "LoadingProcess");
-                }
-                
                 if (target._m_loadFunctions.Count > 0)
-                    ChangeState(new LoadingShowStartState());
+                    ChangeState(new LoadingState(), new ShowTransition());
                 else
-                {
-                    Action showEndDelegate = target._m_loadingShowEndDelegate;
-                    target._m_loadingShowEndDelegate = null;
-                    showEndDelegate?.Invoke();
-                }
+                    ActionUtility.InvokeAndClear(ref target._m_loadingShowEndDelegate);
             }
         }
-        // Loading show start state of the loading process. The load functions will be started after the loading show done.
-        private class LoadingShowStartState : _AState<ELoadingProcessStep, LoadingProcess>
-        {
-            public override ELoadingProcessStep type { get { return ELoadingProcessStep.LoadingShowStart; } }
-            public override string name { get { return "LoadingShowStartState"; } }
-
-
-            protected override void OnEnter()
-            {
-            }
-            protected override void OnEntered()
-            {
-                if (target == null)
-                {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
-                    return;
-                }
-
-                if (target._m_loadingShow == null)
-                {
-                    ChangeState(new LoadingState());
-                    return;
-                }
-
-                uint serialize = enterSerialize;
-                target._m_loadingShow.Show(() =>
-                {
-                    if (serialize != enterSerialize)
-                        return;
-
-                    ChangeState(new LoadingState());
-                });
-            }
-            protected override void OnExit()
-            {
-            }
-            protected override void OnUpdate(float _)
-            {
-            }
-        }
-        // Loading state of the loading process. Running load functions, if there are new load functions, they will be added to the loading process.
         private class LoadingState : _AState<ELoadingProcessStep, LoadingProcess>
         {
-            private Parallel _m_parallelOperation;
-            
-            
+            private int _m_runningFunctionCount;
+
+
             public override ELoadingProcessStep type { get { return ELoadingProcessStep.Loading; } }
             public override string name { get { return "LoadingState"; } }
-            
 
-            protected override void OnEnter()
+
+            protected override void OnEnter() { stateMachine.Update(); }
+            protected override void OnExit() { }
+            protected override void OnUpdate()
             {
+                int count = target.loadFunctionCount;
+                if (count == 0 && _m_runningFunctionCount == 0)
+                {
+                    ChangeState(new IdleState(), new HideTransition());
+                    return;
+                }
+
+                // AddLoadFunction requests another update for work appended by this batch.
+                for (int i = 0; i < count; i++)
+                    StartFunction(target._m_loadFunctions.Dequeue());
             }
-            protected override void OnEntered()
+
+
+            private void StartFunction(AsyncFunction _function)
             {
-                if (target == null)
+                _m_runningFunctionCount++;
+                bool completed = false;
+                _function(() =>
                 {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
-                    return;
-                }
-
-                if (target._m_loadFunctions.Count == 0)
-                {
-                    ChangeState(new LoadingShowEndState());
-                    return;
-                }
-
-                List<AsyncFunction> loadFunctions = new List<AsyncFunction>(target._m_loadFunctions);
-                target._m_loadFunctions.Clear();
-
-                _m_parallelOperation = new Parallel("LoadingProcess");
-                foreach (AsyncFunction loadFunction in loadFunctions)
-                    _m_parallelOperation.RunFunction(loadFunction);
-
-                uint serialize = enterSerialize;
-                _m_parallelOperation.AddCompleteCallback(() =>
-                {
-                    if (serialize != enterSerialize)
+                    if (completed)
                         return;
 
-                    ChangeState(new LoadingShowEndState());
+                    completed = true;
+                    _m_runningFunctionCount--;
+                    stateMachine.Update();
                 });
-            }
-            protected override void OnExit()
-            {
-                _m_parallelOperation = null;
-            }
-            protected override void OnUpdate(float _)
-            {
-                if (target == null || _m_parallelOperation == null)
-                {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
-                    return;
-                }
-                
-                if (target._m_loadFunctions.Count == 0)
-                    return;
-                
-                List<AsyncFunction> loadFunctions = new List<AsyncFunction>(target._m_loadFunctions);
-                target._m_loadFunctions.Clear();
-                foreach (AsyncFunction loadFunction in loadFunctions)
-                    _m_parallelOperation.RunFunction(loadFunction);
-
-                if (target._m_forceHide)
-                {
-                    target._m_forceHide = false;
-                    ChangeState(new LoadingShowEndState());
-                }
             }
         }
-        // Loading show end state of the loading process. The loading show will be hidden after the load functions done.
-        private class LoadingShowEndState : _AState<ELoadingProcessStep, LoadingProcess>
+        #endregion
+
+
+        #region Transitions
+        private class ShowTransition : _ATransition<ELoadingProcessStep, LoadingProcess>
         {
-            public override ELoadingProcessStep type { get { return ELoadingProcessStep.LoadingShowEnd; } }
-            public override string name { get { return "LoadingShowEndState"; } }
-
-
-            protected override void OnEnter()
+            protected override void OnEnter(Action _complete)
             {
-            }
-            protected override void OnEntered()
-            {
-                if (target == null)
-                {
-                    Console.LogError(SystemNames.Loading, "The state machine is broken. Make sure to invoke the Loading module on the main thread.");
-                    return;
-                }
-
                 if (target._m_loadingShow == null)
-                {
-                    ChangeState(new IdleState());
-                    return;
-                }
-
-                uint serialize = enterSerialize;
-                target._m_loadingShow.Hide(() =>
-                {
-                    if (serialize != enterSerialize)
-                        return;
-
-                    ChangeState(new IdleState());
-                });
+                    _complete.Invoke();
+                else
+                    target._m_loadingShow.Show(_complete);
             }
-            protected override void OnExit()
+        }
+        private class HideTransition : _ATransition<ELoadingProcessStep, LoadingProcess>
+        {
+            protected override void OnEnter(Action _complete)
             {
-            }
-            protected override void OnUpdate(float _)
-            {
+                if (target._m_loadingShow == null)
+                    _complete.Invoke();
+                else
+                    target._m_loadingShow.Hide(_complete);
             }
         }
         #endregion

@@ -103,7 +103,7 @@ namespace CodaGame
         /// <para>Equivalent to calling <see cref="_AUIPanel.Destroy(Action)"/> on the panel instance.</para>
         /// </remarks>
         /// <param name="_panel">The panel instance to destroy.</param>
-        /// <param name="_complete">Callback invoked when the operation completes.</param>
+        /// <param name="_complete">Called after release for an accepted request, or immediately for an invalid request.</param>
         public static void Destroy(_AUIPanel _panel, Action _complete = null)
         {
             if (_panel == null)

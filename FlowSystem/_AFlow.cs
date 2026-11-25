@@ -19,6 +19,9 @@ namespace CodaGame
     /// <para>
     /// For resource loading, override <see cref="OnEnter"/> and invoke '_complete' when resources are ready.
     /// </para>
+    /// <para>Exceptions thrown synchronously by lifecycle hooks are logged and normal flow transitions
+    /// continue, without rolling back business side effects. Exceptions in later
+    /// asynchronous work must be handled by the caller.</para>
     /// </remarks>
     [PublicAPI]
     public abstract class _AFlow
@@ -54,6 +57,9 @@ namespace CodaGame
         /// <remarks>
         /// <para>You MUST invoke '_complete' when the enter process is finished.</para>
         /// <para>The default implementation invokes '_complete' immediately (no loading).</para>
+        /// <para>If OnEnter throws synchronously, the exception is logged and completion is signaled
+        /// if it has not already occurred. The flow remains managed and becomes Active as usual;
+        /// this does not guarantee that business initialization succeeded.</para>
         /// </remarks>
         /// <param name="_complete">Callback that must be invoked when the enter process is complete.</param>
         protected virtual void OnEnter([NotNull] Action _complete) { _complete.Invoke(); }
@@ -104,7 +110,26 @@ namespace CodaGame
         {
             _m_state = EFlowState.Entering;
             Console.LogVerbose(SystemNames.Flow, flowName, "Entering...");
-            OnEnter(_complete);
+            bool completed = false;
+            Action completeOnce = () =>
+            {
+                if (completed)
+                    return;
+
+                completed = true;
+                _complete();
+            };
+
+            try
+            {
+                OnEnter(completeOnce);
+            }
+            catch (Exception exception)
+            {
+                Console.LogError(SystemNames.Flow, GetType().Name, $"{nameof(OnEnter)} failed: {exception}");
+                // An exception must not leave the manager waiting for entry forever.
+                completeOnce();
+            }
         }
         /// <summary>
         /// Invoke OnPause. Called by FlowManager.
@@ -113,7 +138,7 @@ namespace CodaGame
         {
             _m_state = EFlowState.Paused;
             Console.LogVerbose(SystemNames.Flow, flowName, "Paused.");
-            OnPause();
+            InvokeLifecycle(OnPause, nameof(OnPause));
         }
         /// <summary>
         /// Invoke OnResume. Called by FlowManager.
@@ -122,7 +147,7 @@ namespace CodaGame
         {
             _m_state = EFlowState.Active;
             Console.LogVerbose(SystemNames.Flow, flowName, "Resumed.");
-            OnResume();
+            InvokeLifecycle(OnResume, nameof(OnResume));
         }
         /// <summary>
         /// Invoke OnExit. Called by FlowManager.
@@ -131,7 +156,20 @@ namespace CodaGame
         {
             _m_state = EFlowState.None;
             Console.LogVerbose(SystemNames.Flow, flowName, $"Exited (isCovered={_isCovered}).");
-            OnExit(_isCovered);
+            InvokeLifecycle(() => OnExit(_isCovered), nameof(OnExit));
+        }
+
+
+        private void InvokeLifecycle([NotNull] Action _callback, string _hookName)
+        {
+            try
+            {
+                _callback();
+            }
+            catch (Exception exception)
+            {
+                Console.LogError(SystemNames.Flow, GetType().Name, $"{_hookName} failed: {exception}");
+            }
         }
     }
 }
